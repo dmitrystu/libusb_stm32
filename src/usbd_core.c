@@ -50,7 +50,6 @@ static void usbd_set_address (usbd_device *dev, usbd_ctlreq *req) {
  */
 static void usbd_process_callback (usbd_device *dev) {
     if (dev->complete_callback) {
-//        dev->complete_callback(dev, &(dev->req));
         dev->complete_callback(dev, dev->status.data_buf);
         dev->complete_callback = 0;
     }
@@ -176,7 +175,6 @@ static bool usbd_process_eptrq(usbd_device *dev, usbd_ctlreq *req) {
 static bool usbd_process_request(usbd_device *dev, usbd_ctlreq *req) {
     /* processing control request by callback */
     if (dev->control_callback) {
-//        if (dev->control_callback(dev, &(dev->req), &(dev->complete_callback))) {
         if (dev->control_callback(dev, req, &(dev->complete_callback))) {
             return true;
         }
@@ -223,10 +221,10 @@ static void usbd_process_eptx(usbd_device *dev, uint8_t ep) {
         /* if all data is not sent */
         if (0 != dev->status.data_count) break;
         /* if last packet has a EP0 size and host awaiting for the more data ZLP should be sent*/
-        /* if ZLP required state is unchanged */
-        /* next TX event sends ZLP */
-        if ((dev->status.control_state == usbd_ctl_ztxdata) && (_t == dev->status.ep0size)) break;
-        dev->status.control_state = usbd_ctl_lastdata; /* no ZLP required */
+        /* if ZLP required, control state will be unchanged, therefore next TX event sends ZLP */
+        if ( usbd_ctl_txdata == dev->status.control_state || _t != dev->status.ep0size ) {
+            dev->status.control_state = usbd_ctl_lastdata; /* no ZLP required */
+        }
         break;
     case usbd_ctl_lastdata:
         dev->status.control_state = usbd_ctl_statusout;
@@ -251,13 +249,13 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
     usbd_ctlreq *const req = dev->status.data_buf;
     switch (dev->status.control_state) {
     case usbd_ctl_idle:
-        /* read SETUP packet, stall if incorrect packet length */
+        /* read SETUP packet, send STALL_PID if incorrect packet length */
         if (0x08 !=  dev->driver->ep_read(ep, req, dev->status.data_maxsize)) {
             return usbd_stall_pid(dev, ep);
         }
         dev->status.data_ptr = req->data;
         dev->status.data_count = req->wLength;
-        /* processing request if no payload data*/
+        /* processing request with no payload data*/
         if ((req->bmRequestType & USB_REQ_DEVTOHOST) || (0 == req->wLength)) goto do_process_request;
         /* checking available memory for DATA OUT stage */
         if (req->wLength > dev->status.data_maxsize) {
@@ -285,7 +283,7 @@ do_process_request:
         /* preparing */
         ep |= 0x80;
         dev->status.data_ptr = req->data;
-        dev->status.data_count = /*dev->req.wLength*/ dev->status.data_maxsize;
+        dev->status.data_count = dev->status.data_maxsize;
         if (usbd_process_request(dev, req)) {
             if (req->bmRequestType & USB_REQ_DEVTOHOST) {
                 /* return data from function */
@@ -305,8 +303,7 @@ do_process_request:
                 dev->driver->ep_write(ep, 0, 0);
             }
         } else {
-            /* unsupported function. stall TX STATUS_IN stage */
-            /* Sends STALL PID */
+            /* unsupported function. Let's send STALL_PID */
             return usbd_stall_pid(dev, ep);
         }
         break;

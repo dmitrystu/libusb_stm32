@@ -55,6 +55,7 @@
 #define TGL_SET(mask, bits)  ((EP_NOTOG | (mask))<<16 | (bits))
 
     .syntax unified
+    .cpu cortex-m0plus
     .text
     .thumb
 
@@ -326,19 +327,11 @@ _ep_read:
     cmp     r5, #0x01
     bne     .L_epr_sngl
 .L_epr_dblbulk:
-//    ldr     r5, =0x00008F8F
-//    ldrh    r0, [r3]
-//    ands    r0, r5
-//    movs    r5, 0x40
-//    orrs    r0, r5
-//    strh    r0, [r3]
-//    ldrh    r0, [r3]
     negs    r0, r0
     lsrs    r0, #7          // ~SW_RX in CF
     b       .L_epr_load_table
 .L_epr_iso:
-//    ldrh    r0, [r3]
-    lsrs    r0, #15     // DTOG_RX passsed to CF
+    lsrs    r0, #15         // DTOG_RX passsed to CF
 .L_epr_load_table:
     ldrh    r0, [r4, #0]    // R0 rxaddr0
     ldrh    r5, [r4, #2]    // R5 rxcnt0
@@ -546,11 +539,11 @@ _ep_config:
     strh    r0, [r5, #2]    //store txcnt
     cmp     r1, #0x06       // is DBLBULK
     beq     .L_epc_txdbl
-    ldr     r3, =TGL_SET((EP_TX_STAT | EP_TX_DTOG) , EP_TX_NAK) // 0x8FFF0020 //mask ep to naked , clr DTOG_TX
+    ldr     r3, =TGL_SET((EP_TX_STAT | EP_TX_DTOG) , EP_TX_NAK) //set state NAKED , clr DTOG_TX
     cmp     r1, #0x01       // is ISO
     bne     .L_epc_txsetstate   //
 .L_epc_txdbl:
-    ldr     r3, =TGL_SET((EP_TX_STAT | EP_TX_DTOG | EP_TX_SWBUF) , EP_TX_VAL) //xCFFF0030 mask to valid if dblbuffered or iso clr DTOG_TX & SWBUF_TX
+    ldr     r3, =TGL_SET((EP_TX_STAT | EP_TX_DTOG | EP_TX_SWBUF) , EP_TX_VAL) //set state VALID clr DTOG_TX & SWBUF_TX
     bl      _get_next_pma
     bcc     .L_epc_fail
     strh    r0, [r5, #4]    //store txaddr1

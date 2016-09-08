@@ -13,17 +13,25 @@
  * limitations under the License.
  */
 
+/** \file usbd_core.h
+ * \brief Core and hardware driver framework.
+ * \author Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
+ * \version 1.0
+ * \copyright Apache License, Version 2.0
+ */
+
 #ifndef _USBD_CORE_H_
-#define _USBD_CORE_H
+#define _USBD_CORE_H_
 #if defined(__cplusplus)
     extern "C" {
 #endif
 #include <stdbool.h>
 
+
+
+
 /** \addtogroup USBD_CORE USB device core
- * \brief This module contains core and hardware driver framework definitions
- * \details
- *
+ * \brief Contains core and hardware driver framework definitions
  * @{ */
 #define USB_EPTYPE_DBLBUF       0x04        /**< indicates a doublebuffered endpoint (bulk endpoint only) */
 #define USB_EPDIR_IN            0x00        /**< indicates host-to-device endpoint direction  */
@@ -106,7 +114,7 @@ typedef struct usbd_device usbd_device;
 typedef struct usbd_ctlreq usbd_ctlreq;
 typedef struct usbd_status usbd_status;
 
-/**\name USB Device middleware callbacks function prototypes
+/**\name USB Device user callbacks function prototypes
  * @{ */
  /** Generic USB device event callback for events and endpoints processing
   * \param[in] dev pointer to USB device
@@ -119,6 +127,7 @@ typedef void (*usbd_evt_callback)(usbd_device *dev, uint8_t event, uint8_t ep);
 /** USB control transfer completed callback.
  * \param[in] dev pointer to USB device
  * \param[in] req pointer to usb request structure
+ * \note When this callback will be completed usbd_device#complete_callback will be reseted to NULL
  */
 typedef void (*usbd_ctl_complete)(usbd_device *dev, usbd_ctlreq *req);
 
@@ -132,7 +141,7 @@ typedef void (*usbd_ctl_complete)(usbd_device *dev, usbd_ctlreq *req);
  *          - SET_FEATURE, CLEAR_FEATURE (endpoints only)
  *          - SET_ADDRESS
  * \param[in] dev points to USB device
- * \param[in] req pointer to usb request structure
+ * \param[in] req points to usb control request
  * \param[out] *callback \ref usbd_ctl_complete "pointer to USB control transfer completed callback", default is NULL (no callback)
  * \return TRUE if control request processed successfully, false otherwise.
  */
@@ -290,7 +299,6 @@ struct usbd_device {
     usbd_status                 status;
 };
 
-
 /** Initializes device structure
  * \param dev USB device that will be initialized
  * \param drv Pointer to hardware driver
@@ -306,12 +314,11 @@ void usbd_init(usbd_device *dev, const struct usbd_driver *drv, const uint8_t ep
  */
 void usbd_poll(usbd_device *dev);
 
-/** Asynchronous devise control
+/** Asynchronous device control
  * \param dev USB device
  * \param cmd control command
  */
 void usbd_control(usbd_device *dev, enum usbd_commands cmd);
-
 
 
 /** \name API macro functions

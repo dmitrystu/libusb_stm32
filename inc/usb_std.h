@@ -37,7 +37,7 @@ extern "C" {
 /** Macro to create \ref usb_string_descriptor from array of characters */
 #define USB_STRING_DESC(...)        {.bLength = 2 + sizeof((uint16_t[]){__VA_ARGS__}), .bDescriptorType = USB_DTYPE_STRING, .wString = {__VA_ARGS__}}
 
-/**\brief Macro to */
+/**\brief Macro to set мaximum power consumption field for the \ref usb_config_descriptor */
 #define USB_CFG_POWER_MA(mA)        ((mA) >> 1)
 /** @} */
 
@@ -128,152 +128,152 @@ extern "C" {
 #define USB_STD_SYNCH_FRAME         0x0C /**< This request is used to set and then report an endpoint's synchronization frame */
 /** @} */
 
-/** \brief USB standard LANGID codes */
-enum usb_std_langid_codes {
-    USB_LANGID_AFR      = 0x0436,   /**< Afrikaans */
-    USB_LANGID_SQI      = 0x041c,   /**< Albanian */
-    USB_LANGID_ARA_SA   = 0x0401,   /**< Arabic (Saudi Arabia) */
-    USB_LANGID_ARA_IQ   = 0x0801,   /**< Arabic (Iraq) */
-    USB_LANGID_ARA_EG   = 0x0c01,   /**< Arabic (Egypt) */
-    USB_LANGID_ARA_LY   = 0x1001,   /**< Arabic (Libya) */
-    USB_LANGID_ARA_DZ   = 0x1401,   /**< Arabic (Algeria) */
-    USB_LANGID_ARA_MA   = 0x1801,   /**< Arabic (Morocco) */
-    USB_LANGID_ARA_TN   = 0x1c01,   /**< Arabic (Tunisia) */
-    USB_LANGID_ARA_OM   = 0x2001,   /**< Arabic (Oman) */
-    USB_LANGID_ARA_YE   = 0x2401,   /**< Arabic (Yemen) */
-    USB_LANGID_ARA_SY   = 0x2801,   /**< Arabic (Syria) */
-    USB_LANGID_ARA_JO   = 0x2c01,   /**< Arabic (Jordan) */
-    USB_LANGID_ARA_LB   = 0x3001,   /**< Arabic (Lebanon) */
-    USB_LANGID_ARA_KW   = 0x3401,   /**< Arabic (Kuwait) */
-    USB_LANGID_ARA_AE   = 0x3801,   /**< Arabic (U.A.E.) */
-    USB_LANGID_ARA_BH   = 0x3c01,   /**< Arabic (Bahrain) */
-    USB_LANGID_ARA_QA   = 0x4001,   /**< Arabic (Qatar) */
-    USB_LANGID_HYE      = 0x042b,   /**< Armenian */
-    USB_LANGID_ASM      = 0x044d,   /**< Assamese */
-    USB_LANGID_AZE_LAT  = 0x042c,   /**< Azeri (Latin) */
-    USB_LANGID_AZE_CYR  = 0x082c,   /**< Azeri (Cyrillic) */
-    USB_LANGID_EUS      = 0x042d,   /**< Basque */
-    USB_LANGID_BEL      = 0x0423,   /**< Belarussian */
-    USB_LANGID_BEN      = 0x0445,   /**< Bengali */
-    USB_LANGID_BUL      = 0x0402,   /**< Bulgarian */
-    USB_LANGID_MYA      = 0x0455,   /**< Burmese */
-    USB_LANGID_CAT      = 0x0403,   /**< Catalan */
-    USB_LANGID_ZHO_TW   = 0x0404,   /**< Chinese (Taiwan) */
-    USB_LANGID_ZHO_CN   = 0x0804,   /**< Chinese (PRC) */
-    USB_LANGID_ZHO_HK   = 0x0c04,   /**< Chinese (Hong Kong SAR, PRC) */
-    USB_LANGID_ZHO_SG   = 0x1004,   /**< Chinese (Singapore) */
-    USB_LANGID_ZHO_MO   = 0x1404,   /**< Chinese (Macau SAR) */
-    USB_LANGID_HRV      = 0x041a,   /**< Croatian */
-    USB_LANGID_CZE      = 0x0405,   /**< Czech */
-    USB_LANGID_DAN      = 0x0406,   /**< Danish */
-    USB_LANGID_NLD_NL   = 0x0413,   /**< Dutch (Netherlands) */
-    USB_LANGID_NLD_BE   = 0x0813,   /**< Dutch (Belgium) */
-    USB_LANGID_ENG_US   = 0x0409,   /**< English (United States) */
-    USB_LANGID_ENG_UK   = 0x0809,   /**< English (United Kingdom) */
-    USB_LANGID_ENG_AU   = 0x0c09,   /**< English (Australian) */
-    USB_LANGID_ENG_CA   = 0x1009,   /**< English (Canadian) */
-    USB_LANGID_ENG_NZ   = 0x1409,   /**< English (New Zealand) */
-    USB_LANGID_ENG_IE   = 0x1809,   /**< English (Ireland) */
-    USB_LANGID_ENG_ZA   = 0x1c09,   /**< English (South Africa) */
-    USB_LANGID_ENG_JM   = 0x2009,   /**< English (Jamaica) */
-    USB_LANGID_ENG_CAR  = 0x2409,   /**< English (Caribbean) */
-    USB_LANGID_ENG_BZ   = 0x2809,   /**< English (Belize) */
-    USB_LANGID_ENG_TH   = 0x2c09,   /**< English (Trinidad) */
-    USB_LANGID_ENG_ZW   = 0x3009,   /**< English (Zimbabwe) */
-    USB_LANGID_ENG_PH   = 0x3409,   /**< English (Philippines) */
-    USB_LANGID_EST      = 0x0425,   /**< Estonian */
-    USB_LANGID_FAO      = 0x0438,   /**< Faeroese */
-    USB_LANGID_FAS      = 0x0429,   /**< Farsi */
-    USB_LANGID_FIN      = 0x040b,   /**< Finnish */
-    USB_LANGID_FRA      = 0x040c,   /**< French (Standard) */
-    USB_LANGID_FRA_BE   = 0x080c,   /**< French (Belgian) */
-    USB_LANGID_FRA_CA   = 0x0c0c,   /**< French (Canadian) */
-    USB_LANGID_FRA_SZ   = 0x100c,   /**< French (Switzerland) */
-    USB_LANGID_FRA_LU   = 0x140c,   /**< French (Luxembourg) */
-    USB_LANGID_FRA_MC   = 0x180c,   /**< French (Monaco) */
-    USB_LANGID_KAT      = 0x0437,   /**< Georgian */
-    USB_LANGID_DEU      = 0x0407,   /**< German (Standard) */
-    USB_LANGID_DEU_SZ   = 0x0807,   /**< German (Switzerland) */
-    USB_LANGID_DEU_AT   = 0x0c07,   /**< German (Austria) */
-    USB_LANGID_DEU_LU   = 0x1007,   /**< German (Luxembourg) */
-    USB_LANGID_DEU_LI   = 0x1407,   /**< German (Liechtenstein) */
-    USB_LANGID_ELL      = 0x0408,   /**< Greek */
-    USB_LANGID_GUJ      = 0x0447,   /**< Gujarati */
-    USB_LANGID_HEB      = 0x040d,   /**< Hebrew */
-    USB_LANGID_HIN      = 0x0439,   /**< Hindi */
-    USB_LANGID_HUN      = 0x040e,   /**< Hungarian */
-    USB_LANGID_ISL      = 0x040f,   /**< Icelandic */
-    USB_LANGID_IND      = 0x0421,   /**< Indonesian */
-    USB_LANGID_ITA      = 0x0410,   /**< Italian (Standard) */
-    USB_LANGID_ITA_SZ   = 0x0810,   /**< Italian (Switzerland) */
-    USB_LANGID_JPN      = 0x0411,   /**< Japanese */
-    USB_LANGID_KAN      = 0x044b,   /**< Kannada */
-    USB_LANGID_KAS      = 0x0860,   /**< Kashmiri (India) */
-    USB_LANGID_KAZ      = 0x043f,   /**< Kazakh */
-    USB_LANGID_KOK      = 0x0457,   /**< Konkani */
-    USB_LANGID_KOR      = 0x0412,   /**< Korean */
-    USB_LANGID_KOR_JOH  = 0x0812,   /**< Korean (Johab) */
-    USB_LANGID_LAV      = 0x0426,   /**< Latvian */
-    USB_LANGID_LIT      = 0x0427,   /**< Lithuanian */
-    USB_LANGID_LIT_CLS  = 0x0827,   /**< Lithuanian (Classic) */
-    USB_LANGID_MKD      = 0x042f,   /**< Macedonian */
-    USB_LANGID_MSA      = 0x043e,   /**< Malay (Malaysian) */
-    USB_LANGID_MSA_BN   = 0x083e,   /**< Malay (Brunei Darussalam) */
-    USB_LANGID_MAL      = 0x044c,   /**< Malayalam */
-    USB_LANGID_MNI      = 0x0458,   /**< Manipuri */
-    USB_LANGID_MAR      = 0x044e,   /**< Marathi */
-    USB_LANGID_NEP      = 0x0861,   /**< Nepali (India) */
-    USB_LANGID_NOB      = 0x0414,   /**< Norwegian (Bokmal) */
-    USB_LANGID_NNO      = 0x0814,   /**< Norwegian (Nynorsk) */
-    USB_LANGID_ORI      = 0x0448,   /**< Oriya */
-    USB_LANGID_POL      = 0x0415,   /**< Polish */
-    USB_LANGID_POR_BR   = 0x0416,   /**< Portuguese (Brazil) */
-    USB_LANGID_POR      = 0x0816,   /**< Portuguese (Standard) */
-    USB_LANGID_PAN      = 0x0446,   /**< Punjabi */
-    USB_LANGID_RON      = 0x0418,   /**< Romanian */
-    USB_LANGID_RUS      = 0x0419,   /**< Russian */
-    USB_LANGID_SAN      = 0x044f,   /**< Sanskrit */
-    USB_LANGID_SRB_CYR  = 0x0c1a,   /**< Serbian (Cyrillic) */
-    USB_LANGID_SRB_LAT  = 0x081a,   /**< Serbian (Latin) */
-    USB_LANGID_SND      = 0x0459,   /**< Sindhi */
-    USB_LANGID_SLK      = 0x041b,   /**< Slovak */
-    USB_LANGID_SLV      = 0x0424,   /**< Slovenian */
-    USB_LANGID_SPA      = 0x040a,   /**< Spanish (Traditional Sort) */
-    USB_LANGID_SPA_MX   = 0x080a,   /**< Spanish (Mexican) */
-    USB_LANGID_SPA_MDN  = 0x0c0a,   /**< Spanish (Modern Sort) */
-    USB_LANGID_SPA_GT   = 0x100a,   /**< Spanish (Guatemala) */
-    USB_LANGID_SPA_CR   = 0x140a,   /**< Spanish (Costa Rica) */
-    USB_LANGID_SPA_PA   = 0x180a,   /**< Spanish (Panama) */
-    USB_LANGID_SPA_DO   = 0x1c0a,   /**< Spanish (Dominican Republic) */
-    USB_LANGID_SPA_VE   = 0x200a,   /**< Spanish (Venezuela) */
-    USB_LANGID_SPA_CO   = 0x240a,   /**< Spanish (Colombia) */
-    USB_LANGID_SPA_PE   = 0x280a,   /**< Spanish (Peru) */
-    USB_LANGID_SPA_AR   = 0x2c0a,   /**< Spanish (Argentina) */
-    USB_LANGID_SPA_EC   = 0x300a,   /**< Spanish (Ecuador) */
-    USB_LANGID_SPA_CL   = 0x340a,   /**< Spanish (Chile) */
-    USB_LANGID_SPA_UY   = 0x380a,   /**< Spanish (Uruguay) */
-    USB_LANGID_SPA_PY   = 0x3c0a,   /**< Spanish (Paraguay) */
-    USB_LANGID_SPA_BO   = 0x400a,   /**< Spanish (Bolivia) */
-    USB_LANGID_SPA_SV   = 0x440a,   /**< Spanish (El Salvador) */
-    USB_LANGID_SPA_HN   = 0x480a,   /**< Spanish (Honduras) */
-    USB_LANGID_SPA_NI   = 0x4c0a,   /**< Spanish (Nicaragua) */
-    USB_LANGID_SPA_PR   = 0x500a,   /**< Spanish (Puerto Rico) */
-    USB_LANGID_NSO      = 0x0430,   /**< Sutu, Sotho. */
-    USB_LANGID_SWA      = 0x0441,   /**< Swahili (Kenya) */
-    USB_LANGID_SWE      = 0x041d,   /**< Swedish */
-    USB_LANGID_SWE_FI   = 0x081d,   /**< Swedish (Finland) */
-    USB_LANGID_TAM      = 0x0449,   /**< Tamil */
-    USB_LANGID_TAT      = 0x0444,   /**< Tatar (Tatarstan) */
-    USB_LANGID_TEL      = 0x044a,   /**< Telugu */
-    USB_LANGID_THA      = 0x041e,   /**< Thai */
-    USB_LANGID_TUR      = 0x041f,   /**< Turkish */
-    USB_LANGIG_UKR      = 0x0422,   /**< Ukrainian */
-    USB_LANGID_URD_PK   = 0x0420,   /**< Urdu (Pakistan) */
-    USB_LANGID_URD_IN   = 0x0820,   /**< Urdu (India) */
-    USB_LANGID_UZB_LAT  = 0x0443,   /**< Uzbek (Latin) */
-    USB_LANGID_UZB_CYR  = 0x0843,   /**< Uzbek (Cyrillic) */
-    USB_LANGID_VIE      = 0x042a,   /**< Vietnamese. */
-};
+/** \addtogroup USB_STD_LANGID USB standard LANGID codes
+ * @{ */
+#define USB_LANGID_AFR          0x0436   /**< Afrikaans */
+#define USB_LANGID_SQI          0x041c   /**< Albanian */
+#define USB_LANGID_ARA_SA       0x0401   /**< Arabic (Saudi Arabia) */
+#define USB_LANGID_ARA_IQ       0x0801   /**< Arabic (Iraq) */
+#define USB_LANGID_ARA_EG       0x0c01   /**< Arabic (Egypt) */
+#define USB_LANGID_ARA_LY       0x1001   /**< Arabic (Libya) */
+#define USB_LANGID_ARA_DZ       0x1401   /**< Arabic (Algeria) */
+#define USB_LANGID_ARA_MA       0x1801   /**< Arabic (Morocco) */
+#define USB_LANGID_ARA_TN       0x1c01   /**< Arabic (Tunisia) */
+#define USB_LANGID_ARA_OM       0x2001   /**< Arabic (Oman) */
+#define USB_LANGID_ARA_YE       0x2401   /**< Arabic (Yemen) */
+#define USB_LANGID_ARA_SY       0x2801   /**< Arabic (Syria) */
+#define USB_LANGID_ARA_JO       0x2c01   /**< Arabic (Jordan) */
+#define USB_LANGID_ARA_LB       0x3001   /**< Arabic (Lebanon) */
+#define USB_LANGID_ARA_KW       0x3401   /**< Arabic (Kuwait) */
+#define USB_LANGID_ARA_AE       0x3801   /**< Arabic (U.A.E.) */
+#define USB_LANGID_ARA_BH       0x3c01   /**< Arabic (Bahrain) */
+#define USB_LANGID_ARA_QA       0x4001   /**< Arabic (Qatar) */
+#define USB_LANGID_HYE          0x042b   /**< Armenian */
+#define USB_LANGID_ASM          0x044d   /**< Assamese */
+#define USB_LANGID_AZE_LAT      0x042c   /**< Azeri (Latin) */
+#define USB_LANGID_AZE_CYR      0x082c   /**< Azeri (Cyrillic) */
+#define USB_LANGID_EUS          0x042d   /**< Basque */
+#define USB_LANGID_BEL          0x0423   /**< Belarussian */
+#define USB_LANGID_BEN          0x0445   /**< Bengali */
+#define USB_LANGID_BUL          0x0402   /**< Bulgarian */
+#define USB_LANGID_MYA          0x0455   /**< Burmese */
+#define USB_LANGID_CAT          0x0403   /**< Catalan */
+#define USB_LANGID_ZHO_TW       0x0404   /**< Chinese (Taiwan) */
+#define USB_LANGID_ZHO_CN       0x0804   /**< Chinese (PRC) */
+#define USB_LANGID_ZHO_HK       0x0c04   /**< Chinese (Hong Kong SAR, PRC) */
+#define USB_LANGID_ZHO_SG       0x1004   /**< Chinese (Singapore) */
+#define USB_LANGID_ZHO_MO       0x1404   /**< Chinese (Macau SAR) */
+#define USB_LANGID_HRV          0x041a   /**< Croatian */
+#define USB_LANGID_CZE          0x0405   /**< Czech */
+#define USB_LANGID_DAN          0x0406   /**< Danish */
+#define USB_LANGID_NLD_NL       0x0413   /**< Dutch (Netherlands) */
+#define USB_LANGID_NLD_BE       0x0813   /**< Dutch (Belgium) */
+#define USB_LANGID_ENG_US       0x0409   /**< English (United States) */
+#define USB_LANGID_ENG_UK       0x0809   /**< English (United Kingdom) */
+#define USB_LANGID_ENG_AU       0x0c09   /**< English (Australian) */
+#define USB_LANGID_ENG_CA       0x1009   /**< English (Canadian) */
+#define USB_LANGID_ENG_NZ       0x1409   /**< English (New Zealand) */
+#define USB_LANGID_ENG_IE       0x1809   /**< English (Ireland) */
+#define USB_LANGID_ENG_ZA       0x1c09   /**< English (South Africa) */
+#define USB_LANGID_ENG_JM       0x2009   /**< English (Jamaica) */
+#define USB_LANGID_ENG_CAR      0x2409   /**< English (Caribbean) */
+#define USB_LANGID_ENG_BZ       0x2809   /**< English (Belize) */
+#define USB_LANGID_ENG_TH       0x2c09   /**< English (Trinidad) */
+#define USB_LANGID_ENG_ZW       0x3009   /**< English (Zimbabwe) */
+#define USB_LANGID_ENG_PH       0x3409   /**< English (Philippines) */
+#define USB_LANGID_EST          0x0425   /**< Estonian */
+#define USB_LANGID_FAO          0x0438   /**< Faeroese */
+#define USB_LANGID_FAS          0x0429   /**< Farsi */
+#define USB_LANGID_FIN          0x040b   /**< Finnish */
+#define USB_LANGID_FRA          0x040c   /**< French (Standard) */
+#define USB_LANGID_FRA_BE       0x080c   /**< French (Belgian) */
+#define USB_LANGID_FRA_CA       0x0c0c   /**< French (Canadian) */
+#define USB_LANGID_FRA_SZ       0x100c   /**< French (Switzerland) */
+#define USB_LANGID_FRA_LU       0x140c   /**< French (Luxembourg) */
+#define USB_LANGID_FRA_MC       0x180c   /**< French (Monaco) */
+#define USB_LANGID_KAT          0x0437   /**< Georgian */
+#define USB_LANGID_DEU          0x0407   /**< German (Standard) */
+#define USB_LANGID_DEU_SZ       0x0807   /**< German (Switzerland) */
+#define USB_LANGID_DEU_AT       0x0c07   /**< German (Austria) */
+#define USB_LANGID_DEU_LU       0x1007   /**< German (Luxembourg) */
+#define USB_LANGID_DEU_LI       0x1407   /**< German (Liechtenstein) */
+#define USB_LANGID_ELL          0x0408   /**< Greek */
+#define USB_LANGID_GUJ          0x0447   /**< Gujarati */
+#define USB_LANGID_HEB          0x040d   /**< Hebrew */
+#define USB_LANGID_HIN          0x0439   /**< Hindi */
+#define USB_LANGID_HUN          0x040e   /**< Hungarian */
+#define USB_LANGID_ISL          0x040f   /**< Icelandic */
+#define USB_LANGID_IND          0x0421   /**< Indonesian */
+#define USB_LANGID_ITA          0x0410   /**< Italian (Standard) */
+#define USB_LANGID_ITA_SZ       0x0810   /**< Italian (Switzerland) */
+#define USB_LANGID_JPN          0x0411   /**< Japanese */
+#define USB_LANGID_KAN          0x044b   /**< Kannada */
+#define USB_LANGID_KAS          0x0860   /**< Kashmiri (India) */
+#define USB_LANGID_KAZ          0x043f   /**< Kazakh */
+#define USB_LANGID_KOK          0x0457   /**< Konkani */
+#define USB_LANGID_KOR          0x0412   /**< Korean */
+#define USB_LANGID_KOR_JOH      0x0812   /**< Korean (Johab) */
+#define USB_LANGID_LAV          0x0426   /**< Latvian */
+#define USB_LANGID_LIT          0x0427   /**< Lithuanian */
+#define USB_LANGID_LIT_CLS      0x0827   /**< Lithuanian (Classic) */
+#define USB_LANGID_MKD          0x042f   /**< Macedonian */
+#define USB_LANGID_MSA          0x043e   /**< Malay (Malaysian) */
+#define USB_LANGID_MSA_BN       0x083e   /**< Malay (Brunei Darussalam) */
+#define USB_LANGID_MAL          0x044c   /**< Malayalam */
+#define USB_LANGID_MNI          0x0458   /**< Manipuri */
+#define USB_LANGID_MAR          0x044e   /**< Marathi */
+#define USB_LANGID_NEP          0x0861   /**< Nepali (India) */
+#define USB_LANGID_NOB          0x0414   /**< Norwegian (Bokmal) */
+#define USB_LANGID_NNO          0x0814   /**< Norwegian (Nynorsk) */
+#define USB_LANGID_ORI          0x0448   /**< Oriya */
+#define USB_LANGID_POL          0x0415   /**< Polish */
+#define USB_LANGID_POR_BR       0x0416   /**< Portuguese (Brazil) */
+#define USB_LANGID_POR          0x0816   /**< Portuguese (Standard) */
+#define USB_LANGID_PAN          0x0446   /**< Punjabi */
+#define USB_LANGID_RON          0x0418   /**< Romanian */
+#define USB_LANGID_RUS          0x0419   /**< Russian */
+#define USB_LANGID_SAN          0x044f   /**< Sanskrit */
+#define USB_LANGID_SRB_CYR      0x0c1a   /**< Serbian (Cyrillic) */
+#define USB_LANGID_SRB_LAT      0x081a   /**< Serbian (Latin) */
+#define USB_LANGID_SND          0x0459   /**< Sindhi */
+#define USB_LANGID_SLK          0x041b   /**< Slovak */
+#define USB_LANGID_SLV          0x0424   /**< Slovenian */
+#define USB_LANGID_SPA          0x040a   /**< Spanish (Traditional Sort) */
+#define USB_LANGID_SPA_MX       0x080a   /**< Spanish (Mexican) */
+#define USB_LANGID_SPA_MDN      0x0c0a   /**< Spanish (Modern Sort) */
+#define USB_LANGID_SPA_GT       0x100a   /**< Spanish (Guatemala) */
+#define USB_LANGID_SPA_CR       0x140a   /**< Spanish (Costa Rica) */
+#define USB_LANGID_SPA_PA       0x180a   /**< Spanish (Panama) */
+#define USB_LANGID_SPA_DO       0x1c0a   /**< Spanish (Dominican Republic) */
+#define USB_LANGID_SPA_VE       0x200a   /**< Spanish (Venezuela) */
+#define USB_LANGID_SPA_CO       0x240a   /**< Spanish (Colombia) */
+#define USB_LANGID_SPA_PE       0x280a   /**< Spanish (Peru) */
+#define USB_LANGID_SPA_AR       0x2c0a   /**< Spanish (Argentina) */
+#define USB_LANGID_SPA_EC       0x300a   /**< Spanish (Ecuador) */
+#define USB_LANGID_SPA_CL       0x340a   /**< Spanish (Chile) */
+#define USB_LANGID_SPA_UY       0x380a   /**< Spanish (Uruguay) */
+#define USB_LANGID_SPA_PY       0x3c0a   /**< Spanish (Paraguay) */
+#define USB_LANGID_SPA_BO       0x400a   /**< Spanish (Bolivia) */
+#define USB_LANGID_SPA_SV       0x440a   /**< Spanish (El Salvador) */
+#define USB_LANGID_SPA_HN       0x480a   /**< Spanish (Honduras) */
+#define USB_LANGID_SPA_NI       0x4c0a   /**< Spanish (Nicaragua) */
+#define USB_LANGID_SPA_PR       0x500a   /**< Spanish (Puerto Rico) */
+#define USB_LANGID_NSO          0x0430   /**< Sutu, Sotho. */
+#define USB_LANGID_SWA          0x0441   /**< Swahili (Kenya) */
+#define USB_LANGID_SWE          0x041d   /**< Swedish */
+#define USB_LANGID_SWE_FI       0x081d   /**< Swedish (Finland) */
+#define USB_LANGID_TAM          0x0449   /**< Tamil */
+#define USB_LANGID_TAT          0x0444   /**< Tatar (Tatarstan) */
+#define USB_LANGID_TEL          0x044a   /**< Telugu */
+#define USB_LANGID_THA          0x041e   /**< Thai */
+#define USB_LANGID_TUR          0x041f   /**< Turkish */
+#define USB_LANGIG_UKR          0x0422   /**< Ukrainian */
+#define USB_LANGID_URD_PK       0x0420   /**< Urdu (Pakistan) */
+#define USB_LANGID_URD_IN       0x0820   /**< Urdu (India) */
+#define USB_LANGID_UZB_LAT      0x0443   /**< Uzbek (Latin) */
+#define USB_LANGID_UZB_CYR      0x0843   /**< Uzbek (Cyrillic) */
+#define USB_LANGID_VIE          0x042a   /**< Vietnamese. */
+/** @} */
 
 /** \brief common USB descriptor header */
 struct usb_header_descriptor {
@@ -380,7 +380,7 @@ struct usb_endpoint_descriptor {
 struct usb_string_descriptor {
     uint8_t  bLength;               /**< Size of the descriptor, in bytes. */
     uint8_t  bDescriptorType;       /**< Type of the descriptor, must be \ref USB_DTYPE_STRING */
-    uint16_t wString[];             /**< String data, as unicode characters (alternatively, array of \ref USB_STD_LANGIDS ). */
+    uint16_t wString[];             /**< String data, as unicode characters (for zero-indexed descriptor, array of \ref USB_STD_LANGID ). */
 } __attribute__((packed));
 
 struct usb_debug_descriptor {
