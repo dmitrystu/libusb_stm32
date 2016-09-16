@@ -54,6 +54,14 @@
 
 #define TGL_SET(mask, bits)  ((EP_NOTOG | (mask))<<16 | (bits))
 
+#define TX_STALL    TGL_SET(EP_TX_STAT,                            EP_TX_STAL)
+#define RX_STALL    TGL_SET(EP_RX_STAT,                            EP_RX_STAL)
+#define TX_USTALL   TGL_SET(EP_TX_STAT | EP_TX_DTOG,               EP_TX_NAK)
+#define RX_USTALL   TGL_SET(EP_RX_STAT | EP_RX_DTOG,               EP_RX_VAL)
+#define DTX_USTALL  TGL_SET(EP_TX_STAT | EP_TX_DTOG | EP_TX_SWBUF, EP_TX_VAL)
+#define DRX_USTALL  TGL_SET(EP_RX_STAT | EP_RX_DTOG | EP_RX_SWBUF, EP_RX_VAL | EP_RX_SWBUF)
+
+
     .syntax unified
     .cpu cortex-m0plus
     .text
@@ -153,7 +161,7 @@ _connect:
     subs    r1, r0, #1
     sbcs    r0, r1
     lsls    r0, #15
-    ldr     r1, =USB_REGBASE
+    ldr     r1, =#USB_REGBASE
     strh    r0, [r1, #0x18]      //USB->BCDR
     bx      lr
     .size   _connect, . - _connect
@@ -171,7 +179,7 @@ _setaddr:
     .thumb_func
     .type   _reset, %function
 _reset:
-    ldr     r2, =USB_REGBASE
+    ldr     r2, =#USB_REGBASE
     movs    r0, #0x01           //FRES
     ldrh    r1, [r2]            //USB->CNTR
     orrs    r1, r0
@@ -184,8 +192,8 @@ _reset:
     .thumb_func
     .type   _enable, %function
 _enable:
-    ldr     r1, =USB_REGBASE     //USB->CNTR
-    ldr     r2, =RCC_BASE        //RCC
+    ldr     r1, =#USB_REGBASE     //USB->CNTR
+    ldr     r2, =#RCC_BASE        //RCC
     movs    r3, #0x01
     lsls    r3, #23             //USBEN or USBRST
     tst     r0, r0
@@ -229,40 +237,40 @@ _enable:
 _ep_setstall:
     lsls    r2, r0, #28
     lsrs    r2, #26
-    ldr     r3, =USB_EPBASE
+    ldr     r3, =#USB_EPBASE
     adds    r3, r2          // epr -> r3
     movs    r2, 0x30        // TX_STAT_MASK -> r2
     cmp     r0, #80
     blo     .L_eps_rx
 .L_eps_tx:
-    ldr     r0, =TGL_SET((EP_TX_STAT | EP_TX_DTOG) , EP_TX_STAL)  //stall TX
+    ldr     r0, =#TX_STALL   //stall TX
     tst     r1, r1
     bne     .L_eps_reg_set
 .L_eps_tx_unstall:
     ldrh    r1, [r3]        // *epr -> r1
     lsls    r1, #21
     lsrs    r1, #29         // EPTTYPE | EPKIND mask only
-    ldr     r0, =TGL_SET((EP_TX_STAT | EP_TX_DTOG | EP_TX_SWBUF) , EP_TX_VAL) //unstall dblbulk or iso TX (VALID and clr DTOG_TX & SWBUF_TX)
+    ldr     r0, =#DTX_USTALL //unstall dblbulk or iso TX (VALID and clr DTOG_TX & SWBUF_TX)
     cmp     r1, #0x01       // if doublebuffered bulk endpoint
     beq     .L_eps_reg_set
     cmp     r1, #0x04       // if isochronous endpoint
-    ldr     r0, =TGL_SET((EP_TX_STAT | EP_TX_DTOG) , EP_TX_NAK) // unstall other TX (NAKED + clr DTOG_TX)
+    ldr     r0, =#TX_USTALL  // unstall other TX (NAKED + clr DTOG_TX)
     b       .L_eps_reg_set
 .L_eps_rx:
     lsls    r2, #8          // RX_STAT_MASK -> R2
-    ldr     r0,=TGL_SET((EP_RX_STAT | EP_RX_DTOG) , EP_RX_STAL)  //stall RX
+    ldr     r0,=#RX_STALL    //stall RX
     tst     r1, r1
     bne     .L_eps_reg_set
 .L_eps_rx_unstall:
     ldrh    r1, [r3]        // *epr -> r1
     lsls    r1, #21
     lsrs    r1, #29         // EPTTYPE | EPKIND mask only
-    ldr     r0, =TGL_SET((EP_RX_STAT | EP_RX_DTOG | EP_RX_SWBUF) , (EP_RX_VAL | EP_RX_SWBUF)) //unstall dblbulk or iso (VALID. clr DTOG_RX set SWBUF_RX)
+    ldr     r0, =#DRX_USTALL //unstall dblbulk or iso (VALID. clr DTOG_RX set SWBUF_RX)
     cmp     r1, #0x01       // if dblbulk
     beq     .L_eps_reg_set
     cmp     r1, #0x04       // if iso
     beq     .L_eps_reg_set
-    ldr     r0, =TGL_SET((EP_RX_STAT | EP_RX_DTOG) , EP_RX_VAL) // unstall other RX (VALID + clr
+    ldr     r0, =#RX_USTALL  // unstall other RX (VALID + clr
 /* R0 - mask and toggle bits
  * R2 - mask for STAT bits
  * R3 - endpoint register pointer
@@ -284,7 +292,7 @@ _ep_setstall:
     .type   _ep_isstalled, %function
 /* bool ep_isstalled(uint8t ep) */
 _ep_isstalled:
-    ldr     r1, =USB_EPBASE
+    ldr     r1, =#USB_EPBASE
     lsls    r2, r0, #28
     lsrs    r2, #26
     ldr     r1, [r1, r2]
@@ -312,8 +320,8 @@ _ep_isstalled:
  */
 _ep_read:
     push    {r4, r5, lr}
-    ldr     r3, =USB_EPBASE
-    ldr     r4, =USB_PMABASE
+    ldr     r3, =#USB_EPBASE
+    ldr     r4, =#USB_PMABASE
     lsls    r0, #28
     lsrs    r0, #26
     adds    r3, r0          // *EPR -> R3
@@ -340,7 +348,7 @@ _ep_read:
     ldrh    r0, [r4, #4]    // R0 rxaddr1 or rxaddr
     ldrh    r5, [r4, #6]    // R5 rxcnt1 or rxcnt
 .L_epr_prepare:
-    ldr     r4, =USB_PMABASE
+    ldr     r4, =#USB_PMABASE
     adds    r0, r4          // R0 now has a physical address
     lsls    r5, #22
     lsrs    r5, #22         // R5 bytes count
@@ -367,7 +375,7 @@ _ep_read:
     beq     .L_epr_exit     // ep is iso. no needs to set it to valid
     cmp     r1, #0x01
     beq     .L_epr_exit     // ep is dblbulk. no needs to set it to valid
-    ldr     r2, =TGL_SET(EP_RX_STAT , EP_RX_VAL)  //0xBF8F3000
+    ldr     r2, =#TGL_SET(EP_RX_STAT , EP_RX_VAL)  //0xBF8F3000
     eors    r0, r2
     lsrs    r2, #16
     ands    r0, r2
@@ -387,8 +395,8 @@ _ep_read:
  */
 _ep_write:
     push    {r2, r4, r5, lr}
-    ldr     r3, =USB_EPBASE
-    ldr     r4, =USB_PMABASE
+    ldr     r3, =#USB_EPBASE
+    ldr     r4, =#USB_PMABASE
     lsls    r0, #28
     lsrs    r0, #26
     adds    r3, r0          // *EPR -> R3
@@ -416,7 +424,7 @@ _ep_write:
     ldrh    r0, [r4, #0]    // R0 txaddr
 .L_epw_prepare:
     strh    r2, [r4, #2]    // set txcount
-    ldr     r4, =USB_PMABASE
+    ldr     r4, =#USB_PMABASE
     adds    r0, r4
 .L_epw_write:
     cmp     r2, #0x01
@@ -437,18 +445,20 @@ _ep_write:
     ldrh    r0, [r3]
     lsls    r1, r0, #21
     lsrs    r1, #29
-    subs    r1, #0x04
-    beq     .L_epw_exit     // ep is iso. no needs to change states
-    ldr     r2, =TGL_SET(EP_TX_STAT , EP_TX_VAL) //0x8FBF0030
-    adds    r1, #0x03
+    cmp     r1, #0x04
+    beq     .L_epw_exit        //nothing to do with ISO ep
+    ldr     r2, =#TGL_SET(EP_TX_STAT, EP_TX_VAL)
+    cmp     r1, #0x01
     bne     .L_epw_setstate
 // ep is dblbulk. needs to switch SW_TX
-    movs    r2, 0x01
-    lsls    r2, #14
-    orrs    r0, r2
-    ldr     r2, =TGL_SET(EP_TX_SWBUF, 0 ) //0xCF8F0000
+    ldr     r2, =#TGL_SET(EP_TX_SWBUF, EP_TX_SWBUF)
+    bics    r0, r2              //clearing SW_BUF for setting in to 1 by XOR
+//    movs    r2, 0x01
+//    lsls    r2, #14
+//    orrs    r0, r2
+//    ldr     r2, =TGL_SET(EP_TX_SWBUF, 0 ) //0xCF8F0000
 
-.L_epw_setstate:
+ .L_epw_setstate:
     eors    r0, r2
     lsrs    r2, #16
     ands    r0, r2
@@ -539,11 +549,11 @@ _ep_config:
     strh    r0, [r5, #2]    //store txcnt
     cmp     r1, #0x06       // is DBLBULK
     beq     .L_epc_txdbl
-    ldr     r3, =TGL_SET((EP_TX_STAT | EP_TX_DTOG) , EP_TX_NAK) //set state NAKED , clr DTOG_TX
+    ldr     r3, =TX_USTALL  //set state NAKED , clr DTOG_TX
     cmp     r1, #0x01       // is ISO
     bne     .L_epc_txsetstate   //
 .L_epc_txdbl:
-    ldr     r3, =TGL_SET((EP_TX_STAT | EP_TX_DTOG | EP_TX_SWBUF) , EP_TX_VAL) //set state VALID clr DTOG_TX & SWBUF_TX
+    ldr     r3, =DTX_USTALL //set state VALID clr DTOG_TX & SWBUF_TX
     bl      _get_next_pma
     bcc     .L_epc_fail
     strh    r0, [r5, #4]    //store txaddr1
@@ -590,14 +600,14 @@ _ep_config:
     bcc     .L_epc_fail
     strh    r0, [r5, #4]    //store rxaddr1
     strh    r3, [r5, #6]    //store rxcnt1
-    ldr     r3, =TGL_SET((EP_RX_STAT | EP_RX_DTOG | EP_RX_SWBUF) , (EP_RX_VAL | EP_RX_SWBUF)) //0xFFCF3040
+    ldr     r3, =DRX_USTALL
     b       .L_epc_rxsetstate
 .L_epc_rxsngl:
     bl      _get_next_pma
     bcc     .L_epc_fail
     strh    r0, [r5, #4]    //store rxaddr1 or rxaddr
     strh    r3, [r5, #6]    //store rxcnt1 or rxcnt
-    ldr     r3, =TGL_SET((EP_RX_STAT | EP_RX_DTOG) , EP_RX_VAL) //0xFF8F3000
+    ldr     r3, =RX_USTALL
 .L_epc_rxsetstate:
     ldr     r5, =USB_EPBASE
     lsrs    r4, #1
