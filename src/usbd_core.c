@@ -400,12 +400,4 @@ void usbd_control(usbd_device *dev, enum usbd_commands cmd) {
 }
 
 
-/*
-const struct usbd_api usbd = {
-    usbd_init,
-    usbd_poll,
-};
-
-*/
-
 

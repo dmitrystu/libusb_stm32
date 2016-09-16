@@ -375,7 +375,7 @@ _ep_read:
     beq     .L_epr_exit     // ep is iso. no needs to set it to valid
     cmp     r1, #0x01
     beq     .L_epr_exit     // ep is dblbulk. no needs to set it to valid
-    ldr     r2, =#TGL_SET(EP_RX_STAT , EP_RX_VAL)  //0xBF8F3000
+    ldr     r2, =#TGL_SET(EP_RX_STAT , EP_RX_VAL)
     eors    r0, r2
     lsrs    r2, #16
     ands    r0, r2
@@ -453,11 +453,6 @@ _ep_write:
 // ep is dblbulk. needs to switch SW_TX
     ldr     r2, =#TGL_SET(EP_TX_SWBUF, EP_TX_SWBUF)
     bics    r0, r2              //clearing SW_BUF for setting in to 1 by XOR
-//    movs    r2, 0x01
-//    lsls    r2, #14
-//    orrs    r0, r2
-//    ldr     r2, =TGL_SET(EP_TX_SWBUF, 0 ) //0xCF8F0000
-
  .L_epw_setstate:
     eors    r0, r2
     lsrs    r2, #16
@@ -478,7 +473,7 @@ _get_next_pma:
     movs    r1, #16
     movs    r3, #1
     lsls    r3, #10         //R3 MAX_PMA_SIZE
-    ldr     r0, =USB_PMABASE
+    ldr     r0, =#USB_PMABASE
 .L_gnp_chkaddr:
     ldrh    r4, [r0, #0]    //txaddr
     tst     r4, r4
@@ -532,14 +527,14 @@ _ep_config:
     lsrs    r4, #28
     orrs    r3, r4
     lsls    r4, #2
-    ldr     r5, =USB_EPBASE
+    ldr     r5, =#USB_EPBASE
     strh    r3, [r5, r4]    //setup EPTYPE EPKIND EPADDR
     cmp     r1, #0x00       // is a control ep ?
     beq     .L_epc_setuptx
     cmp     r0, #0x80
     blo     .L_epc_setuprx
 .L_epc_setuptx:
-    ldr     r5, =USB_PMABASE
+    ldr     r5, =#USB_PMABASE
     lsls    r4, #1
     adds    r5, r4
     bl      _get_next_pma
@@ -549,18 +544,18 @@ _ep_config:
     strh    r0, [r5, #2]    //store txcnt
     cmp     r1, #0x06       // is DBLBULK
     beq     .L_epc_txdbl
-    ldr     r3, =TX_USTALL  //set state NAKED , clr DTOG_TX
+    ldr     r3, =#TX_USTALL  //set state NAKED , clr DTOG_TX
     cmp     r1, #0x01       // is ISO
     bne     .L_epc_txsetstate   //
 .L_epc_txdbl:
-    ldr     r3, =DTX_USTALL //set state VALID clr DTOG_TX & SWBUF_TX
+    ldr     r3, =#DTX_USTALL //set state VALID clr DTOG_TX & SWBUF_TX
     bl      _get_next_pma
     bcc     .L_epc_fail
     strh    r0, [r5, #4]    //store txaddr1
     movs    r0, #0x00
     strh    r0, [r5, #6]    //store txcnt
 .L_epc_txsetstate:
-    ldr     r5, =USB_EPBASE
+    ldr     r5, =#USB_EPBASE
     lsrs    r4, #1
     ldrh    r0, [r5, r4]
     eors    r0, r3
@@ -584,7 +579,7 @@ _ep_config:
     adds    r2, #0x20
 .L_epc_rxbb:
     lsls    r3, #9
-    ldr     r5, =USB_PMABASE
+    ldr     r5, =#USB_PMABASE
     lsls    r4, #1
     adds    r5, r4
     cmp     r1, 0x06    //if dblbulk
@@ -600,16 +595,16 @@ _ep_config:
     bcc     .L_epc_fail
     strh    r0, [r5, #4]    //store rxaddr1
     strh    r3, [r5, #6]    //store rxcnt1
-    ldr     r3, =DRX_USTALL
+    ldr     r3, =#DRX_USTALL
     b       .L_epc_rxsetstate
 .L_epc_rxsngl:
     bl      _get_next_pma
     bcc     .L_epc_fail
     strh    r0, [r5, #4]    //store rxaddr1 or rxaddr
     strh    r3, [r5, #6]    //store rxcnt1 or rxcnt
-    ldr     r3, =RX_USTALL
+    ldr     r3, =#RX_USTALL
 .L_epc_rxsetstate:
-    ldr     r5, =USB_EPBASE
+    ldr     r5, =#USB_EPBASE
     lsrs    r4, #1
     ldrh    r0, [r5, r4]
     eors    r0, r3
@@ -635,13 +630,13 @@ _ep_config:
 _ep_deconfig:
     lsls    r1, r0, #28
     lsrs    r1, #26
-    ldr     r2, =USB_EPBASE
-    ldr     r3, =USB_PMABASE
+    ldr     r2, =#USB_EPBASE
+    ldr     r3, =#USB_PMABASE
     adds    r2, r1
     lsls    r1, #1
     adds    r3, r1
 /* clearing endpoint register */
-    ldr     r1, =EP_NOTOG
+    ldr     r1, =#EP_NOTOG
     ldrh    r0, [r2]
     bics    r0, r1
     strh    r0, [r2]
@@ -667,7 +662,7 @@ _ep_deconfig:
 /*void evt_poll(usbd_device *dev, usbd_evt_callback callback)*/
 _evt_poll:
     push    {r0, r1, r4, r5}
-    ldr     r3, =USB_REGBASE
+    ldr     r3, =#USB_REGBASE
     ldrh    r0, [r3, #4]        //USB->ISTR -> R2
 /* ep_index -> R2 */
     movs    r2, 0x07
@@ -722,7 +717,7 @@ _evt_poll:
     lsls    r5, #0x08
 .L_ep_clr_ctr:
     bics    r4, r5
-    ldr     r5, =EP_NOTOG
+    ldr     r5, =#EP_NOTOG
     ands    r4, r5
     orrs    r4, r3
     strh    r4, [r0]            // clr CTR flag
@@ -764,9 +759,9 @@ _evt_poll:
 /* do reset routine */
 .L_ep_resetm:
     movs    r1, #7
-    ldr     r2, =USB_EPBASE
-    ldr     r0, =USB_PMABASE
-    ldr     r5, =EP_NOTOG
+    ldr     r2, =#USB_EPBASE
+    ldr     r0, =#USB_PMABASE
+    ldr     r5, =#EP_NOTOG
 .L_ep_reset_loop:
     ldrh    r4, [r2]
     bics    r4, r5
