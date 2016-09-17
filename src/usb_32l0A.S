@@ -82,6 +82,7 @@ usb_stml0a:
     .long   _ep_setstall
     .long   _ep_isstalled
     .long   _evt_poll
+    .long   _get_frame
     .long   _get_serial_desc
     .size   usb_stml0a, . - usb_stml0a
 
@@ -188,6 +189,16 @@ _reset:
     strh    r1, [r2]            // clr FRES
     bx      lr
     .size   _reset, . - _reset
+
+    .thumb_func
+    .type   _get_frame, %function
+_get_frame:
+    ldr     r0, =#USB_REGBASE
+    ldrh    r0, [r0, #0x08]     //FNR
+    lsls    r0, #21
+    lsrs    r0, #21
+    bx      lr
+    .size   _get_frame, . - _get_frame
 
     .thumb_func
     .type   _enable, %function
