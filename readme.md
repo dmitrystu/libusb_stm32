@@ -1,4 +1,4 @@
-﻿### Lightweight USB Device Stack ###
+### Lightweight USB Device Stack ###
 
 + Lightweight and fast
 + Event-driven process workflow
@@ -9,7 +9,8 @@
 
 | MCU series | Driver Name | Written on | Endpoints (1) | Internal S/N | Doublebuffered transfer   |
 | ---------- | ----------- | ---------- | ------------- |------------- | ------------------------- |
-| STM32L0    | usb_stml0a  | GCC ASM    |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L0/F0 | usb_stml0a  | GCC ASM    |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L0/F0 | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
 
 
 1. Single physicsl endpoint can be used to implement
