@@ -16,7 +16,9 @@
 #if !defined (__ASSEMBLER__)
     #define __ASSEMBLER__
 #endif
-#include "..\inc\usbd_core.h"
+
+#include "..\usb.h"
+#if defined(USE_STMV0A_DRIVER)
 
 #define USB_EPBASE  0x40005C00
 #define USB_REGBASE 0x40005C40
@@ -68,9 +70,9 @@
     .thumb
 
 
-    .globl  usb_stml0a
+    .globl  usb_stmv0a
     .align  2
-usb_stml0a:
+usb_stmv0a:
     .long   _enable
     .long   _reset
     .long   _connect
@@ -84,7 +86,7 @@ usb_stml0a:
     .long   _evt_poll
     .long   _get_frame
     .long   _get_serial_desc
-    .size   usb_stml0a, . - usb_stml0a
+    .size   usb_stmv0a, . - usb_stmv0a
 
 
     .thumb_func
@@ -807,3 +809,5 @@ _evt_poll:
     .pool
 
    .end
+
+#endif

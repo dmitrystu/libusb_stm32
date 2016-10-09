@@ -25,10 +25,6 @@
 #if defined(__cplusplus)
     extern "C" {
 #endif
-#include <stdbool.h>
-
-
-
 
 /** \addtogroup USBD_CORE USB device core
  * \brief Contains core and hardware driver framework definitions

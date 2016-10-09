@@ -21,18 +21,33 @@
 #endif
 
 
-#include "inc\usbd_core.h"
-#include "inc\usb_std.h"
 
 
-#if defined(STM32L0)
-    extern const struct usbd_driver usb_stml0a;
-    #define usb_hw_driver usb_stml0a
+#if defined(STM32L052xx) && !defined(USE_C_DRIVER)
+    #define USE_STMV0A_DRIVER
+#elif defined(STM32L052xx)
+    #define USE_STMV0_DRIVER
+#elif defined(STM32L053xx) || defined(STM32F042xx) || defined(STM32F072xx) ||
+      defined(STM32L432xx) || defined(STM32L442xx) || defined(STM32L433xx) ||
+      defined(STM32L443xx)
+    #define USE_STMV0_DRIVER
+    #warning "Driver has not been tested with this MPU"
 #else
     #error "No supported MCU family selected"
 #endif
 
 
+#include "inc\usbd_core.h"
+#if !defined(__ASSEMBLER__)
+    #include "inc\usb_std.h"
+    #if defined(USE_STMV0A_DRIVER)
+        extern const struct usbd_driver usb_stmv0a;
+        #define usbd_hw usb_stmv0a
+    #elif defined(USE_STMV0_DRIVER)
+        extern const struct usbd_driver usb_stmv0;
+        #define usbd_hw usb_stmv0
+    #endif
+#endif
 
 #if defined (__cplusplus)
     }

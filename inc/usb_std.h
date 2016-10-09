@@ -128,6 +128,23 @@ extern "C" {
 #define USB_STD_SYNCH_FRAME         0x0C /**< This request is used to set and then report an endpoint's synchronization frame */
 /** @} */
 
+/**\name USB Feature selector
+ * @{ */
+#define USB_FEAT_ENDPOINT_HALT      0x00
+#define USB_FEAT_REMOTE_WKUP        0x01
+#define USB_FEAT_TEST_MODE          0x02
+#define USB_FEAT_DEBUG_MODE         0x06
+/** @} */
+
+/**\name USB Test mode Selectors
+ * @{ */
+#define USB_TEST_J                  0x01
+#define USB_TEST_K                  0x02
+#define USB_TEST_SE0_NAK            0x03
+#define USB_TEST_PACKET             0x04
+#define USB_TEST_FOECR_ENABLE       0x05
+/** @} */
+
 /** \addtogroup USB_STD_LANGID USB standard LANGID codes
  * @{ */
 #define USB_LANGID_AFR          0x0436   /**< Afrikaans */
@@ -371,7 +388,6 @@ struct usb_endpoint_descriptor {
     uint16_t wMaxPacketSize;        /**< Size of the endpoint bank, in bytes. This indicates the maximum packet size that the endpoint can receive at a time. */
     uint8_t  bInterval;             /**< Polling interval in milliseconds for the endpoint if it is an INTERRUPT or ISOCHRONOUS type. */
 } __attribute__((packed));
-
 /** \brief USB string descriptor
  *  \details String descriptors are referenced by their one-based index number. A string descriptor contains one or more not NULL-terminated Unicode strings.
  *  \note String descriptors are optional. if a device does not support string descriptors, all references to string descriptors within device, configuration,
@@ -382,10 +398,14 @@ struct usb_string_descriptor {
     uint8_t  bDescriptorType;       /**< Type of the descriptor, must be \ref USB_DTYPE_STRING */
     uint16_t wString[];             /**< String data, as unicode characters (for zero-indexed descriptor, array of \ref USB_STD_LANGID ). */
 } __attribute__((packed));
-
+/** \brief USB debug descriptor
+ *  \details This descriptor is used to describe certain characteristics of the device that the host debug port driver needs to know
+ *           to communicate with the device. Specifically, the debug descriptor lists the addresses of the endpoints that comprise the
+ *           Debug Pipe. The endpoints are identified by endpoint number.
+ */
 struct usb_debug_descriptor {
-    uint8_t  bLength;
-    uint8_t  bDescriptorType;
+    uint8_t  bLength;               /**< Size of the descriptor, in bytes. */
+    uint8_t  bDescriptorType;       /**< Type ot the descriptor, must be \ref USB_DTYPE_DEBUG */
     uint8_t  bDebugInEndpoint;      /**< Endpoint number of the Debug Data IN endpoint. This is a Bulk-type endpoint with a maximum packet size of 8 bytes.  */
     uint8_t  bDebugOutEndpoint;     /**< Endpoint number of the Debug Data OUTendpoint. This is a Bulk-type endpoint with a maximum packet size of 8 bytes.  */
 } __attribute__((packed));

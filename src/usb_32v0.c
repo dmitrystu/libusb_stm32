@@ -1,7 +1,9 @@
 #include <stdint.h>
+#include <stdbool.h>
 #include "stm32.h"
 #include "usb.h"
 
+#if defined(USE_STMV0_DRIVER)
 
 #ifndef USB_PMASIZE
     #warning PMA memory size is not defined. Use 1k by default
@@ -452,4 +454,4 @@ const struct usbd_driver usb_stmv0 = {
     get_serialno_desc,
 };
 
-
+#endif //USE_STM32V0_DRIVER

@@ -7,11 +7,17 @@
 
 ### Supported hardware ###
 
-| MCU series | Driver Name | Written on | Endpoints (1) | Internal S/N | Doublebuffered transfer   |
-| ---------- | ----------- | ---------- | ------------- |------------- | ------------------------- |
-| STM32L0/F0 | usb_stml0a  | GCC ASM    |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
-| STM32L0/F0 | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
-
+| MCU series   | Driver Name | Written on | Endpoints (1) | Internal S/N | Doublebuffered transfer   |
+| ------------ | ----------- | ---------- | ------------- |------------- | ------------------------- |
+| STM32L052    | usb_stmv0a  | GCC ASM    |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L052    | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L053(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32F042(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32F072(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L432(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L433(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L442(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L443(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
 
 1. Single physicsl endpoint can be used to implement
   + one bi-directional/single-buffer logical endpoint (CONTROL)
@@ -19,6 +25,8 @@
   + two mono-directional/single-buffer logical endpoints (BULK OR INTERRUPT)
 
 2. At this moment BULK IN endpoint can use both buffers, but it is not **real** doublebuffered.
+
+3. **Not tested**
 
 ### Implemented definitions for classes ###
 1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](http://www.usb.org/developers/hidpage/HID1_11.pdf)
