@@ -27,8 +27,8 @@
     #define USE_STMV0A_DRIVER
 #elif defined(STM32L052xx)
     #define USE_STMV0_DRIVER
-#elif defined(STM32L053xx) || defined(STM32F042xx) || defined(STM32F072xx) ||
-      defined(STM32L432xx) || defined(STM32L442xx) || defined(STM32L433xx) ||
+#elif defined(STM32L053xx) || defined(STM32F042xx) || defined(STM32F072xx) || \
+      defined(STM32L432xx) || defined(STM32L442xx) || defined(STM32L433xx) || \
       defined(STM32L443xx)
     #define USE_STMV0_DRIVER
     #warning "Driver has not been tested with this MPU"

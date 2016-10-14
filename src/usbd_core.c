@@ -240,7 +240,6 @@ static void usbd_process_eptx(usbd_device *dev, uint8_t ep) {
     }
 }
 
-
 /** \brief Control endpoint RX event processing
  * \param dev pointer to usb device
  * \param ep endpoint number
@@ -282,13 +281,11 @@ do_process_request:
         /* usb request received */
         /* let's handle it */
         /* preparing */
-        ep |= 0x80;
         dev->status.data_ptr = req->data;
         dev->status.data_count = dev->status.data_maxsize;
         if (usbd_process_request(dev, req)) {
             if (req->bmRequestType & USB_REQ_DEVTOHOST) {
                 /* return data from function */
-                dev->status.control_state = usbd_ctl_txdata;
                 if (dev->status.data_count >= req->wLength) {
                     dev->status.data_count = req->wLength;
                     dev->status.control_state = usbd_ctl_txdata;
@@ -297,11 +294,11 @@ do_process_request:
                     /* ZLP maybe wanted */
                     dev->status.control_state = usbd_ctl_ztxdata;
                 }
-                return usbd_process_eptx(dev, ep);
+                return usbd_process_eptx(dev, ep | 0x80);
             } else {
                 /* confirming by ZLP in STATUS_IN stage */
                 dev->status.control_state = usbd_ctl_statusin;
-                dev->driver->ep_write(ep, 0, 0);
+                dev->driver->ep_write(ep | 0x80, 0, 0);
             }
         } else {
             /* unsupported function. Let's send STALL_PID */
@@ -360,15 +357,22 @@ static void usbd_process_evt(usbd_device *dev, uint8_t evt, uint8_t ep) {
     if (dev->events[evt]) dev->events[evt](dev, evt, ep);
 }
 
+inline static void __memclr(void* ptr, uint32_t sz) {
+    do {
+        *(uint8_t*)ptr = 0x00;
+    } while (--sz);
+}
+
 
 
 void usbd_init(usbd_device *dev, const struct usbd_driver *drv, const uint8_t ep0size, void *buffer, const uint16_t bsize) {
-    memset(dev, 0, sizeof(struct usbd_device));
+    //memset(dev, 0, sizeof(usbd_device));
+    __memclr(dev, sizeof(usbd_device));
     dev->driver = drv;
     dev->status.ep0size = ep0size;
     dev->status.data_ptr = buffer;
     dev->status.data_buf = buffer;
-    dev->status.data_maxsize = bsize - offsetof(struct usbd_ctlreq, data);
+    dev->status.data_maxsize = bsize - offsetof(usbd_ctlreq, data);
 }
 
 void usbd_poll(usbd_device *dev) {

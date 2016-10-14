@@ -44,7 +44,7 @@
 #define USB_DFU_UPLOAD                  0x02    /**< This request is employed by the host to solicit firmware from the device.*/
 #define USB_DFU_GETSTATUS               0x03    /**< The host employs this request to facilitate synchronization with the device. \see usb_dfu_status */
 #define USB_DFU_CLRSTATAUS              0x04    /**< This request resets DFU machine state to DFU_IDLE*/
-#define USB_DFU_GETSATAE                0x05    /**< This request solicits a report about the state of the device. */
+#define USB_DFU_GETSTATE                0x05    /**< This request solicits a report about the state of the device. */
 #define USB_DFU_ABORT                   0x06    /**< This request enables the host to exit from certain states and return to the DFU_IDLE state*/
 /** @} */
 
@@ -62,7 +62,7 @@
 #define USB_DFU_STATUS_OK               0x00 /**< No error condition is present. */
 #define USB_DFU_STATUS_ERR_TARGET       0x01 /**< File is not targeted for use by this device. */
 #define USB_DFU_STATUS_ERR_FILE         0x02 /**< File is for this device but fails some vendor specific verification test. */
-#define USB_DFU_STATIS_ERR_WRITE        0x03 /**< Device is unable to write memory. */
+#define USB_DFU_STATUS_ERR_WRITE        0x03 /**< Device is unable to write memory. */
 #define USB_DFU_STATUS_ERR_ERASE        0x04 /**< Memory erase function failed. */
 #define USB_DFU_STATUS_ERR_CHECK_ERASED 0x05 /**< Memory erase check failed. */
 #define USB_DFU_STATUS_ERR_PROG         0x06 /**< Program memory function failed. */

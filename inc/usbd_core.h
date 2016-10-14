@@ -106,9 +106,9 @@ enum usbd_commands {
     usbd_cmd_reset,             /**< Resets device */
 };
 
-typedef struct usbd_device usbd_device;
-typedef struct usbd_ctlreq usbd_ctlreq;
-typedef struct usbd_status usbd_status;
+typedef struct _usbd_device usbd_device;
+typedef struct _usbd_ctlreq usbd_ctlreq;
+typedef struct _usbd_status usbd_status;
 
 /**\name USB Device user callbacks function prototypes
  * @{ */
@@ -247,18 +247,18 @@ typedef uint16_t (*usbd_hw_get_serialno)(void *buffer);
 /** @} */
 
 /** Represents generic USB control request */
-struct usbd_ctlreq {
+struct _usbd_ctlreq {
     uint8_t     bmRequestType;  /**< This bitmapped field identifies the characteristics of the specific request. */
     uint8_t     bRequest;       /**< This field specifies the particular request. */
     uint16_t    wValue;         /**< It is used to pass a parameter to the device, specific to the request. */
     uint16_t    wIndex;         /**< It is used to pass a parameter to the device, specific to the request. */
     uint16_t    wLength;        /**< This field specifies the length of the data transferred during the second phase of the control transfer */
     uint8_t     data[];         /**< Request data payload */
-} __attribute__((packed));
+};
 
 
 /** USB device status data for control endpoint */
-struct usbd_status {
+struct _usbd_status {
     void        *data_buf;
     void        *data_ptr;      /**< Pointer to control endpoint current data buffer */
     uint16_t    data_count;     /**< Control endpoint data counter */
@@ -290,7 +290,7 @@ struct usbd_driver {
  *  \note use helper \ref usbd_device typedef
  *  \note structure must be aligned
  */
-struct usbd_device {
+struct _usbd_device {
     const struct usbd_driver    *driver;
     usbd_ctl_callback           control_callback;
     usbd_ctl_complete           complete_callback;
