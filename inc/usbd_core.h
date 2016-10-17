@@ -106,6 +106,13 @@ enum usbd_commands {
     usbd_cmd_reset,             /**< Resets device */
 };
 
+/* Reporting status results */
+typedef enum _usbd_respond {
+    usbd_fail,                  /**< Function has an error, STALLPID will be issued */
+    usbd_ack,                   /**< Function completes request accepted ZLP or data will be send */
+    usbd_nak,                   /**< Function is busy. NAK handshake */
+} usbd_respond;
+
 typedef struct _usbd_device usbd_device;
 typedef struct _usbd_ctlreq usbd_ctlreq;
 typedef struct _usbd_status usbd_status;
@@ -141,7 +148,7 @@ typedef void (*usbd_ctl_complete)(usbd_device *dev, usbd_ctlreq *req);
  * \param[out] *callback \ref usbd_ctl_complete "pointer to USB control transfer completed callback", default is NULL (no callback)
  * \return TRUE if control request processed successfully, false otherwise.
  */
-typedef bool (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, usbd_ctl_complete *callback);
+typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, usbd_ctl_complete *callback);
 
 /** USB get descriptor callback
  * \details Called when GET_DESCRIPTOR request issued
@@ -305,10 +312,10 @@ struct _usbd_device {
  * \param dev USB device that will be initialized
  * \param drv Pointer to hardware driver
  * \param ep0size Control endpoint 0 size
- * \param buffer Pointer to control request data buffer
+ * \param buffer Pointer to control request data buffer (32-bit aligned)
  * \param bsize Size of the data buffer
  */
-void usbd_init(usbd_device *dev, const struct usbd_driver *drv, const uint8_t ep0size, void *buffer, const uint16_t bsize);
+void usbd_init(usbd_device *dev, const struct usbd_driver *drv, const uint8_t ep0size, uint32_t *buffer, const uint16_t bsize);
 
 /** Polls USB for events
  * \param dev Pointer to device structure

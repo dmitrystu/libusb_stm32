@@ -56,7 +56,7 @@ static void usbd_process_callback (usbd_device *dev) {
     }
 }
 
-static bool usbd_configure(usbd_device *dev, uint8_t config) {
+static usbd_respond usbd_configure(usbd_device *dev, uint8_t config) {
     if (0 == config) {
         /* de-configuring endpoints except EP0 */
         for (int i = 1; i < 8; i++) {
@@ -67,17 +67,17 @@ static bool usbd_configure(usbd_device *dev, uint8_t config) {
         }
         dev->status.device_cfg = 0;
         dev->status.device_state = usbd_state_addressed;
-        return true;
+        return usbd_ack;
     } else {
         if (dev->config_callback) {
             if (dev->config_callback(dev, config)) {
                 dev->status.device_cfg = config;
                 dev->status.device_state = usbd_state_configured;
-                return true;
+                return usbd_ack;
             }
         }
     }
-    return false;
+    return usbd_fail;
 }
 
 
@@ -86,7 +86,7 @@ static bool usbd_configure(usbd_device *dev, uint8_t config) {
  * \param req pointer to control request
  * \return TRUE if request is handled
  */
-static bool usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
+static usbd_respond usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
     switch (req->bRequest) {
     case USB_STD_CLEAR_FEATURE:
         /* not yet supported */
@@ -94,12 +94,12 @@ static bool usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
 
     case USB_STD_GET_CONFIG:
         req->data[0] = dev->status.device_cfg;
-        return true;
+        return usbd_ack;
 
     case USB_STD_GET_DESCRIPTOR:
         if (req->wValue == ((USB_DTYPE_STRING << 8) | INTSERIALNO_DESCRIPTOR )) {
             dev->status.data_count = dev->driver->get_serialno_desc(req->data);
-            return true;
+            return usbd_ack;
         } else {
             if (dev->descriptor_callback) {
                 return dev->descriptor_callback(req, &(dev->status.data_ptr), &(dev->status.data_count));
@@ -109,10 +109,10 @@ static bool usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
     case USB_STD_GET_STATUS:
         req->data[0] = 0;
         req->data[1] = 0;
-        return true;
+        return usbd_ack;
     case USB_STD_SET_ADDRESS:
         dev->complete_callback = usbd_set_address;
-        return true;
+        return usbd_ack;
     case USB_STD_SET_CONFIG:
         return usbd_configure(dev, req->wValue);
     case USB_STD_SET_DESCRIPTOR:
@@ -126,7 +126,7 @@ static bool usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
     default:
         break;
     }
-    return false;
+    return usbd_fail;
 }
 
 /** \brief Processing standard interface control request
@@ -134,16 +134,17 @@ static bool usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
  * \param req pointer to control request
  * \return TRUE if request is handled
  */
-static bool usbd_process_intrq(usbd_device *dev, usbd_ctlreq *req) {
+static usbd_respond usbd_process_intrq(usbd_device *dev, usbd_ctlreq *req) {
+    (void)dev;
     switch (req->bRequest) {
     case USB_STD_GET_STATUS:
         req->data[0] = 0;
         req->data[1] = 0;
-        return true;
+        return usbd_ack;
     default:
         break;
     }
-    return false;
+    return usbd_fail;
 }
 
 /** \brief Processing standard endpoint control request
@@ -151,20 +152,20 @@ static bool usbd_process_intrq(usbd_device *dev, usbd_ctlreq *req) {
  * \param req pointer to control request
  * \return TRUE if request is handled
  */
-static bool usbd_process_eptrq(usbd_device *dev, usbd_ctlreq *req) {
+static usbd_respond usbd_process_eptrq(usbd_device *dev, usbd_ctlreq *req) {
     switch (req->bRequest) {
     case USB_STD_SET_FEATURE:
         dev->driver->ep_setstall(req->wIndex, 1);
-        return true;
+        return usbd_ack;
     case USB_STD_CLEAR_FEATURE:
         dev->driver->ep_setstall(req->wIndex, 0);
-        return true;
+        return usbd_ack;
     case USB_STD_GET_STATUS:
         req->data[0] = dev->driver->ep_isstalled(req->wIndex) ? 1 : 0;
         req->data[1] = 0;
-        return true;
+        return usbd_ack;
     default:
-        return false;
+        return usbd_ack;
     }
 }
 
@@ -173,12 +174,11 @@ static bool usbd_process_eptrq(usbd_device *dev, usbd_ctlreq *req) {
  * \param req pointer to usb control request
  * \return TRUE if request is handled
  */
-static bool usbd_process_request(usbd_device *dev, usbd_ctlreq *req) {
+static usbd_respond usbd_process_request(usbd_device *dev, usbd_ctlreq *req) {
     /* processing control request by callback */
     if (dev->control_callback) {
-        if (dev->control_callback(dev, req, &(dev->complete_callback))) {
-            return true;
-        }
+        usbd_respond r = dev->control_callback(dev, req, &(dev->complete_callback));
+        if (r != usbd_fail) return r;
     }
     /* continuing standard USB requests */
     switch (req->bmRequestType & (USB_REQ_TYPE | USB_REQ_RECIPIENT)) {
@@ -282,8 +282,9 @@ do_process_request:
         /* let's handle it */
         /* preparing */
         dev->status.data_ptr = req->data;
-        dev->status.data_count = dev->status.data_maxsize;
-        if (usbd_process_request(dev, req)) {
+        dev->status.data_count = req->wLength;/*dev->status.data_maxsize;*/
+        switch (usbd_process_request(dev, req)){
+        case usbd_ack:
             if (req->bmRequestType & USB_REQ_DEVTOHOST) {
                 /* return data from function */
                 if (dev->status.data_count >= req->wLength) {
@@ -295,13 +296,17 @@ do_process_request:
                     dev->status.control_state = usbd_ctl_ztxdata;
                 }
                 return usbd_process_eptx(dev, ep | 0x80);
+
             } else {
                 /* confirming by ZLP in STATUS_IN stage */
                 dev->status.control_state = usbd_ctl_statusin;
                 dev->driver->ep_write(ep | 0x80, 0, 0);
             }
-        } else {
-            /* unsupported function. Let's send STALL_PID */
+            break;
+        case usbd_nak:
+            dev->status.control_state = usbd_ctl_statusin;
+            break;
+        default:
             return usbd_stall_pid(dev, ep);
         }
         break;
@@ -358,15 +363,13 @@ static void usbd_process_evt(usbd_device *dev, uint8_t evt, uint8_t ep) {
 }
 
 inline static void __memclr(void* ptr, uint32_t sz) {
+    uint8_t *b = ptr;
     do {
-        *(uint8_t*)ptr = 0x00;
+        *b++ = 0x00;
     } while (--sz);
 }
 
-
-
-void usbd_init(usbd_device *dev, const struct usbd_driver *drv, const uint8_t ep0size, void *buffer, const uint16_t bsize) {
-    //memset(dev, 0, sizeof(usbd_device));
+void usbd_init(usbd_device *dev, const struct usbd_driver *drv, const uint8_t ep0size, uint32_t *buffer, const uint16_t bsize) {
     __memclr(dev, sizeof(usbd_device));
     dev->driver = drv;
     dev->status.ep0size = ep0size;
@@ -403,6 +406,3 @@ void usbd_control(usbd_device *dev, enum usbd_commands cmd) {
         break;
     }
 }
-
-
-
