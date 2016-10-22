@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include "usb.h"
+#include "../usb.h"
 
 #define _MIN(a, b) ((a) < (b)) ? (a) : (b)
 
@@ -57,27 +57,14 @@ static void usbd_process_callback (usbd_device *dev) {
 }
 
 static usbd_respond usbd_configure(usbd_device *dev, uint8_t config) {
-    if (0 == config) {
-        /* de-configuring endpoints except EP0 */
-        for (int i = 1; i < 8; i++) {
-            dev->driver->ep_deconfig(i);
-        }
-        if (dev->config_callback) {
-            dev->config_callback(dev, config);
-        }
-        dev->status.device_cfg = 0;
-        dev->status.device_state = usbd_state_addressed;
-        return usbd_ack;
-    } else {
-        if (dev->config_callback) {
-            if (dev->config_callback(dev, config)) {
-                dev->status.device_cfg = config;
-                dev->status.device_state = usbd_state_configured;
-                return usbd_ack;
-            }
-        }
+    usbd_respond resp = usbd_fail;
+    if (dev->config_callback) {
+        resp = dev->config_callback(dev, config);
     }
-    return usbd_fail;
+    if (config == 0 && resp == usbd_ack) {
+        dev->status.device_state = usbd_state_addressed;
+    }
+    return resp;
 }
 
 

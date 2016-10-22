@@ -17,7 +17,7 @@
     #define __ASSEMBLER__
 #endif
 
-#include "..\usb.h"
+#include "../usb.h"
 #if defined(USE_STMV0A_DRIVER)
 
 #define USB_EPBASE  0x40005C00

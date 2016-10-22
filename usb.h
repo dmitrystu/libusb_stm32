@@ -37,9 +37,9 @@
 #endif
 
 
-#include "inc\usbd_core.h"
+#include "inc/usbd_core.h"
 #if !defined(__ASSEMBLER__)
-    #include "inc\usb_std.h"
+    #include "inc/usb_std.h"
     #if defined(USE_STMV0A_DRIVER)
         extern const struct usbd_driver usb_stmv0a;
         #define usbd_hw usb_stmv0a

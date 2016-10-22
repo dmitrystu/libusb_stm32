@@ -146,7 +146,7 @@ typedef void (*usbd_ctl_complete)(usbd_device *dev, usbd_ctlreq *req);
  * \param[in] dev points to USB device
  * \param[in] req points to usb control request
  * \param[out] *callback \ref usbd_ctl_complete "pointer to USB control transfer completed callback", default is NULL (no callback)
- * \return TRUE if control request processed successfully, false otherwise.
+ * \return usbd_respond status.
  */
 typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, usbd_ctl_complete *callback);
 
@@ -163,7 +163,7 @@ typedef bool (*usbd_dsc_callback)(usbd_ctlreq *req, void **address, uint16_t *ds
  * \details called when SET_CONFIGURATION request issued
  * \param[in] dev pointer to USB device
  * \param[in] cfg configuration number.
- * \note if config is 0 all device endpoints EP0 will be de-configured by core before entering this callback
+ * \note if config is 0 device endpoints should be de-configured
  * \return TRUE if success
  */
 typedef bool (*usbd_cfg_callback)(usbd_device *dev, uint8_t cfg);
