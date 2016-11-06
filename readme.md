@@ -14,10 +14,13 @@
 | STM32L053(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
 | STM32F042(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
 | STM32F072(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L1xx    | usb_stmv1a  | GCC ASM    |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+| STM32L1xx    | usb_stmv1   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
 | STM32L432(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
 | STM32L433(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
 | STM32L442(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
 | STM32L443(3) | usb_stmv0   | C          |             8 | FNV1A 32bit  | ISO, BULK OUT, BULK IN (2)|
+
 
 1. Single physicsl endpoint can be used to implement
   + one bi-directional/single-buffer logical endpoint (CONTROL)

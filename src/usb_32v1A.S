@@ -18,13 +18,9 @@
 #endif
 
 #include "../usb.h"
-#if defined(USE_STMV0A_DRIVER)
+#include "memmap.inc"
+#if defined(USE_STMV1A_DRIVER)
 
-#define USB_EPBASE  0x40005C00
-#define USB_REGBASE 0x40005C40
-#define USB_PMABASE 0x40006000
-#define RCC_BASE    0x40021000
-#define UID_BASE    0x1FF80050
 
 #define EP_SETUP    0x0800
 #define EP_TYPE     0x0600
@@ -51,6 +47,22 @@
 #define EP_TX_NAK   0x0020
 #define EP_TX_VAL   0x0030
 
+#define RXADDR0     0x00
+#define RXCOUNT0    0x04
+#define RXADDR1     0x08
+#define RXCOUNT1    0x0C
+
+#define TXADDR0     0x00
+#define TXCOUNT0    0x04
+#define TXADDR1     0x08
+#define TXCOUNT1    0x0C
+
+#define TXADDR      0x00
+#define TXCOUNT     0x04
+#define RXADDR      0x08
+#define RXCOUNT     0x0C
+
+
 
 #define EP_NOTOG    (EP_RX_CTR | EP_TX_CTR | EP_SETUP | EP_TYPE | EP_KIND | EP_ADDR)
 
@@ -65,14 +77,14 @@
 
 
     .syntax unified
-    .cpu cortex-m0plus
+    .cpu cortex-m3
     .text
     .thumb
 
 
-    .globl  usb_stmv0a
+    .globl  usb_stmv1a
     .align  2
-usb_stmv0a:
+usb_stmv1a:
     .long   _enable
     .long   _reset
     .long   _connect
@@ -86,7 +98,7 @@ usb_stmv0a:
     .long   _evt_poll
     .long   _get_frame
     .long   _get_serial_desc
-    .size   usb_stmv0a, . - usb_stmv0a
+    .size   usb_stmv1a, . - usb_stmv1a
 
 
     .thumb_func
@@ -98,10 +110,10 @@ usb_stmv0a:
  */
 _get_serial_desc:
     push    {r4, r5, lr}
-    movs    r1,18               //descriptor size 18 bytes
-    strb    r1,[r0]
+    movs    r1, #18             //descriptor size 18 bytes
+    strb    r1, [r0]
     movs    r1, #0x03           //DTYPE_STRING
-    strb    r1,[r0, #0x01]
+    strb    r1, [r0, #0x01]
     ldr     r5, .L_uid_base     //UID3 this is the serial number
     ldr     r4, .L_fnv1a_offset //FNV1A offset
     ldr     r2, [r5, 0x00]      //UID0
@@ -112,14 +124,12 @@ _get_serial_desc:
     bl      .L_fnv1a
     movs    r3, #28
 .L_gsn_loop:
-    movs    r1, r4
-    lsrs    r1, r3
-    lsls    r1, #28
-    lsrs    r1, #28
-    adds    r1, #0x30           //'0'
-    cmp     r1, #0x3A
-    blo     .L_gsn_store
-    adds    r1, #0x07           //'A' - '0'
+    lsrs    r1, r4, r3
+    and     r1, #0x0F
+    cmp     r1, #0x09
+    ite     gt
+    addgt   r1, #55
+    addle   r1, #48
 .L_gsn_store:
     adds    r0, #0x02
     strb    r1, [r0]
@@ -131,41 +141,35 @@ _get_serial_desc:
     pop     {r4, r5, pc}
 
 .L_fnv1a:
+    movs    r3, #0x04
+.L_fnv1a_loop:
+    uxtb    r1, r2
+    eors    r4, r1
     ldr     r1, .L_fnv1a_prime       //FNV1A prime
-    movs    r3, #0xFF
-    ands    r3, r2
-    eors    r4, r3
     muls    r4, r1
-    lsrs    r2, #8
-    movs    r3, #0xFF
-    ands    r3, r2
-    eors    r4, r3
-    muls    r4, r1
-    lsrs    r2, #8
-    movs    r3, #0xFF
-    ands    r3, r2
-    eors    r4, r3
-    muls    r4, r1
-    lsrs    r2, #8
-    eors    r4, r2
-    muls    r4, r1
+    lsrs    r2, #0x08
+    subs    r3, #0x01
+    bne     .L_fnv1a_loop
     bx      lr
 
     .align 2
-.L_fnv1a_prime:     .long   16777619
-.L_fnv1a_offset:    .long   2166136261
 .L_uid_base:        .long   UID_BASE
+.L_fnv1a_offset:    .long   2166136261
+.L_fnv1a_prime:     .long   16777619
 
     .size _get_serial_desc, . - _get_serial_desc
 
     .thumb_func
     .type   _connect, %function
 _connect:
-    subs    r1, r0, #1
-    sbcs    r0, r1
-    lsls    r0, #15
-    ldr     r1, =#USB_REGBASE
-    strh    r0, [r1, #0x18]      //USB->BCDR
+    ldr     r1, =#SYSCFG_BASE
+    movs    r3, #0x01
+    ldr     r2, [r1, #SYSCFG_PMC]
+    bics    r2, r3
+    cbz     r0, .L_conn_store
+    orrs    r2, r3
+.L_conn_store:
+    str     r2, [r1, #SYSCFG_PMC]
     bx      lr
     .size   _connect, . - _connect
 
@@ -175,7 +179,7 @@ _connect:
 _setaddr:
     ldr     r1, =USB_REGBASE
     adds    r0, #0x80
-    strh    r0, [r1, #0x0C]     //USB->DADDR
+    strh    r0, [r1, #USB_DADDR]     //USB->DADDR
     bx      lr
     .size   _setaddr, . - _setaddr
 
@@ -184,11 +188,11 @@ _setaddr:
 _reset:
     ldr     r2, =#USB_REGBASE
     movs    r0, #0x01           //FRES
-    ldrh    r1, [r2]            //USB->CNTR
+    ldrh    r1, [r2, #USB_CNTR]
     orrs    r1, r0
-    strh    r1, [r2]            // set FRES
+    strh    r1, [r2, #USB_CNTR]  // set FRES
     bics    r1, r0
-    strh    r1, [r2]            // clr FRES
+    strh    r1, [r2, #USB_CNTR]  // clr FRES
     bx      lr
     .size   _reset, . - _reset
 
@@ -196,7 +200,7 @@ _reset:
     .type   _get_frame, %function
 _get_frame:
     ldr     r0, =#USB_REGBASE
-    ldrh    r0, [r0, #0x08]     //FNR
+    ldrh    r0, [r0, #USB_FNR]     //FNR
     lsls    r0, #21
     lsrs    r0, #21
     bx      lr
@@ -205,37 +209,46 @@ _get_frame:
     .thumb_func
     .type   _enable, %function
 _enable:
-    ldr     r1, =#USB_REGBASE     //USB->CNTR
+
     ldr     r2, =#RCC_BASE        //RCC
     movs    r3, #0x01
     lsls    r3, #23             //USBEN or USBRST
-    tst     r0, r0
-    beq     .L_disable
+    cbz     r0, .L_disable
 .L_enable:
-    ldr     r0, [r2, #0x38]
+/* enabling and resetting USB peripheral */
+    ldr     r1, =#USB_REGBASE
+    ldr     r0, [r2, #RCC_APB1ENR]
     orrs    r0, r3
-    str     r0, [r2, #0x38]     //RCC->APB1ENR |= USBEN
-    ldr     r0, [r2, #0x28]
+    str     r0, [r2, #RCC_APB1ENR]     //RCC->APB1ENR |= USBEN
+    ldr     r0, [r2, #RCC_APB1RSTR]
     orrs    r0, r3
-    str     r0, [r2, #0x28]     //RCC->APB1RSTR |= USBRST
+    str     r0, [r2, #RCC_APB1RSTR]     //RCC->APB1RSTR |= USBRST
     bics    r0, r3
-    str     r0, [r2, #0x28]     //RCC->APB1RSTR &= ~USBRST
+    str     r0, [r2, #RCC_APB1RSTR]     //RCC->APB1RSTR &= ~USBRST
+/* enabling SYSCFG peripheral */
+    movs    r3, #0x01                   //SYSCFGEN
+    ldr     r0, [r2, #RCC_APB2ENR]
+    orrs    r0, r3
+    str     r0, [r2, #RCC_APB2ENR]
+/* setting up USB CNTR */
     movs    r0, #0xBE
-    lsls    r0, #0x08           // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
-    strh    r0, [r1]            //set USB->CNTR
+    lsls    r0, #0x08                   // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
+    strh    r0, [r1, #USB_CNTR]         //set USB->CNTR
     bx      lr
 .L_disable:
-    ldr     r0, [r2, #0x38]
+    ldr     r0, [r2, #RCC_APB1ENR]
     tst     r0, r3
-    beq     .L_enable_end       // usb is disabled
-    movs    r0, #0x00
-    strh    r0, [r1, #0x18]     //USB->BCDR disable USB I/O
-    ldr     r0, [r2, #0x28]
-    orrs    r0, r3
-    str     r0, [r2, #0x28]     //RCC->APB1RSTR |= USBRST
-    ldr     r0, [r2, #0x38]
+    beq     .L_enable_end               // usb is already disabled
+/* disabling USB peripheral */
     bics    r0, r3
-    str     r0, [r2, #0x38]     //RCC->APB1ENR &= ~USBEN
+    str     r0, [r2, #RCC_APB1ENR]
+/* disabling USB_PU in SYSCFG_PMC */
+    movs    r3, #0x01
+    ldr     r1, =#SYSCFG_BASE
+    ldr     r0, [r1, #SYSCFG_PMC]
+    bics    r0, r3
+    str     r0, [r1, #SYSCFG_PMC]
+    bx      lr
 .L_enable_end:
     bx      lr
     .size   _enable, . - _enable
@@ -338,7 +351,7 @@ _ep_read:
     lsls    r0, #28
     lsrs    r0, #26
     adds    r3, r0          // *EPR -> R3
-    lsls    r0, #1
+    lsls    r0, #2
     adds    r4, r0          // *EPT -> R4
     ldrh    r0, [r3]        // reading epr
     lsls    r5, r0, #21
@@ -354,14 +367,15 @@ _ep_read:
 .L_epr_iso:
     lsrs    r0, #15         // DTOG_RX passsed to CF
 .L_epr_load_table:
-    ldrh    r0, [r4, #0]    // R0 rxaddr0
-    ldrh    r5, [r4, #2]    // R5 rxcnt0
+    ldrh    r0, [r4, #RXADDR0]    // R0 rxaddr0
+    ldrh    r5, [r4, #RXCOUNT0]    // R5 rxcnt0
     bcs     .L_epr_prepare
 .L_epr_sngl:
-    ldrh    r0, [r4, #4]    // R0 rxaddr1 or rxaddr
-    ldrh    r5, [r4, #6]    // R5 rxcnt1 or rxcnt
+    ldrh    r0, [r4, #RXADDR]    // R0 rxaddr1 or rxaddr
+    ldrh    r5, [r4, #RXCOUNT]   // R5 rxcnt1 or rxcnt
 .L_epr_prepare:
     ldr     r4, =#USB_PMABASE
+    lsls    r0, #0x01
     adds    r0, r4          // R0 now has a physical address
     lsls    r5, #22
     lsrs    r5, #22         // R5 bytes count
@@ -377,7 +391,7 @@ _ep_read:
     lsrs    r4, #8
     strb    r4, [r1, #1]
     adds    r1, #2
-    adds    r0, #2
+    adds    r0, #4
     subs    r2, #2
     bne     .L_epr_read
 .L_epr_read_end:
@@ -413,7 +427,7 @@ _ep_write:
     lsls    r0, #28
     lsrs    r0, #26
     adds    r3, r0          // *EPR -> R3
-    lsls    r0, #1
+    lsls    r0, #2
     adds    r4, r0          // *EPT -> R4
     ldrh    r0, [r3]        // reading epr
     lsls    r0, #21
@@ -432,11 +446,12 @@ _ep_write:
     lsrs    r0, #7          // DTOG_TX passsed to CF
     bcs     .L_epw_sngl
 .L_epw_settx1:
-    adds    r4, #0x04
+    adds    r4, #0x08
 .L_epw_sngl:
-    ldrh    r0, [r4, #0]    // R0 txaddr
-.L_epw_prepare:
-    strh    r2, [r4, #2]    // set txcount
+    ldrh    r0, [r4, #TXADDR]    // R0 txaddr
+    lsls    r0, #0x01
+//.L_epw_prepare:
+    strh    r2, [r4, #TXCOUNT]   // set txcount
     ldr     r4, =#USB_PMABASE
     adds    r0, r4
 .L_epw_write:
@@ -449,7 +464,7 @@ _ep_write:
     orrs    r4, r5
     strh    r4, [r0]
     adds    r1, #2
-    adds    r0, #2
+    adds    r0, #4
     subs    r2, #2
     b       .L_epw_write
 .L_epw_halfw:
@@ -485,7 +500,7 @@ _get_next_pma:
     push    {r1, r3, r4, lr}
     movs    r1, #16
     movs    r3, #1
-    lsls    r3, #10         //R3 MAX_PMA_SIZE
+    lsls    r3, #9         //R3 MAX_PMA_SIZE 512b
     ldr     r0, =#USB_PMABASE
 .L_gnp_chkaddr:
     ldrh    r4, [r0, #0]    //txaddr
@@ -495,7 +510,7 @@ _get_next_pma:
     blo     .L_gnp_nxtaddr
     mov     r3, r4
 .L_gnp_nxtaddr:
-    adds    r0, #4
+    adds    r0, #8
     subs    r1, #1
     bne     .L_gnp_chkaddr
     subs    r0, r3, r2
@@ -548,13 +563,13 @@ _ep_config:
     blo     .L_epc_setuprx
 .L_epc_setuptx:
     ldr     r5, =#USB_PMABASE
-    lsls    r4, #1
+    lsls    r4, #2
     adds    r5, r4
     bl      _get_next_pma
     bcc     .L_epc_fail
-    strh    r0, [r5, #0]    //store txaddr or txaddr0
+    strh    r0, [r5, #TXADDR]    //store txaddr or txaddr0
     movs    r0, #0x00
-    strh    r0, [r5, #2]    //store txcnt
+    strh    r0, [r5, #TXCOUNT]    //store txcnt
     cmp     r1, #0x06       // is DBLBULK
     beq     .L_epc_txdbl
     ldr     r3, =#TX_USTALL  //set state NAKED , clr DTOG_TX
@@ -564,9 +579,9 @@ _ep_config:
     ldr     r3, =#DTX_USTALL //set state VALID clr DTOG_TX & SWBUF_TX
     bl      _get_next_pma
     bcc     .L_epc_fail
-    strh    r0, [r5, #4]    //store txaddr1
+    strh    r0, [r5, #TXADDR1]    //store txaddr1
     movs    r0, #0x00
-    strh    r0, [r5, #6]    //store txcnt
+    strh    r0, [r5, #TXCOUNT1]    //store txcnt
 .L_epc_txsetstate:
     ldr     r5, =#USB_EPBASE
     lsrs    r4, #1
@@ -593,7 +608,7 @@ _ep_config:
 .L_epc_rxbb:
     lsls    r3, #9
     ldr     r5, =#USB_PMABASE
-    lsls    r4, #1
+    lsls    r4, #2
     adds    r5, r4
     cmp     r1, 0x06    //if dblbulk
     beq     .L_epc_rxdbl
@@ -602,19 +617,19 @@ _ep_config:
 .L_epc_rxdbl:
     bl      _get_next_pma
     bcc     .L_epc_fail
-    strh    r0, [r5, #0]    //store rxaddr0
-    strh    r3, [r5, #2]    //store rxcnt0
+    strh    r0, [r5, #RXADDR0]    //store rxaddr0
+    strh    r3, [r5, #RXCOUNT0]    //store rxcnt0
     bl      _get_next_pma
     bcc     .L_epc_fail
-    strh    r0, [r5, #4]    //store rxaddr1
-    strh    r3, [r5, #6]    //store rxcnt1
+    strh    r0, [r5, #RXADDR1]    //store rxaddr1
+    strh    r3, [r5, #RXCOUNT1]    //store rxcnt1
     ldr     r3, =#DRX_USTALL
     b       .L_epc_rxsetstate
 .L_epc_rxsngl:
     bl      _get_next_pma
     bcc     .L_epc_fail
-    strh    r0, [r5, #4]    //store rxaddr1 or rxaddr
-    strh    r3, [r5, #6]    //store rxcnt1 or rxcnt
+    strh    r0, [r5, #RXADDR]    //store rxaddr1 or rxaddr
+    strh    r3, [r5, #RXCOUNT]    //store rxcnt1 or rxcnt
     ldr     r3, =#RX_USTALL
 .L_epc_rxsetstate:
     ldr     r5, =#USB_EPBASE
@@ -655,10 +670,10 @@ _ep_deconfig:
     strh    r0, [r2]
 /* clearing PMA data */
     movs    r0, #0x00
-    strh    r0, [r3, #0x00]
-    strh    r0, [r3, #0x02]
-    strh    r0, [r3, #0x04]
-    strh    r0, [r3, #0x06]
+    strh    r0, [r3, #TXADDR]
+    strh    r0, [r3, #TXCOUNT]
+    strh    r0, [r3, #RXADDR]
+    strh    r0, [r3, #RXCOUNT]
     bx      lr
 
     .size   _ep_deconfig, . - _ep_config
@@ -780,12 +795,12 @@ _evt_poll:
     bics    r4, r5
     strh    r4, [r2]
     movs    r4, #0
-    strh    r4, [r0, #0]
-    strh    r4, [r0, #2]
-    strh    r4, [r0, #4]
-    strh    r4, [r0, #6]
-    adds    r2, #4
-    adds    r0, #8
+    strh    r4, [r0, #TXADDR]
+    strh    r4, [r0, #TXCOUNT]
+    strh    r4, [r0, #RXADDR]
+    strh    r4, [r0, #RXCOUNT]
+    adds    r2, #0x04
+    adds    r0, #0x10
     subs    r1, #1
     bpl     .L_ep_reset_loop
     movs    r2, #0x00
@@ -802,9 +817,6 @@ _evt_poll:
     bx      r3
 
     .size   _evt_poll, . - _evt_poll
-
-
-
 
     .pool
 
