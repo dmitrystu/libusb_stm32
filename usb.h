@@ -20,24 +20,29 @@
     extern "C" {
 #endif
 
-
-
-
-#if defined(STM32L052xx) && !defined(USE_C_DRIVER)
-    #define USE_STMV0A_DRIVER
-#elif defined(STM32L052xx)
-    #define USE_STMV0_DRIVER
-#elif defined(STM32L053xx) || defined(STM32F042xx) || defined(STM32F072xx) || \
-      defined(STM32L432xx) || defined(STM32L442xx) || defined(STM32L433xx) || \
-      defined(STM32L443xx)
-    #define USE_STMV0_DRIVER
-    #warning "Driver has not been tested with this MPU"
-#elif defined(STM32L100xC)
-    #define USE_STMV1A_DRIVER
+#if defined(STM32L0)
+    #if defined(FORCE_C_DRIVER)
+        #define USE_STMV0_DRIVER
+    #elif defined(FORCE_ASM_DRIVER)
+        #define USE_STMV0A_DRIVER
+    #elif defined(STM32L052xx)
+        #define USE_STMV0A_DRIVER
+    #else
+        #define USE_STMV0_DRIVER
+    #endif
+#elif defined(STM32L1)
+    #if defined(FORCE_C_DRIVER)
+        #define USE_STMV1_DRIVER
+    #elif defined(FORCE_ASM_DRIVER)
+        #define USE_STMV1A_DRIVER
+    #elif defined(STM32L100xC)
+        #define USE_STMV1A_DRIVER
+    #else
+        #define USE_STMV1_DRIVER
+    #endif
 #else
     #error "No supported MCU family selected"
 #endif
-
 
 #include "inc/usbd_core.h"
 #if !defined(__ASSEMBLER__)
@@ -54,7 +59,6 @@
     #elif defined(USE_STMV1A_DRIVER)
         extern const struct usbd_driver usb_stmv1a;
         #define usbd_hw usb_stmv1a
-
     #endif
 #endif
 
