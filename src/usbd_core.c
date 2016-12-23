@@ -349,22 +349,6 @@ static void usbd_process_evt(usbd_device *dev, uint8_t evt, uint8_t ep) {
     if (dev->events[evt]) dev->events[evt](dev, evt, ep);
 }
 
-inline static void __memclr(void* ptr, uint32_t sz) {
-    uint8_t *b = ptr;
-    do {
-        *b++ = 0x00;
-    } while (--sz);
-}
-
-void usbd_init(usbd_device *dev, const struct usbd_driver *drv, const uint8_t ep0size, uint32_t *buffer, const uint16_t bsize) {
-    __memclr(dev, sizeof(usbd_device));
-    dev->driver = drv;
-    dev->status.ep0size = ep0size;
-    dev->status.data_ptr = buffer;
-    dev->status.data_buf = buffer;
-    dev->status.data_maxsize = bsize - offsetof(usbd_ctlreq, data);
-}
-
 void usbd_poll(usbd_device *dev) {
     return dev->driver->poll(dev, usbd_process_evt);
 }

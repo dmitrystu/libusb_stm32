@@ -26,6 +26,7 @@
     extern "C" {
 #endif
 
+
 /** \addtogroup USBD_CORE USB device core
  * \brief Contains core and hardware driver framework definitions
  * @{ */
@@ -62,6 +63,7 @@
     #define usbd_evt_error      7
     #define usbd_evt_esof       8
 #else
+
 
 /** USB device events */
 enum usbd_evt {
@@ -117,7 +119,7 @@ typedef struct _usbd_device usbd_device;
 typedef struct _usbd_ctlreq usbd_ctlreq;
 typedef struct _usbd_status usbd_status;
 
-/**\name USB Device user callbacks function prototypes
+/** \addtogroup USB_CORE_API Core API functions
  * @{ */
  /** Generic USB device event callback for events and endpoints processing
   * \param[in] dev pointer to USB device
@@ -127,14 +129,14 @@ typedef struct _usbd_status usbd_status;
   */
 typedef void (*usbd_evt_callback)(usbd_device *dev, uint8_t event, uint8_t ep);
 
-/** USB control transfer completed callback.
+/** USB control transfer completed callback function typedef.
  * \param[in] dev pointer to USB device
  * \param[in] req pointer to usb request structure
  * \note When this callback will be completed usbd_device#complete_callback will be reseted to NULL
  */
 typedef void (*usbd_ctl_complete)(usbd_device *dev, usbd_ctlreq *req);
 
-/** USB control callback.
+/** USB control callback function typedef.
  * \details Uses for the control request processing.
  *          Some requests will be handled by core if callback don't process it (returns FALSE). If request was not processed STALL PID will be issued.
  *          - GET_CONFIGURATION
@@ -150,7 +152,7 @@ typedef void (*usbd_ctl_complete)(usbd_device *dev, usbd_ctlreq *req);
  */
 typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, usbd_ctl_complete *callback);
 
-/** USB get descriptor callback
+/** USB get descriptor callback function typedef
  * \details Called when GET_DESCRIPTOR request issued
  * \param[in] req pointer to usb control request structure
  * \param[in,out] address pointer to the descriptor in memory. Points to req->data by default. You can use this buffer.
@@ -159,7 +161,7 @@ typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, us
  */
 typedef bool (*usbd_dsc_callback)(usbd_ctlreq *req, void **address, uint16_t *dsize);
 
-/** USB set configuration callback
+/** USB set configuration callback function typedef
  * \details called when SET_CONFIGURATION request issued
  * \param[in] dev pointer to USB device
  * \param[in] cfg configuration number.
@@ -170,7 +172,7 @@ typedef bool (*usbd_cfg_callback)(usbd_device *dev, uint8_t cfg);
 
 /** @} */
 
-/**\name USB Hardware driver API function prototypes
+/**\addtogroup USB_HW_API Hardware driver API functions 
  * @{ */
 
 /** Enables or disables USB hardware
@@ -308,6 +310,9 @@ struct _usbd_device {
     usbd_status                 status;
 };
 
+/** \addtogroup USB_CORE_API
+ * @{ */
+
 /** Initializes device structure
  * \param dev USB device that will be initialized
  * \param drv Pointer to hardware driver
@@ -315,7 +320,13 @@ struct _usbd_device {
  * \param buffer Pointer to control request data buffer (32-bit aligned)
  * \param bsize Size of the data buffer
  */
-void usbd_init(usbd_device *dev, const struct usbd_driver *drv, const uint8_t ep0size, uint32_t *buffer, const uint16_t bsize);
+inline static void usbd_init(usbd_device *dev, const struct usbd_driver *drv, const uint8_t ep0size, uint32_t *buffer, const uint16_t bsize) {
+    dev->driver = drv;
+    dev->status.ep0size = ep0size;
+    dev->status.data_ptr = buffer;
+    dev->status.data_buf = buffer;
+    dev->status.data_maxsize = bsize - __builtin_offsetof(usbd_ctlreq, data);
+}
 
 /** Polls USB for events
  * \param dev Pointer to device structure
@@ -329,84 +340,99 @@ void usbd_poll(usbd_device *dev);
  */
 void usbd_control(usbd_device *dev, enum usbd_commands cmd);
 
-
-/** \name API macro functions
- * @{ */
-
-/** Macro to register control callback
+/** Register callback for all control requests
  * \param dev pointer to \ref usbd_device structure
  * \param cb pointer to user \ref usbd_ctl_callback
  */
-#define usbd_reg_control(dev, cb) (dev)->control_callback = (cb)
+inline static void usbd_reg_control(usbd_device *dev, usbd_ctl_callback callback) {
+    dev->control_callback = callback;
+}
 
-/** Macro to register set configuration callback
- * \param dev pointer to \ref usbd_device structire
+/** Register callback for SET_CONFIG control request
+ * \param dev pointer to \ref usbd_device structure
+ * \param cb pointer to user \ref usbd_cfg_callback
+ */
+inline static void usbd_reg_config(usbd_device *dev, usbd_cfg_callback callback) {
+    dev->config_callback = callback;
+}
+
+/** Register callback for GET_DESCRIPTOR control request
+ * \param dev pointer to \ref usbd_device structure
  * \param cb pointer to user \ref usbd_ctl_callback
  */
-#define usbd_reg_config(dev, cb) (dev)->config_callback = (cb)
+inline static void usbd_reg_descr(usbd_device *dev, usbd_dsc_callback callback) {
+    dev->descriptor_callback = callback;
+}
 
-/** Macro to register GET_DESCRIPTOR callback
- * \param dev USB device
- * \param cb callback
+/** Configure endpoint
+ * \param dev pointer to \ref usbd_device structure
+ * \copydetails usbd_hw_ep_config
  */
-#define usbd_reg_descr(dev, cb) (dev)->descriptor_callback = (cb)
+inline static bool usbd_ep_config(usbd_device *dev, uint8_t ep, uint8_t eptype, uint16_t epsize) {
+    return dev->driver->ep_config(ep, eptype, epsize);
+}
 
-/** Macro to register endpoint callback
+/** Deconfigure endpoint
+ * \param dev pointer to \ref usbd_device structure
+ * \copydetails usbd_hw_ep_deconfig
+ */
+inline static void usbd_ep_deconfig(usbd_device *dev, uint8_t ep) {
+    dev->driver->ep_deconfig(ep);
+}
+
+/** Register endpoint callback
  * \param dev pointer to \ref usbd_device structure
  * \param ep endpoint index
  * \param cb pointer to user \ref usbd_evt_callback callback for endpoint events
  */
-#define usbd_reg_endpoint(dev, ep, cb) (dev)->endpoint[(ep) & 0x07] = (cb)
+inline static void usbd_reg_endpoint(usbd_device *dev, uint8_t ep, usbd_evt_callback callback) {
+    dev->endpoint[ep & 0x07] = callback;
+}
 
-/** Macro to registers event callback
+/** Registers event callback
  * \param dev pointer to \ref usbd_device structure
  * \param evt device \ref usbd_evt "event" wants to be registered
  * \param cb pointer to user \ref usbd_evt_callback for this event
  */
-#define usbd_reg_event(dev, evt, cb) (dev)->events[(evt)] = (cb)
+inline static void usbd_reg_event(usbd_device *dev, enum usbd_evt evt, usbd_evt_callback callback) {
+    dev->events[evt] = callback;
+}
 
-/** Macro to configure endpoint
- * \param dev pointer to \ref usbd_device structure
- * \copydetails usbd_hw_ep_config
- */
-#define usbd_ep_config(dev, ep, eptype, epsize) (dev)->driver->ep_config((ep), (eptype), (epsize))
-
-/** Macro to deconfigure endpoint
- * \param dev pointer to \ref usbd_device structure
- * \copydetails usbd_hw_ep_deconfig
- */
-#define usbd_ep_deconfig(dev, ep) (dev)->driver->ep_deconfig(ep)
-
-/** Macro to write data to endpoint
+/** Write data to endpoint
  * \param dev pointer to \ref usbd_device structure
  * \copydetails usbd_hw_ep_write
  */
-#define usbd_ep_write(dev, ep, buf, blen) (dev)->driver->ep_write((ep), (buf), (blen))
+inline static uint16_t usbd_ep_write(usbd_device *dev, uint8_t ep, void *buf, uint16_t blen) {
+    return dev->driver->ep_write(ep, buf, blen);
+}
 
-/** Macro to read data from endpoint
+/** Read data from endpoint
  * \param dev pointer to \ref usbd_device structure
  * \copydetails usbd_hw_ep_read
  */
-#define usbd_ep_read(dev, ep, buffer, length) (dev)->driver->ep_read((ep), (buf), (blen))
+inline static uint16_t usbd_ep_read(usbd_device *dev, uint8_t ep, void *buf, uint16_t blen) {
+    return dev->driver->ep_read(ep, buf, blen);
+}
 
-/** Macro to stall endpoint
+/** Stall endpoint
  * \param dev pointer to \ref usbd_device structure
  * \param ep endpoint address
  */
-#define usbd_ep_stall(dev, ep) (dev)->driver->ep_setstall((ep), 1)
+inline static void usbd_ep_stall(usbd_device *dev, uint8_t ep) {
+    dev->driver->ep_setstall(ep, 1);
+}
 
-/** Macro to unstall endpoint
+/** Unstall endpoint
  * \param dev pointer to \ref usbd_device structure
  * \param ep endpoint address
  */
-#define usbd_ep_unstall(dev, ep) (dev)->driver->ep_setstall((ep), 0)
-
-/** @} */
-
+inline static void usbd_ep_unstall(usbd_device *dev, uint8_t ep) {
+    dev->driver->ep_setstall(ep, 0);
+}
 
 #endif //(__ASSEMBLER__)
-
-/**@} */
+/** @} */
+/** @} */
 
 
 #if defined(__cplusplus)
