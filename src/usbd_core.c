@@ -78,11 +78,9 @@ static usbd_respond usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
     case USB_STD_CLEAR_FEATURE:
         /* not yet supported */
         break;
-
     case USB_STD_GET_CONFIG:
         req->data[0] = dev->status.device_cfg;
         return usbd_ack;
-
     case USB_STD_GET_DESCRIPTOR:
         if (req->wValue == ((USB_DTYPE_STRING << 8) | INTSERIALNO_DESCRIPTOR )) {
             dev->status.data_count = dev->driver->get_serialno_desc(req->data);
@@ -105,11 +103,9 @@ static usbd_respond usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
     case USB_STD_SET_DESCRIPTOR:
         /* should be externally handled */
         break;
-
     case USB_STD_SET_FEATURE:
         /* not yet supported */
         break;
-
     default:
         break;
     }
@@ -152,8 +148,9 @@ static usbd_respond usbd_process_eptrq(usbd_device *dev, usbd_ctlreq *req) {
         req->data[1] = 0;
         return usbd_ack;
     default:
-        return usbd_ack;
+        break;
     }
+    return usbd_fail;
 }
 
 /** \brief Processing control request
@@ -178,7 +175,7 @@ static usbd_respond usbd_process_request(usbd_device *dev, usbd_ctlreq *req) {
     default:
         break;
     }
-    return false;
+    return usbd_fail;
 }
 
 
@@ -286,8 +283,8 @@ do_process_request:
 
             } else {
                 /* confirming by ZLP in STATUS_IN stage */
-                dev->status.control_state = usbd_ctl_statusin;
                 dev->driver->ep_write(ep | 0x80, 0, 0);
+                dev->status.control_state = usbd_ctl_statusin;
             }
             break;
         case usbd_nak:
