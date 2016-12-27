@@ -249,7 +249,7 @@ bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
     return true;
 }
 
-static void ep_deconfig(uint8_t ep) {
+void ep_deconfig(uint8_t ep) {
     pma_table *ept = EPT(ep);
     *EPR(ep) &= ~USB_EPREG_MASK;
     ept->rxadr = 0;
@@ -435,7 +435,7 @@ static uint32_t fnv1a32_turn (uint32_t fnv, uint32_t data ) {
     return fnv;
 }
 
-static uint16_t get_serialno_desc(void *buffer) {
+uint16_t get_serialno_desc(void *buffer) {
     struct  usb_string_descriptor *dsc = buffer;
     uint16_t *str = dsc->wString;
     uint32_t fnv = 2166136261;
@@ -451,10 +451,6 @@ static uint16_t get_serialno_desc(void *buffer) {
     dsc->bLength = 18;
     return 18;
 }
-
-
-
-
 
 const struct usbd_driver usb_stmv1 = {
     enable,
