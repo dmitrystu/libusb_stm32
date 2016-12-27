@@ -240,14 +240,14 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
         dev->status.data_ptr = req->data;
         dev->status.data_count = req->wLength;
         /* processing request with no payload data*/
-        if ((req->bmRequestType & USB_REQ_DEVTOHOST) || (0 == req->wLength)) goto do_process_request;
+        if ((req->bmRequestType & USB_REQ_DEVTOHOST) || (0 == req->wLength)) break;
         /* checking available memory for DATA OUT stage */
         if (req->wLength > dev->status.data_maxsize) {
             return usbd_stall_pid(dev, ep);
         }
         /* continue DATA OUT stage */
         dev->status.control_state = usbd_ctl_rxdata;
-        break;
+        return;
     case usbd_ctl_rxdata:
         /*receive DATA OUT packet(s) */
         _t = dev->driver->ep_read(ep, dev->status.data_ptr, dev->status.data_count);
@@ -259,39 +259,7 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
         /* if all data payload was not received yet */
             dev->status.data_count -= _t;
             dev->status.data_ptr += _t;
-            break;
-        }
-do_process_request:
-        /* usb request received */
-        /* let's handle it */
-        /* preparing */
-        dev->status.data_ptr = req->data;
-        dev->status.data_count = req->wLength;/*dev->status.data_maxsize;*/
-        switch (usbd_process_request(dev, req)){
-        case usbd_ack:
-            if (req->bmRequestType & USB_REQ_DEVTOHOST) {
-                /* return data from function */
-                if (dev->status.data_count >= req->wLength) {
-                    dev->status.data_count = req->wLength;
-                    dev->status.control_state = usbd_ctl_txdata;
-                } else {
-                    /* DATA IN packet smaller than requested */
-                    /* ZLP maybe wanted */
-                    dev->status.control_state = usbd_ctl_ztxdata;
-                }
-                return usbd_process_eptx(dev, ep | 0x80);
-
-            } else {
-                /* confirming by ZLP in STATUS_IN stage */
-                dev->driver->ep_write(ep | 0x80, 0, 0);
-                dev->status.control_state = usbd_ctl_statusin;
-            }
-            break;
-        case usbd_nak:
-            dev->status.control_state = usbd_ctl_statusin;
-            break;
-        default:
-            return usbd_stall_pid(dev, ep);
+            return;
         }
         break;
     case usbd_ctl_statusout:
@@ -301,6 +269,35 @@ do_process_request:
         return usbd_process_callback(dev);
     default:
         /* unexpected RX packet */
+        return usbd_stall_pid(dev, ep);
+    }
+    /* usb request received. let's handle it */
+    dev->status.data_ptr = req->data;
+    dev->status.data_count = req->wLength;/*dev->status.data_maxsize;*/
+    switch (usbd_process_request(dev, req)) {
+    case usbd_ack:
+        if (req->bmRequestType & USB_REQ_DEVTOHOST) {
+            /* return data from function */
+            if (dev->status.data_count >= req->wLength) {
+                dev->status.data_count = req->wLength;
+                dev->status.control_state = usbd_ctl_txdata;
+            } else {
+                /* DATA IN packet smaller than requested */
+                /* ZLP maybe wanted */
+                dev->status.control_state = usbd_ctl_ztxdata;
+            }
+            return usbd_process_eptx(dev, ep | 0x80);
+
+        } else {
+            /* confirming by ZLP in STATUS_IN stage */
+            dev->driver->ep_write(ep | 0x80, 0, 0);
+            dev->status.control_state = usbd_ctl_statusin;
+        }
+        break;
+    case usbd_nak:
+        dev->status.control_state = usbd_ctl_statusin;
+        break;
+    default:
         return usbd_stall_pid(dev, ep);
     }
 }
