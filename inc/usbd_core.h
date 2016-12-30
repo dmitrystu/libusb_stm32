@@ -52,32 +52,21 @@
 /** @} */
 
 
-#if defined(__ASSEMBLER__)
-    #define usbd_evt_reset      0
-    #define usbd_evt_sof        1
-    #define usbd_evt_susp       2
-    #define usbd_evt_wkup       3
-    #define usbd_evt_eptx       4
-    #define usbd_evt_eprx       5
-    #define usbd_evt_epsetup    6
-    #define usbd_evt_error      7
-    #define usbd_evt_esof       8
-#else
+/** \name USB device events
+ * @{ */
+#define usbd_evt_reset      0   /**< Reset */
+#define usbd_evt_sof        1   /**< Start Of Frame */
+#define usbd_evt_susp       2   /**< Suspend */
+#define usbd_evt_wkup       3   /**< Wakeup */
+#define usbd_evt_eptx       4   /**< Transmit completed */
+#define usbd_evt_eprx       5   /**< Data packet received */
+#define usbd_evt_epsetup    6   /**< Setup packet received */
+#define usbd_evt_error      7   /**< Data error */
+#define usbd_evt_esof       8   /**< Missed SOF */
+#define usbd_evt_count      9   /* this is trick to count qty */
+/** @} */
 
-
-/** USB device events */
-enum usbd_evt {
-    usbd_evt_reset,             /**< Reset */
-    usbd_evt_sof,               /**< Start Of Frame */
-    usbd_evt_susp,              /**< Suspend */
-    usbd_evt_wkup,              /**< Wakeup */
-    usbd_evt_eptx,              /**< Transmit completed */
-    usbd_evt_eprx,              /**< Data packet received */
-    usbd_evt_epsetup,           /**< Setup packet received */
-    usbd_evt_error,             /**< Data error */
-    usbd_evt_esof,              /**< Missed SOF */
-    usbd_evt_count, /* this is trick to count qty */
-};
+#if !defined(__ASSEMBLER__)
 
 /** USB device machine state */
 enum usbd_machine_state {
@@ -172,7 +161,7 @@ typedef bool (*usbd_cfg_callback)(usbd_device *dev, uint8_t cfg);
 
 /** @} */
 
-/**\addtogroup USB_HW_API Hardware driver API functions 
+/**\addtogroup USB_HW_API Hardware driver API functions
  * @{ */
 
 /** Enables or disables USB hardware
@@ -394,7 +383,7 @@ inline static void usbd_reg_endpoint(usbd_device *dev, uint8_t ep, usbd_evt_call
  * \param evt device \ref usbd_evt "event" wants to be registered
  * \param cb pointer to user \ref usbd_evt_callback for this event
  */
-inline static void usbd_reg_event(usbd_device *dev, enum usbd_evt evt, usbd_evt_callback callback) {
+inline static void usbd_reg_event(usbd_device *dev, uint8_t evt, usbd_evt_callback callback) {
     dev->events[evt] = callback;
 }
 

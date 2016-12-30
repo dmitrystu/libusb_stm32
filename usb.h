@@ -20,29 +20,34 @@
     extern "C" {
 #endif
 
-#if defined(STM32L0)
-    #if defined(FORCE_C_DRIVER)
-        #define USE_STMV0_DRIVER
-    #elif defined(FORCE_ASM_DRIVER)
+#if defined(STM32L052xx) || defined(STM32L053xx) || \
+    defined(STM32L062xx) || defined(STM32L063xx) || \
+    defined(STM32L072xx) || defined(STM32L073xx) || \
+    defined(STM32L082xx) || defined(STM32L083xx) || \
+    defined(STM32L432xx) || defined(STM32L433xx) || \
+    defined(STM32L442xx) || defined(STM32L443xx) || \
+    defined(STM32L452xx) || defined(STM32L462xx) || \
+    defined(STM32F042x6) || defined(STM32F048xx) || \
+    defined(STM32F070x6) || defined(STM32F070xB) || \
+    defined(STM32F072xB) || defined(STM32F078xx) \
+
+    #define USE_STMV0_DRIVER
+
+    #if (defined(FORCE_ASM_DRIVER) || defined(STM32L052xx)) && !defined(FORCE_C_DRIVER)
+        #undef USE_STMV0_DRIVER
         #define USE_STMV0A_DRIVER
-    #elif defined(STM32L052xx)
-        #define USE_STMV0A_DRIVER
-    #else
-        #define USE_STMV0_DRIVER
     #endif
+
 #elif defined(STM32L1)
-    #if defined(FORCE_C_DRIVER)
-        #define USE_STMV1_DRIVER
-    #elif defined(FORCE_ASM_DRIVER)
+    #define USE_STMV1_DRIVER
+    #if (defined(FORCE_ASM_DRIVER) || defined(STM32L100xC)) && !defined(FORCE_C_DRIVER)
+        #undef USE_STMV1_DRIVER
         #define USE_STMV1A_DRIVER
-    #elif defined(STM32L100xC)
-        #define USE_STMV1A_DRIVER
-    #else
-        #define USE_STMV1_DRIVER
     #endif
 #else
-    #error "No supported MCU family selected"
+    #error Unsupported STM32 family
 #endif
+
 
 #include "inc/usbd_core.h"
 #if !defined(__ASSEMBLER__)
