@@ -45,7 +45,7 @@ static void usbd_set_address (usbd_device *dev, usbd_ctlreq *req) {
     dev->status.device_state = (req->wValue) ? usbd_state_addressed : usbd_state_default;
 }
 
-/** \brief Callback processing after STATUS-IN or STATUS-OUT stage completed
+/** \brief Control transfer completion callback processing
  * \param dev pointer to the usb device
  * \return none
  */
@@ -56,19 +56,24 @@ static void usbd_process_callback (usbd_device *dev) {
     }
 }
 
+/** \brief SET_CONFIG request processing
+ * \param dev usbd_device
+ * \param config config number from request
+ * \return usbd_ack if success
+ */
 static usbd_respond usbd_configure(usbd_device *dev, uint8_t config) {
-    usbd_respond resp = usbd_fail;
     if (dev->config_callback) {
-        resp = dev->config_callback(dev, config);
+        if (dev->config_callback(dev, config)) {
+            dev->status.device_cfg = config;
+            dev->status.device_state = (config) ? usbd_state_configured : usbd_state_addressed;
+            return usbd_ack;
+        }
     }
-    if (config == 0 && resp == usbd_ack) {
-        dev->status.device_state = usbd_state_addressed;
-    }
-    return resp;
+    return usbd_fail;
 }
 
 
-/** \brief Processing standard device control request
+/** \brief Standard control request processing for device
  * \param dev pointer to usb device
  * \param req pointer to control request
  * \return TRUE if request is handled
@@ -112,7 +117,7 @@ static usbd_respond usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
     return usbd_fail;
 }
 
-/** \brief Processing standard interface control request
+/** \brief Standard control request processing for interface
  * \param dev pointer to usb device
  * \param req pointer to control request
  * \return TRUE if request is handled
@@ -130,7 +135,7 @@ static usbd_respond usbd_process_intrq(usbd_device *dev, usbd_ctlreq *req) {
     return usbd_fail;
 }
 
-/** \brief Processing standard endpoint control request
+/** \brief Standard control request processing for endpoint
  * \param dev pointer to usb device
  * \param req pointer to control request
  * \return TRUE if request is handled
