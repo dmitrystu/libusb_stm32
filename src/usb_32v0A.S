@@ -19,7 +19,7 @@
 
 #include "../usb.h"
 #include "memmap.inc"
-#if defined(USE_STMV0A_DRIVER)
+#if defined(USE_STMV0_DRIVER)
 
 #define EP_SETUP    0x0800
 #define EP_TYPE     0x0600

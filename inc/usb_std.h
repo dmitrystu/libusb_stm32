@@ -50,6 +50,8 @@ extern "C" {
 /** \anchor USB_ENDPOINT_DEF
  *  \name USB endpoint attributes definitions
  * @{ */
+#define USB_EPDIR_IN                0x00        /**< indicates host-to-device endpoint direction  */
+#define USB_EPDIR_OUT               0x80        /**< indicates device-to-host endpoint direction */
 #define USB_EPTYPE_CONTROL          0x00
 #define USB_EPTYPE_ISOCHRONUS       0x01
 #define USB_EPTYPE_BULK             0x02

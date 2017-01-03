@@ -31,9 +31,6 @@
  * \brief Contains core and hardware driver framework definitions
  * @{ */
 #define USB_EPTYPE_DBLBUF       0x04        /**< indicates a doublebuffered endpoint (bulk endpoint only) */
-#define USB_EPDIR_IN            0x00        /**< indicates host-to-device endpoint direction  */
-#define USB_EPDIR_OUT           0x80        /**< indicates device-to-host endpoint direction */
-
 
 /** \name bmRequestType bitmapped field
  * @{ */
@@ -55,20 +52,20 @@
 /** \name USB device events
  * @{ */
 #define usbd_evt_reset      0   /**< Reset */
-#define usbd_evt_sof        1   /**< Start Of Frame */
+#define usbd_evt_sof        1   /**< Start of frame */
 #define usbd_evt_susp       2   /**< Suspend */
 #define usbd_evt_wkup       3   /**< Wakeup */
-#define usbd_evt_eptx       4   /**< Transmit completed */
+#define usbd_evt_eptx       4   /**< Data packet transmitted*/
 #define usbd_evt_eprx       5   /**< Data packet received */
 #define usbd_evt_epsetup    6   /**< Setup packet received */
 #define usbd_evt_error      7   /**< Data error */
 #define usbd_evt_esof       8   /**< Missed SOF */
-#define usbd_evt_count      9   /* this is trick to count qty */
+#define usbd_evt_count      9
 /** @} */
 
 #if !defined(__ASSEMBLER__)
 
-/** USB device machine state */
+/** USB device machine states */
 enum usbd_machine_state {
     usbd_state_disabled,
     usbd_state_disconnected,
@@ -97,7 +94,7 @@ enum usbd_commands {
     usbd_cmd_reset,             /**< Resets device */
 };
 
-/* Reporting status results */
+/** Reporting status results */
 typedef enum _usbd_respond {
     usbd_fail,                  /**< Function has an error, STALLPID will be issued */
     usbd_ack,                   /**< Function completes request accepted ZLP or data will be send */
@@ -118,14 +115,14 @@ typedef struct _usbd_status usbd_status;
   */
 typedef void (*usbd_evt_callback)(usbd_device *dev, uint8_t event, uint8_t ep);
 
-/** USB control transfer completed callback function typedef.
+/** USB control transfer completed callback function.
  * \param[in] dev pointer to USB device
  * \param[in] req pointer to usb request structure
  * \note When this callback will be completed usbd_device#complete_callback will be reseted to NULL
  */
-typedef void (*usbd_ctl_complete)(usbd_device *dev, usbd_ctlreq *req);
+typedef void (*usbd_rqc_callback)(usbd_device *dev, usbd_ctlreq *req);
 
-/** USB control callback function typedef.
+/** USB control callback function.
  * \details Uses for the control request processing.
  *          Some requests will be handled by core if callback don't process it (returns FALSE). If request was not processed STALL PID will be issued.
  *          - GET_CONFIGURATION
@@ -136,12 +133,12 @@ typedef void (*usbd_ctl_complete)(usbd_device *dev, usbd_ctlreq *req);
  *          - SET_ADDRESS
  * \param[in] dev points to USB device
  * \param[in] req points to usb control request
- * \param[out] *callback \ref usbd_ctl_complete "pointer to USB control transfer completed callback", default is NULL (no callback)
+ * \param[out] *callback \ref usbd_rqc_callback "pointer to USB control transfer completed callback", default is NULL (no callback)
  * \return usbd_respond status.
  */
-typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, usbd_ctl_complete *callback);
+typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, usbd_rqc_callback *callback);
 
-/** USB get descriptor callback function typedef
+/** USB get descriptor callback function
  * \details Called when GET_DESCRIPTOR request issued
  * \param[in] req pointer to usb control request structure
  * \param[in,out] address pointer to the descriptor in memory. Points to req->data by default. You can use this buffer.
@@ -150,7 +147,7 @@ typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, us
  */
 typedef bool (*usbd_dsc_callback)(usbd_ctlreq *req, void **address, uint16_t *dsize);
 
-/** USB set configuration callback function typedef
+/** USB set configuration callback function
  * \details called when SET_CONFIGURATION request issued
  * \param[in] dev pointer to USB device
  * \param[in] cfg configuration number.
@@ -251,52 +248,49 @@ struct _usbd_ctlreq {
     uint16_t    wValue;         /**< It is used to pass a parameter to the device, specific to the request. */
     uint16_t    wIndex;         /**< It is used to pass a parameter to the device, specific to the request. */
     uint16_t    wLength;        /**< This field specifies the length of the data transferred during the second phase of the control transfer */
-    uint8_t     data[];         /**< Request data payload */
+    uint8_t     data[];         /**< Data payload */
 };
 
-
-/** USB device status data for control endpoint */
+/** USB device status data */
 struct _usbd_status {
-    void        *data_buf;
-    void        *data_ptr;      /**< Pointer to control endpoint current data buffer */
-    uint16_t    data_count;     /**< Control endpoint data counter */
-    uint16_t    data_maxsize;   /**< Size of the data buffer for control endpoint */
+    void        *data_buf;      /**< Pointer to data buffer used for control requests */
+    void        *data_ptr;      /**< Pointer to current data for control request */
+    uint16_t    data_count;     /**< Count remained data for control request */
+    uint16_t    data_maxsize;   /**< Size of the data buffer for control requests */
     uint8_t     ep0size;        /**< Size of the control endpoint */
-    uint8_t     device_cfg;     /**< Current device configuration ID */
+    uint8_t     device_cfg;     /**< Current device configuration number */
     uint8_t     device_state;   /**< Current \ref usbd_machine_state */
     uint8_t     control_state;  /**< Current \ref usbd_ctl_state */
 };
 
-/** Structure represents a hardware USB driver call table */
+/** Represents a hardware USB driver call table */
 struct usbd_driver {
-    usbd_hw_enable          enable;
-    usbd_hw_reset           reset;
-    usbd_hw_connect         connect;
-    usbd_hw_setaddr         setaddr;
-    usbd_hw_ep_config       ep_config;
-    usbd_hw_ep_deconfig     ep_deconfig;
-    usbd_hw_ep_read         ep_read;
-    usbd_hw_ep_write        ep_write;
-    usbd_hw_ep_setstall     ep_setstall;
-    usbd_hw_ep_isstalled    ep_isstalled;
-    usbd_hw_poll            poll;
-    usbd_hw_get_frameno     frame_no;
-    usbd_hw_get_serialno    get_serialno_desc;
+    usbd_hw_enable          enable;             /**< \copydoc usbd_hw_enable */
+    usbd_hw_reset           reset;              /**< \copydoc usbd_hw_reset */
+    usbd_hw_connect         connect;            /**< \copydoc usbd_hw_connect */
+    usbd_hw_setaddr         setaddr;            /**< \copydoc usbd_hw_setaddr */
+    usbd_hw_ep_config       ep_config;          /**< \copydoc usbd_hw_ep_config */
+    usbd_hw_ep_deconfig     ep_deconfig;        /**< \copydoc usbd_hw_ep_deconfig */
+    usbd_hw_ep_read         ep_read;            /**< \copydoc usbd_hw_ep_read */
+    usbd_hw_ep_write        ep_write;           /**< \copydoc usbd_hw_ep_write */
+    usbd_hw_ep_setstall     ep_setstall;        /**< \copydoc usbd_hw_ep_setstall */
+    usbd_hw_ep_isstalled    ep_isstalled;       /**< \copydoc usbd_hw_ep_isstalled */
+    usbd_hw_poll            poll;               /**< \copydoc usbd_hw_poll */
+    usbd_hw_get_frameno     frame_no;           /**< \copydoc usbd_hw_get_frameno */
+    usbd_hw_get_serialno    get_serialno_desc;  /**< \copydoc usbd_hw_get_serialno */
 };
 
-/** Structure represents a USB device data. No other data used by USB core and driver
- *  \note use helper \ref usbd_device typedef
- *  \note structure must be aligned
+/** Represents a USB device data.
  */
 struct _usbd_device {
     const struct usbd_driver    *driver;
-    usbd_ctl_callback           control_callback;
-    usbd_ctl_complete           complete_callback;
-    usbd_cfg_callback           config_callback;
-    usbd_dsc_callback           descriptor_callback;
+    usbd_ctl_callback           control_callback;           /**< \copydoc usbd_ctl_callback */
+    usbd_rqc_callback           complete_callback;          /**< \copydoc usbd_rqc_callback */
+    usbd_cfg_callback           config_callback;            /**< \copydoc usbd_cfg_callback */
+    usbd_dsc_callback           descriptor_callback;        /**< \copydoc usbd_dsc_callback */
     usbd_evt_callback           events[usbd_evt_count];     /**< events callbacks array */
     usbd_evt_callback           endpoint[8];                /**< endpoint callbacks array for tx, rx and setup events */
-    usbd_status                 status;
+    usbd_status                 status;                     /**< \copydoc _usbd_status */
 };
 
 /** \addtogroup USB_CORE_API
