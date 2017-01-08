@@ -338,156 +338,185 @@ _ep_isstalled:
 
     .thumb_func
     .type       _ep_read, %function
-/* uint16_t _ep_read(uint8_t ep, void *buf, uint16_t blen)
+/* int32_t _ep_read(uint8_t ep, void *buf, uint16_t blen)
  * in  R0 <- endpoint
  * in  R1 <- *buffer
  * in  R2 <- length of the buffer
- * out length of the recieved data -> R0
+ * out length of the recieved data -> R0 or 0 on error
  */
 _ep_read:
     push    {r4, r5, lr}
     ldr     r3, =#USB_EPBASE
     ldr     r4, =#USB_PMABASE
-    lsls    r0, #28
+    lsls    r0,  #28
     lsrs    r0, #26
     adds    r3, r0          // *EPR -> R3
     lsls    r0, #2
     adds    r4, r0          // *EPT -> R4
-    ldrh    r0, [r3]        // reading epr
-    lsls    r5, r0, #21
-    lsrs    r5, #29
-    cmp     r5, #0x04
+    ldrh    r5, [r3]        // reading epr
+/* validating endpoint */
+    movs    r0, #0x37
+    lsls    r0, #0x08
+    ands    r0, r5
+    lsrs    r0, #0x08
+    cmp     r0, #0x34       // (OK) RX_VALID + ISO
     beq     .L_epr_iso
-    cmp     r5, #0x01
-    bne     .L_epr_sngl
-.L_epr_dblbulk:
-    negs    r0, r0
-    lsrs    r0, #7          // ~SW_RX in CF
-    b       .L_epr_load_table
+    cmp     r0, #0x31       // (OK) RX_VALID + DBLBULK
+    beq     .L_epr_dbl
+    cmp     r0, #0x20       // (OK) RX_NAKED + BULK
+    beq     .L_epr_sngl
+    cmp     r0, #0x22       // (OK) RX_NAKED + CTRL
+    beq     .L_epr_sngl
+    cmp     r0, #0x26       // (OK) RX_NAKED + INTR
+    beq     .L_epr_sngl
+    movs    r0, #0xFF       // endpoint contains no valid data
+    sxtb    r0, r0
+    b       .L_epr_exit
+/* processing */
+.L_epr_dbl:
+    lsrs    r0, r5, #8
+    eors    r0, r5
+    lsrs    r0, #6          // SW_RX ^ DTOG_RX -> CF
+    bcc     .L_epr_notog    // jmp if SW_RX != DTOG_RX (VALID)
+    ldr     r0, =#EP_NOTOG
+    ands    r5, r0
+    adds    r5, #EP_RX_SWBUF
+    strh    r5, [r3]        // toggling SW_RX
+    ldrh    r5, [r3]
+.L_epr_notog:
+    negs    r5, r5
+    lsls    r5, #8          // shift ~SW_RX to DTOG_RX
 .L_epr_iso:
-    lsrs    r0, #15         // DTOG_RX passsed to CF
-.L_epr_load_table:
-    ldrh    r0, [r4, #RXADDR0]    // R0 rxaddr0
-    ldrh    r5, [r4, #RXCOUNT0]    // R5 rxcnt0
-    bcs     .L_epr_prepare
+    lsrs    r5, #15         // DTOG_RX -> CF
+    bcc     .L_epr_sngl
+    subs    r4, #0x08       // set RXADDR0
 .L_epr_sngl:
-    ldrh    r0, [r4, #RXADDR]    // R0 rxaddr1 or rxaddr
-    ldrh    r5, [r4, #RXCOUNT]   // R5 rxcnt1 or rxcnt
-.L_epr_prepare:
+    ldrh    r0, [r4, #RXCOUNT]
+    lsrs    r5, r0, #0x0A
+    lsls    r5, #0x0A       // r5 = r5 & ~0x03FF
+    strh    r5, [r4, #RXCOUNT]
+    lsls    r0, #22
+    lsrs    r0, #22         // r0 &= 0x3FF (RX count)
+    ldrh    r5, [r4, #RXADDR]
     ldr     r4, =#USB_PMABASE
-    lsls    r0, #0x01
-    adds    r0, r4          // R0 now has a physical address
-    lsls    r5, #22
-    lsrs    r5, #22         // R5 bytes count
-    cmp     r2, r5
+    lsls    r5, #0x01
+    adds    r5, r4          // R5 now has a physical address
+    cmp     r2, r0
     blo     .L_epr_read
-    mov     r2, r5          // if buffer is larger
+    mov     r2, r0          // if buffer is larger
 .L_epr_read:
     cmp     r2, #1
     blo     .L_epr_read_end
-    ldrh    r4, [r0]
+    ldrh    r4, [r5]
     strb    r4, [r1]
     beq     .L_epr_read_end
     lsrs    r4, #8
     strb    r4, [r1, #1]
     adds    r1, #2
-    adds    r0, #4
+    adds    r5, #4
     subs    r2, #2
-    bne     .L_epr_read
+    bhi     .L_epr_read
 .L_epr_read_end:
-    ldrh    r0, [r3]
-    lsls    r1, r0, #21
+    ldrh    r5, [r3]        // reload EPR
+    lsls    r1, r5, #21
     lsrs    r1, #29
     cmp     r1, #0x04
     beq     .L_epr_exit     // ep is iso. no needs to set it to valid
     cmp     r1, #0x01
     beq     .L_epr_exit     // ep is dblbulk. no needs to set it to valid
     ldr     r2, =#TGL_SET(EP_RX_STAT , EP_RX_VAL)
-    eors    r0, r2
+    eors    r5, r2
     lsrs    r2, #16
-    ands    r0, r2
-    strh    r0, [r3]        // set ep to VALID state
+    ands    r5, r2
+    strh    r5, [r3]        // set ep to VALID state
 .L_epr_exit:
-    mov     r0, r5
     pop     {r4, r5, pc}
     .size   _ep_read, . - _ep_read
 
 
-
     .thumb_func
     .type   _ep_write, %function
-/* uint16_t ep_write(uint8_t ep, void *buf, uint16_t blen)
- *
-
+/* int32_t ep_write(uint8_t ep, void *buf, uint16_t blen)
+ * R0 -> endpoint
+ * R1 -> *buffer
+ * R2 -> data length
+ * result -> R0
  */
 _ep_write:
-    push    {r2, r4, r5, lr}
+    push    {r4, r5, r6, lr}
     ldr     r3, =#USB_EPBASE
     ldr     r4, =#USB_PMABASE
     lsls    r0, #28
     lsrs    r0, #26
     adds    r3, r0          // *EPR -> R3
     lsls    r0, #2
-    adds    r4, r0          // *EPT -> R4
-    ldrh    r0, [r3]        // reading epr
-    lsls    r0, #21
-    lsrs    r0, #29
-    subs    r0, #0x04
+    adds    r4, r0          // TXADDR0 -> R4
+    ldrh    r5, [r3]        // reading epr
+    movs    r0, #0x73
+    lsls    r0, #4
+    ands    r0, r5
+    lsrs    r0, #4
+    cmp     r0, #0x43       // (OK) TX_VALID + ISO
     beq     .L_epw_iso
-    adds    r0, #0x03
-    bne     .L_epw_sngl
-.L_epw_dblbulk:
-    ldrh    r0, [r3]
-    lsrs    r0, #15          // SW_TX in CF
-    bcc     .L_epw_sngl
-    b       .L_epw_settx1
+    cmp     r0, #0x13       // (OK) TX_VALID + DBLBULK
+    beq     .L_epw_dbl
+    cmp     r0, #0x12       // (OK) TX_NAK + DBLBULK
+    beq     .L_epw_dbl
+    cmp     r0, #0x02       // (OK) TX_NAK + BULK
+    beq     .L_epw_sngl
+    cmp     r0, #0x22       // (OK) TX_NAK + CONTROL
+    beq     .L_epw_sngl
+    cmp     r0, #0x62       // (OK) TX_NAK + INTERRUPT
+    beq     .L_epw_sngl
+    movs    r0, #0xFF
+    sxtb    r0, r0
+    b       .L_epw_exit
+.L_epw_dbl:
+    negs    r5, r5
+    lsrs    r5, #8          // ~SWBUF_TX -> DTOG_TX
 .L_epw_iso:
-    ldrh    r0, [r3]
-    lsrs    r0, #7          // DTOG_TX passsed to CF
+    lsrs    r5, #7          // DTOG_TX -> CF
     bcs     .L_epw_sngl
-.L_epw_settx1:
-    adds    r4, #0x08
+    adds    r4, #8          // TXADDR1 -> R4
 .L_epw_sngl:
-    ldrh    r0, [r4, #TXADDR]    // R0 txaddr
-    lsls    r0, #0x01
-//.L_epw_prepare:
-    strh    r2, [r4, #TXCOUNT]   // set txcount
+    strh    r2, [r4, #TXCOUNT]
+    mov     r0, r2          // save count for return
+    ldrh    r5, [r4, #TXADDR]
     ldr     r4, =#USB_PMABASE
-    adds    r0, r4
+    lsls    r5, #1
+    adds    r5, r4          // PMA BUFFER -> R5
 .L_epw_write:
-    cmp     r2, #0x01
-    blo     .L_epw_writeend
+    cmp     r2, #1
+    blo     .L_epw_write_end
     ldrb    r4, [r1]
-    beq     .L_epw_halfw
-    ldrb    r5, [r1, #1]
-    lsls    r5, #8
-    orrs    r4, r5
-    strh    r4, [r0]
+    beq     .L_epw_store
+    ldrb    r6, [r1, #1]
+    lsls    r6, #8
+    orrs    r4, r6
+.L_epw_store:
+    strh    r4, [r5]
+    adds    r5, #4
     adds    r1, #2
-    adds    r0, #4
     subs    r2, #2
-    b       .L_epw_write
-.L_epw_halfw:
-    strh    r4, [r0]
-.L_epw_writeend:
-    ldrh    r0, [r3]
-    lsls    r1, r0, #21
+    bhi     .L_epw_write
+.L_epw_write_end:
+    ldrh    r5, [r3]        // reload EPR
+    lsls    r1, r5, #21
     lsrs    r1, #29
     cmp     r1, #0x04
-    beq     .L_epw_exit        //nothing to do with ISO ep
+    beq     .L_epw_exit     // isochronous ep. do nothing
     ldr     r2, =#TGL_SET(EP_TX_STAT, EP_TX_VAL)
     cmp     r1, #0x01
-    bne     .L_epw_setstate
-// ep is dblbulk. needs to switch SW_TX
+    bne     .L_epw_setstate // NOT a doublebuffered bulk
     ldr     r2, =#TGL_SET(EP_TX_SWBUF, EP_TX_SWBUF)
-    bics    r0, r2              //clearing SW_BUF for setting in to 1 by XOR
- .L_epw_setstate:
-    eors    r0, r2
+    bics    r5, r2          // clear TX_SWBUF
+.L_epw_setstate:
+    eors    r5, r2
     lsrs    r2, #16
-    ands    r0, r2
-    strh    r0, [r3]
+    ands    r5, r2
+    strh    r5, [r3]
 .L_epw_exit:
-    pop     {r0, r4, r5, pc}
+    pop     {r4, r5, r6, pc}
     .size   _ep_write, .- _ep_write
 
 
@@ -715,42 +744,31 @@ _evt_poll:
     bx      lr
 
 .L_ep_ctrm:
-    movs    r3, #0x00
+    movs    r5, #0x80           // CTR_TX mask to R5
     ldr     r0,=#USB_EPBASE
     lsrs    r0, #2
     adds    r0, r2
     lsls    r0, #2              // R0 ep register address
-    ldrh    r4, [r0]            //R4 *USB->EPx
-    lsrs    r5, r4, #8         // CTR_TX -> CF
+    ldrh    r4, [r0]            // R4 EPR valur
+    lsrs    r3, r4, #8          // CTR_TX -> CF
     bcc     .L_ep_ctr_rx
 /* CTR_TX event */
     movs    r1, #usbd_evt_eptx
-    movs    r5, #0x80
-    adds    r2, #0x80           // set endpoint tx
+    orrs    r2, r5              // set endpoint tx
     b       .L_ep_clr_ctr
 .L_ep_ctr_rx:
 /* CTR_RX  RX or SETUP */
-    movs    r1, #usbd_evt_epsetup
-    lsls    r5, r4, #21             //SETUP -> CF
-    bcs     .L_ep_ctr_evt
+    lsls    r5, #0x08           // set mask to CRT_RX
     movs    r1, #usbd_evt_eprx
-    lsrs    r5, #29                 //EP_TYPE | EP_KIND -> R5 LSB
-    cmp     r5, #0x01               //if dblbuf bulk
-    bne     .L_ep_ctr_evt
-/* if ep is dblbulk RX */
-    movs    r3, #EP_RX_SWBUF
-.L_ep_ctr_evt:
-/* clear CTR_RX */
-    movs    r5, #0x80
-    lsls    r5, #0x08
+    lsls    r3, r4, #21         //SETUP -> CF
+    bcc     .L_ep_clr_ctr
+    movs    r1, #usbd_evt_epsetup
 .L_ep_clr_ctr:
-    bics    r4, r5
+    bics    r4, r5              //clear CTR flag
     ldr     r5, =#EP_NOTOG
     ands    r4, r5
-    orrs    r4, r3
-    strh    r4, [r0]            // clr CTR flag
+    strh    r4, [r0]            // store
     b       .L_ep_callback
-
 .L_ep_errm:
     movs    r1, #usbd_evt_error
     movs    r4, #ISTRBIT(13)

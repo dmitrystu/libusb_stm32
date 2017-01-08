@@ -197,9 +197,9 @@ typedef void (*usbd_hw_ep_deconfig)(uint8_t ep);
  * \param ep endpoint index, should belong to OUT or CONTROL endpoint.
  * \param buf pointer to read buffer
  * \param blen size of the read buffer in bytes
- * \return size of the actually received data
+ * \return size of the actually received data, -1 on error.
  */
-typedef uint16_t (*usbd_hw_ep_read)(uint8_t ep, void *buf, uint16_t blen);
+typedef int32_t (*usbd_hw_ep_read)(uint8_t ep, void *buf, uint16_t blen);
 
 /** Writes data to IN or control endpoint
  * \param ep endpoint index, hould belong to IN or CONTROL endpoint
@@ -207,7 +207,7 @@ typedef uint16_t (*usbd_hw_ep_read)(uint8_t ep, void *buf, uint16_t blen);
  * \param blen size of data will be written
  * \return number of written bytes
  */
-typedef uint16_t (*usbd_hw_ep_write)(uint8_t ep, void *buf, uint16_t blen);
+typedef int32_t (*usbd_hw_ep_write)(uint8_t ep, void *buf, uint16_t blen);
 
 /** Stalls and unstalls endpoint
  * \param ep endpoint address

@@ -25,7 +25,12 @@
 #define EP_TX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_TX_VALID,                   USB_EPTX_STAT)
 #define EP_RX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_RX_VALID,                   USB_EPRX_STAT)
 
-
+typedef struct {
+    uint16_t    addr;
+    uint16_t    :16;
+    uint16_t    cnt;
+    uint16_t    :16;
+} pma_rec;
 
 typedef union pma_table {
     struct {
@@ -57,6 +62,18 @@ typedef union pma_table {
     uint16_t    :16;
     uint16_t    rxcnt1;
     uint16_t    :16;
+    };
+    struct {
+    pma_rec     tx;
+    pma_rec     rx;
+    };
+    struct {
+    pma_rec     tx0;
+    pma_rec     tx1;
+    };
+    struct {
+    pma_rec     rx0;
+    pma_rec     rx1;
     };
 } pma_table;
 
@@ -258,22 +275,14 @@ void ep_deconfig(uint8_t ep) {
     ept->txcnt = 0;
 }
 
-
-
-static void pma_write(const uint16_t txadr, const uint8_t *buf, uint16_t blen) {
-    uint16_t *pma = (void*)(USB_PMAADDR + 2 * txadr);
-    while (blen > 1) {
-        *pma = buf[1] << 8 | buf[0];
-        pma += 2;
-        buf += 2;
-        blen -= 2;
+static uint16_t pma_read (uint8_t *buf, uint16_t blen, pma_rec *rx) {
+    uint16_t *pma = (void*)(USB_PMAADDR + 2 * rx->addr);
+    uint16_t rxcnt = rx->cnt & 0x03FF;
+    rx->cnt &= ~0x3FF;
+    if (blen > rxcnt) {
+        blen = rxcnt;
     }
-    if (blen) *pma = *buf;
-}
-
-static void pma_read (const uint16_t rxadr, uint8_t *buf, uint16_t blen, uint16_t rxlen) {
-    uint16_t *pma = (void*)(USB_PMAADDR + 2 * rxadr);
-    if (blen > rxlen) blen = rxlen;
+    rxcnt = blen;
     while (blen) {
         uint16_t _t = *pma;
         *buf++ = _t & 0xFF;
@@ -283,97 +292,103 @@ static void pma_read (const uint16_t rxadr, uint8_t *buf, uint16_t blen, uint16_
             blen--;
         } else break;
     }
+    return rxcnt;
 }
 
-uint16_t ep_read(uint8_t ep, void *buf, uint16_t blen) {
+int32_t ep_read(uint8_t ep, void *buf, uint16_t blen) {
     pma_table *tbl = EPT(ep);
     volatile uint16_t *reg = EPR(ep);
-    uint16_t rxlen, rxbuf;
-
-    switch (*reg & (USB_EP_T_FIELD | USB_EP_KIND)) {
-    case (USB_EP_BULK | USB_EP_KIND):
+    switch (*reg & (USB_EPRX_STAT | USB_EP_T_FIELD | USB_EP_KIND)) {
+    /* doublebuffered bulk endpoint */
+    case (USB_EP_RX_VALID | USB_EP_BULK | USB_EP_KIND):
+        /* switching SWBUF if EP is NAKED */
+        switch (*reg & (USB_EP_DTOG_RX | USB_EP_SWBUF_RX)) {
+        case 0:
+        case (USB_EP_DTOG_RX | USB_EP_SWBUF_RX):
+            *reg = (*reg & USB_EPREG_MASK) | USB_EP_SWBUF_RX;
+        default:
+            break;
+        }
         if (*reg & USB_EP_SWBUF_RX) {
-            rxbuf = tbl->rxadr1;
-            rxlen = tbl->rxcnt1 & 0x03FF;
+            return pma_read(buf, blen, &(tbl->rx1));
         } else {
-            rxbuf = tbl->rxadr0;
-            rxlen = tbl->rxcnt0 & 0x03FF;
+            return pma_read(buf, blen, &(tbl->rx0));
         }
-        pma_read(rxbuf, buf, blen, rxlen);
-        break;
-    case USB_EP_ISOCHRONOUS:
+    /* isochronous endpoint */
+    case (USB_EP_RX_VALID | USB_EP_ISOCHRONOUS):
         if (*reg & USB_EP_DTOG_RX) {
-            rxbuf = tbl->rxadr0;
-            rxlen = tbl->rxcnt0 & 0x03FF;
+            return pma_read(buf, blen, &(tbl->rx1));
         } else {
-            rxbuf = tbl->rxadr1;
-            rxlen = tbl->rxcnt1 & 0x03FF;
+            return pma_read(buf, blen, &(tbl->rx0));
         }
-        pma_read(rxbuf, buf, blen, rxlen);
-        break;
-    default:
-        rxbuf = tbl->rxadr;
-        rxlen = tbl->rxcnt & 0x03FF;
-        pma_read(rxbuf, buf, blen, rxlen);
+    /* regular endpoint */
+    case (USB_EP_RX_NAK | USB_EP_BULK):
+    case (USB_EP_RX_NAK | USB_EP_CONTROL):
+    case (USB_EP_RX_NAK | USB_EP_INTERRUPT):
+        {
+        int32_t res = pma_read(buf, blen, &(tbl->rx));
         /* setting endpoint to VALID state */
         EP_RX_VALID(reg);
-        break;
+        return res;
+        }
+    /* invalid or not ready */
+    default:
+        return -1;
     }
-    return rxlen;
 }
 
+static void pma_write(const uint8_t *buf, uint16_t blen, pma_rec *tx) {
+    uint16_t *pma = (void*)(USB_PMAADDR + 2 * (tx->addr));
+    tx->cnt = blen;
+    while (blen > 1) {
+        *pma = buf[1] << 8 | buf[0];
+        pma += 2;
+        buf += 2;
+        blen -= 2;
+    }
+    if (blen) *pma = *buf;
+}
 
-
-uint16_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
+int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     pma_table *tbl = EPT(ep);
     volatile uint16_t *reg = EPR(ep);
-    uint16_t txbuf;
-    switch (*reg & (USB_EP_T_FIELD | USB_EP_KIND)) {
-    case (USB_EP_BULK | USB_EP_KIND):
+    switch (*reg & (USB_EPTX_STAT | USB_EP_T_FIELD | USB_EP_KIND)) {
+    /* doublebuffered bulk endpoint */
+    /* it STAT_TX bits can be in NAKED state. No answer about this */
+    case (USB_EP_TX_VALID | USB_EP_BULK | USB_EP_KIND):
+    case (USB_EP_TX_NAK   | USB_EP_BULK | USB_EP_KIND):
         if (*reg & USB_EP_SWBUF_TX) {
-            tbl->txcnt1 = blen;
-            txbuf = tbl->txadr1;
+            pma_write(buf, blen, &(tbl->tx1));
         } else {
-            tbl->txcnt0 = blen;
-            txbuf = tbl->txadr0;
+            pma_write(buf, blen, &(tbl->tx0));
         }
-        break;
-    case USB_EP_ISOCHRONOUS:
-        if (*reg & USB_EP_DTOG_TX) {
-            tbl->txcnt0 = blen;
-            txbuf = tbl->txadr0;
-        } else {
-            tbl->txcnt1 = blen;
-            txbuf = tbl->txadr1;
-        }
-        break;
-    default:
-        tbl->txcnt = blen;
-        txbuf = tbl->txadr;
-        break;
-    }
-    pma_write(txbuf, buf, blen);
-
-    switch (*reg & (USB_EP_T_FIELD | USB_EP_KIND)) {
-    case (USB_EP_BULK | USB_EP_KIND):
-        /* switching buffer if doublebuffered bulk endpoint */
         *reg = (*reg & USB_EPREG_MASK) | USB_EP_SWBUF_TX;
         break;
-    case USB_EP_ISOCHRONOUS:
+    /* isochronous endpoint */
+    case (USB_EP_TX_VALID | USB_EP_ISOCHRONOUS):
+        if (!(*reg & USB_EP_DTOG_TX)) {
+            pma_write(buf, blen, &(tbl->tx1));
+        } else {
+            pma_write(buf, blen, &(tbl->tx0));
+        }
         break;
-    default:
-        /* set TX valid to start transfer */
+    /* regular endpoint */
+    case (USB_EP_TX_NAK | USB_EP_BULK):
+    case (USB_EP_TX_NAK | USB_EP_CONTROL):
+    case (USB_EP_TX_NAK | USB_EP_INTERRUPT):
+        pma_write(buf, blen, &(tbl->tx));
         EP_TX_VALID(reg);
+        break;
+    /* invalid or not ready */
+    default:
+        return -1;
     }
     return blen;
-
 }
 
 uint16_t get_frame (void) {
     return USB->FNR & USB_FNR_FN;
 }
-
-
 
 void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
     uint8_t _ev, _ep;
@@ -387,13 +402,7 @@ void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
             _ep |= 0x80;
             _ev = usbd_evt_eptx;
         } else {
-            /* clearing CTR */
-            if ((*reg & (USB_EP_T_FIELD | USB_EP_KIND)) == (USB_EP_BULK | USB_EP_KIND)) {
-                /* switching RX buffer and if doublebuffered bulk endpoint */
-                *reg = (*reg & (USB_EPREG_MASK ^ USB_EP_CTR_RX)) | USB_EP_SWBUF_RX;
-            } else {
-                *reg &= (USB_EPREG_MASK ^ USB_EP_CTR_RX);
-            }
+            *reg &= (USB_EPREG_MASK ^ USB_EP_CTR_RX);
             _ev = (*reg & USB_EP_SETUP) ? usbd_evt_epsetup : usbd_evt_eprx;
         }
     } else if (_istr & USB_ISTR_RESET) {
