@@ -49,17 +49,17 @@
 #define RXADDR0     0x00
 #define RXCOUNT0    0x02
 #define RXADDR1     0x04
-#define RXCOUNT1    0x08
+#define RXCOUNT1    0x06
 
 #define TXADDR0     0x00
 #define TXCOUNT0    0x02
 #define TXADDR1     0x04
-#define TXCOUNT1    0x08
+#define TXCOUNT1    0x06
 
 #define TXADDR      0x00
 #define TXCOUNT     0x02
 #define RXADDR      0x04
-#define RXCOUNT     0x08
+#define RXCOUNT     0x06
 
 
 #define EP_NOTOG    (EP_RX_CTR | EP_TX_CTR | EP_SETUP | EP_TYPE | EP_KIND | EP_ADDR)
