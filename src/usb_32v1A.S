@@ -261,40 +261,37 @@ _enable:
  * in  R1 <- 0 if unstall, !0 if stall
  */
 _ep_setstall:
+    push    {r4, lr}
     lsls    r2, r0, #28
     lsrs    r2, #26
     ldr     r3, =#USB_EPBASE
     adds    r3, r2          // epr -> r3
     movs    r2, 0x30        // TX_STAT_MASK -> r2
-    cmp     r0, #80
+    ldrh    r4, [r3]
+    lsls    r4, #21
+    lsrs    r4, #29         // EP_TYPE | EP_KIND -> R4 LSB
+    cmp     r4, #0x04       // ISO ?
+    beq     .L_eps_exit
+    cmp     r0, #0x80
     blo     .L_eps_rx
 .L_eps_tx:
     ldr     r0, =#TX_STALL   //stall TX
-    tst     r1, r1
+    cmp     r1, #0x00
     bne     .L_eps_reg_set
 .L_eps_tx_unstall:
-    ldrh    r1, [r3]        // *epr -> r1
-    lsls    r1, #21
-    lsrs    r1, #29         // EPTTYPE | EPKIND mask only
     ldr     r0, =#DTX_USTALL //unstall dblbulk or iso TX (VALID and clr DTOG_TX & SWBUF_TX)
-    cmp     r1, #0x01       // if doublebuffered bulk endpoint
+    cmp     r4, #0x01       // if doublebuffered bulk endpoint
     beq     .L_eps_reg_set
-    cmp     r1, #0x04       // if isochronous endpoint
     ldr     r0, =#TX_USTALL  // unstall other TX (NAKED + clr DTOG_TX)
     b       .L_eps_reg_set
 .L_eps_rx:
     lsls    r2, #8          // RX_STAT_MASK -> R2
     ldr     r0,=#RX_STALL    //stall RX
-    tst     r1, r1
+    cmp     r1, #0x00
     bne     .L_eps_reg_set
 .L_eps_rx_unstall:
-    ldrh    r1, [r3]        // *epr -> r1
-    lsls    r1, #21
-    lsrs    r1, #29         // EPTTYPE | EPKIND mask only
     ldr     r0, =#DRX_USTALL //unstall dblbulk or iso (VALID. clr DTOG_RX set SWBUF_RX)
-    cmp     r1, #0x01       // if dblbulk
-    beq     .L_eps_reg_set
-    cmp     r1, #0x04       // if iso
+    cmp     r4, #0x01       // if dblbulk
     beq     .L_eps_reg_set
     ldr     r0, =#RX_USTALL  // unstall other RX (VALID + clr
 /* R0 - mask and toggle bits
@@ -310,7 +307,7 @@ _ep_setstall:
     ands    r1, r0
     strh    r1, [r3]
 .L_eps_exit:
-    bx      lr
+    pop     {r4, pc}
     .size   _ep_setstall, . - _ep_setstall
 
 
@@ -384,7 +381,7 @@ _ep_read:
     strh    r5, [r3]        // toggling SW_RX
     ldrh    r5, [r3]
 .L_epr_notog:
-    negs    r5, r5
+    mvns    r5, r5
     lsls    r5, #8          // shift ~SW_RX to DTOG_RX
 .L_epr_iso:
     lsrs    r5, #15         // DTOG_RX -> CF
@@ -472,7 +469,7 @@ _ep_write:
     sxtb    r0, r0
     b       .L_epw_exit
 .L_epw_dbl:
-    negs    r5, r5
+    mvns    r5, r5
     lsrs    r5, #8          // ~SWBUF_TX -> DTOG_TX
 .L_epw_iso:
     lsrs    r5, #7          // DTOG_TX -> CF
@@ -639,35 +636,31 @@ _ep_config:
     ldr     r5, =#USB_PMABASE
     lsls    r4, #2
     adds    r5, r4
+/* RX or RX1 */
+    bl      _get_next_pma
+    bcc     .L_epc_fail
+    strh    r0, [r5, #RXADDR]
+    strh    r3, [r5, #RXCOUNT]
+    ldr     r0, =#RX_USTALL
+/* check if doublebuffered */
     cmp     r1, 0x06    //if dblbulk
     beq     .L_epc_rxdbl
     cmp     r1, 0x01    // iso
-    bne     .L_epc_rxsngl
+    bne     .L_epc_rxsetstate
 .L_epc_rxdbl:
     bl      _get_next_pma
     bcc     .L_epc_fail
     strh    r0, [r5, #RXADDR0]    //store rxaddr0
     strh    r3, [r5, #RXCOUNT0]    //store rxcnt0
-    bl      _get_next_pma
-    bcc     .L_epc_fail
-    strh    r0, [r5, #RXADDR1]    //store rxaddr1
-    strh    r3, [r5, #RXCOUNT1]    //store rxcnt1
-    ldr     r3, =#DRX_USTALL
-    b       .L_epc_rxsetstate
-.L_epc_rxsngl:
-    bl      _get_next_pma
-    bcc     .L_epc_fail
-    strh    r0, [r5, #RXADDR]    //store rxaddr1 or rxaddr
-    strh    r3, [r5, #RXCOUNT]    //store rxcnt1 or rxcnt
-    ldr     r3, =#RX_USTALL
+    ldr     r0, =#DRX_USTALL
 .L_epc_rxsetstate:
     ldr     r5, =#USB_EPBASE
     lsrs    r4, #1
-    ldrh    r0, [r5, r4]
-    eors    r0, r3
-    lsrs    r3, #16
-    ands    r0, r3
-    strh    r0, [r5, r4]
+    ldrh    r3, [r5, r4]
+    eors    r3, r0
+    lsrs    r0, #16
+    ands    r3, r0
+    strh    r3, [r5, r4]
 .L_epc_exit:
     movs    r0, #0x01
     pop     {r4, r5, pc}

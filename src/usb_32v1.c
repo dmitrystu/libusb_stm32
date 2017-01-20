@@ -34,36 +34,6 @@ typedef struct {
 
 typedef union pma_table {
     struct {
-    uint16_t    txadr;
-    uint16_t    :16;
-    uint16_t    txcnt;
-    uint16_t    :16;
-    uint16_t    rxadr;
-    uint16_t    :16;
-    uint16_t    rxcnt;
-    uint16_t    :16;
-    };
-    struct {
-    uint16_t    txadr0;
-    uint16_t    :16;
-    uint16_t    txcnt0;
-    uint16_t    :16;
-    uint16_t    txadr1;
-    uint16_t    :16;
-    uint16_t    txcnt1;
-    uint16_t    :16;
-    };
-    struct {
-    uint16_t    rxadr0;
-    uint16_t    :16;
-    uint16_t    rxcnt0;
-    uint16_t    :16;
-    uint16_t    rxadr1;
-    uint16_t    :16;
-    uint16_t    rxcnt1;
-    uint16_t    :16;
-    };
-    struct {
     pma_rec     tx;
     pma_rec     rx;
     };
@@ -102,8 +72,8 @@ static uint16_t get_next_pma(uint16_t sz) {
     unsigned _result = USB_PMASIZE;
     for (int i = 0; i < 8; i++) {
         pma_table *tbl = EPT(i);
-        if ((tbl->rxadr) && (tbl->rxadr < _result)) _result = tbl->rxadr;
-        if ((tbl->txadr) && (tbl->txadr < _result)) _result = tbl->txadr;
+        if ((tbl->tx.addr) && (tbl->tx.addr < _result)) _result = tbl->tx.addr;
+        if ((tbl->rx.addr) && (tbl->rx.addr < _result)) _result = tbl->rx.addr;
     }
     if ( _result < (4 * sizeof(pma_table) + sz)) {
         return 0;
@@ -217,18 +187,16 @@ bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
         uint16_t _pma;
         _pma = get_next_pma(epsize);
         if (_pma == 0) return false;
+        tbl->tx.addr = _pma;
+        tbl->tx.cnt  = 0;
         if ((eptype == USB_EPTYPE_ISOCHRONUS) ||
             (eptype == (USB_EPTYPE_BULK | USB_EPTYPE_DBLBUF))) {
-            tbl->txadr0 = _pma;
             _pma = get_next_pma(epsize);
             if (_pma == 0) return false;
-            tbl->txadr1 = _pma;
-            tbl->txcnt0 = 0;
-            tbl->txcnt1 = 0;
+            tbl->tx1.addr = _pma;
+            tbl->tx1.cnt  = 0;
             EP_DTX_UNSTALL(reg);
         } else {
-            tbl->txadr = _pma;
-            tbl->txcnt = 0;
             EP_TX_UNSTALL(reg);
         }
     }
@@ -248,18 +216,16 @@ bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
         }
         _pma = get_next_pma(epsize);
         if (_pma == 0) return false;
+        tbl->rx.addr = _pma;
+        tbl->rx.cnt  = _rxcnt;
         if ((eptype == USB_EPTYPE_ISOCHRONUS) ||
             (eptype == (USB_EPTYPE_BULK | USB_EPTYPE_DBLBUF))) {
-            tbl->rxadr0 = _pma;
             _pma = get_next_pma(epsize);
             if (_pma == 0) return false;
-            tbl->rxadr1 = _pma;
-            tbl->rxcnt0 = _rxcnt;
-            tbl->rxcnt1 = _rxcnt;
+            tbl->rx0.addr = _pma;
+            tbl->rx0.cnt  = _rxcnt;
             EP_DRX_UNSTALL(reg);
         } else {
-            tbl->rxadr = _pma;
-            tbl->rxcnt = _rxcnt;
             EP_RX_UNSTALL(reg);
         }
     }
@@ -269,10 +235,10 @@ bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
 void ep_deconfig(uint8_t ep) {
     pma_table *ept = EPT(ep);
     *EPR(ep) &= ~USB_EPREG_MASK;
-    ept->rxadr = 0;
-    ept->rxcnt = 0;
-    ept->txadr = 0;
-    ept->txcnt = 0;
+    ept->rx.addr = 0;
+    ept->rx.cnt  = 0;
+    ept->tx.addr = 0;
+    ept->tx.cnt  = 0;
 }
 
 static uint16_t pma_read (uint8_t *buf, uint16_t blen, pma_rec *rx) {
