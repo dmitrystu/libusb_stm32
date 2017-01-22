@@ -142,10 +142,10 @@ typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, us
  * \details Called when GET_DESCRIPTOR request issued
  * \param[in] req pointer to usb control request structure
  * \param[in,out] address pointer to the descriptor in memory. Points to req->data by default. You can use this buffer.
- * \param[in,out] dsize descriptor size. req->data buffer size by default.
- * \return TRUE if you passed the correct descriptor, FALSE otherwise.
+ * \param[in,out] dsize descriptor size. maximum buffer size by default.
+ * \return usbd_ack if you passed the correct descriptor, usbd_fail otherwise.
  */
-typedef bool (*usbd_dsc_callback)(usbd_ctlreq *req, void **address, uint16_t *dsize);
+typedef usbd_respond (*usbd_dsc_callback)(usbd_ctlreq *req, void **address, uint16_t *dsize);
 
 /** USB set configuration callback function
  * \details called when SET_CONFIGURATION request issued
@@ -154,7 +154,7 @@ typedef bool (*usbd_dsc_callback)(usbd_ctlreq *req, void **address, uint16_t *ds
  * \note if config is 0 device endpoints should be de-configured
  * \return TRUE if success
  */
-typedef bool (*usbd_cfg_callback)(usbd_device *dev, uint8_t cfg);
+typedef usbd_respond (*usbd_cfg_callback)(usbd_device *dev, uint8_t cfg);
 
 /** @} */
 

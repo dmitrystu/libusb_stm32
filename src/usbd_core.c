@@ -63,7 +63,7 @@ static void usbd_process_callback (usbd_device *dev) {
  */
 static usbd_respond usbd_configure(usbd_device *dev, uint8_t config) {
     if (dev->config_callback) {
-        if (dev->config_callback(dev, config)) {
+        if (dev->config_callback(dev, config) == usbd_ack) {
             dev->status.device_cfg = config;
             dev->status.device_state = (config) ? usbd_state_configured : usbd_state_addressed;
             return usbd_ack;
@@ -278,7 +278,7 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
     }
     /* usb request received. let's handle it */
     dev->status.data_ptr = req->data;
-    dev->status.data_count = req->wLength;/*dev->status.data_maxsize;*/
+    dev->status.data_count = /*req->wLength;*/dev->status.data_maxsize;
     switch (usbd_process_request(dev, req)) {
     case usbd_ack:
         if (req->bmRequestType & USB_REQ_DEVTOHOST) {
