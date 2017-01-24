@@ -610,7 +610,7 @@ _ep_config:
     strh    r0, [r5, #TXCOUNT1]    //store txcnt
 .L_epc_txsetstate:
     ldr     r5, =#USB_EPBASE
-    lsrs    r4, #1
+    lsrs    r4, #2
     ldrh    r0, [r5, r4]
     eors    r0, r3
     lsrs    r3, #16
@@ -655,7 +655,7 @@ _ep_config:
     ldr     r0, =#DRX_USTALL
 .L_epc_rxsetstate:
     ldr     r5, =#USB_EPBASE
-    lsrs    r4, #1
+    lsrs    r4, #2
     ldrh    r3, [r5, r4]
     eors    r3, r0
     lsrs    r0, #16
