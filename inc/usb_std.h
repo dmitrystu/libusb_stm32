@@ -19,6 +19,9 @@
 extern "C" {
 #endif
 
+#define __CAT(x,y) x ## y
+#define CAT(x,y) __CAT(x,y)
+
 /**\addtogroup USB_STD USB Standard
  * \brief This module contains generic USB device framework definitions
  * \details This module based on
@@ -34,8 +37,10 @@ extern "C" {
  */
 #define VERSION_BCD(maj, min, rev)  (((maj & 0xFF) << 8) | ((min & 0x0F) << 4) | (rev & 0x0F))
 
-/** Macro to create \ref usb_string_descriptor from array of characters */
-#define USB_STRING_DESC(...)        {.bLength = 2 + sizeof((uint16_t[]){__VA_ARGS__}), .bDescriptorType = USB_DTYPE_STRING, .wString = {__VA_ARGS__}}
+/** Macro to create \ref usb_string_descriptor from array */
+#define USB_ARRAY_DESC(...)        {.bLength = 2 + sizeof((uint16_t[]){__VA_ARGS__}), .bDescriptorType = USB_DTYPE_STRING, .wString = {__VA_ARGS__}}
+/** Macro to create \ref usb_string_descriptor from string */
+#define USB_STRING_DESC(s)         {.bLength = sizeof(CAT(u,s)), .bDescriptorType = USB_DTYPE_STRING, .wString = {CAT(u,s)}}
 
 /**\brief Macro to set мaximum power consumption field for the \ref usb_config_descriptor */
 #define USB_CFG_POWER_MA(mA)        ((mA) >> 1)
