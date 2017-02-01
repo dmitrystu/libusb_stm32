@@ -320,8 +320,6 @@ int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     volatile uint16_t *reg = EPR(ep);
     switch (*reg & (USB_EPTX_STAT | USB_EP_T_FIELD | USB_EP_KIND)) {
     /* doublebuffered bulk endpoint */
-    /* it STAT_TX bits can be in NAKED state. No answer about this */
-    case (USB_EP_TX_VALID | USB_EP_BULK | USB_EP_KIND):
     case (USB_EP_TX_NAK   | USB_EP_BULK | USB_EP_KIND):
         if (*reg & USB_EP_SWBUF_TX) {
             pma_write(buf, blen, &(tbl->tx1));
@@ -428,6 +426,7 @@ uint16_t get_serialno_desc(void *buffer) {
 }
 
 const struct usbd_driver usb_stmv1 = {
+    0,
     enable,
     reset,
     connect,

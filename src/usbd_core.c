@@ -101,7 +101,11 @@ static usbd_respond usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
         req->data[1] = 0;
         return usbd_ack;
     case USB_STD_SET_ADDRESS:
-        dev->complete_callback = usbd_set_address;
+        if (dev->driver->caps & USBD_HW_ADDRFST) {
+            usbd_set_address(dev, req);
+        } else {
+            dev->complete_callback = usbd_set_address;
+        }
         return usbd_ack;
     case USB_STD_SET_CONFIG:
         return usbd_configure(dev, req->wValue);
@@ -200,7 +204,7 @@ static void usbd_stall_pid(usbd_device *dev, uint8_t ep) {
  * \param ep endpoint number
  */
 static void usbd_process_eptx(usbd_device *dev, uint8_t ep) {
-    uint16_t _t;
+    int32_t _t;
     switch (dev->status.control_state) {
     case usbd_ctl_ztxdata:
     case usbd_ctl_txdata:

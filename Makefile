@@ -17,6 +17,12 @@ CFLAGS.stm32l100xc   = -mcpu=cortex-m3 -mfloat-abi=soft
 DEFINES.stm32l100xc  = STM32L1 STM32L100xC
 LDSCRIPT.stm32l100xc = demo/stm32l100xc.ld
 
+STARTUP.stm32l476rg  = $(CMSIS)/device/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l476xx.s
+CFLAGS.stm32l476rg   = -mcpu=cortex-m4
+DEFINES.stm32l476rg  = STM32L4 STM32L476xx
+LDSCRIPT.stm32l476rg = demo/stm32l476xg.ld
+
+
 MCU         ?= stm32l100xc
 LDFLAGS     ?= --specs=nano.specs -nostartfiles -Wl,--gc-sections
 DSRC         = $(wildcard demo/*.c) $(wildcard demo/*.S) $(STARTUP.$(MCU))
@@ -48,7 +54,6 @@ program: $(DOUT).hex
 	$(FLASH) --reset --format ihex write $(DOUT).hex
 
 demo: clean $(DOUT).hex
-
 
 $(DOUT).hex : $(DOUT).elf
 	@echo building $@

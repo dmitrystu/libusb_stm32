@@ -17,9 +17,10 @@
     #define __ASSEMBLER__
 #endif
 
+#if defined(USE_STMV0_DRIVER)
 #include "../usb.h"
 #include "memmap.inc"
-#if defined(USE_STMV0_DRIVER)
+
 
 #define EP_SETUP    0x0800
 #define EP_TYPE     0x0600
@@ -83,6 +84,7 @@
     .globl  usb_stmv0a
     .align  2
 usb_stmv0a:
+    .long   0
     .long   _enable
     .long   _reset
     .long   _connect

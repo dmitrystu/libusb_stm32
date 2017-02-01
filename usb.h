@@ -42,6 +42,8 @@
     #if (defined(FORCE_ASM_DRIVER) || defined(STM32L100xC)) && !defined(FORCE_C_DRIVER)
         #define USE_STMV1A_DRIVER
     #endif
+#elif defined(STM32L476xx)
+    #define USE_STMV2_DRIVER
 #else
     #error Unsupported STM32 family
 #endif
@@ -62,6 +64,9 @@
     #elif defined(USE_STMV1_DRIVER)
         extern const struct usbd_driver usb_stmv1;
         #define usbd_hw usb_stmv1
+    #elif defined(USE_STMV2_DRIVER)
+        extern const struct usbd_driver usb_stmv2;
+        #define usbd_hw usb_stmv2
     #endif
 #endif
 

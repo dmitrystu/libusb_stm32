@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include "macro.h"
 #include "stm32.h"
 #include "usb.h"
 #include "inc/usb_cdc.h"
@@ -140,7 +141,8 @@ static const struct usb_string_descriptor *const dtable[] = {
 
 usbd_device udev;
 uint32_t	ubuf[0x20];
-uint8_t     dbuf[0x100];
+uint8_t     fifo[0x200];
+uint32_t    fpos = 0;
 
 static struct usb_cdc_line_coding cdc_line = {
     .dwDTERate          = 38400,
@@ -200,48 +202,30 @@ static usbd_respond cdc_control(usbd_device *dev, usbd_ctlreq *req, usbd_rqc_cal
 
 
 static void cdc_rxonly (usbd_device *dev, uint8_t event, uint8_t ep) {
-    usbd_ep_read(dev, ep, dbuf, CDC_DATA_SZ);
+   usbd_ep_read(dev, ep, fifo, CDC_DATA_SZ);
 }
 
 static void cdc_txonly(usbd_device *dev, uint8_t event, uint8_t ep) {
     uint8_t _t = dev->driver->frame_no();
-    memset(dbuf, _t, CDC_DATA_SZ);   
-    usbd_ep_write(dev, ep, dbuf, CDC_DATA_SZ);
-
+    memset(fifo, _t, CDC_DATA_SZ);
+    usbd_ep_write(dev, ep, fifo, CDC_DATA_SZ);
 }
 
-
-static void cdc_loopback (usbd_device *dev, uint8_t event, uint8_t ep) {
-#define WAIT_TX     0x01
-#define WAIT_RX     0x02
-    static uint16_t rpos = 0;
-    static uint8_t  flags = WAIT_RX;
+static void cdc_loopback(usbd_device *dev, uint8_t event, uint8_t ep) {
     int _t;
     switch (event) {
-read_delayed:
-    case usbd_evt_eprx:
-        if (rpos > (sizeof(dbuf) - CDC_DATA_SZ)) {
-            /* buffer overflow. stop accepting data */
-            flags &= ~WAIT_RX;
-        } else {
-            _t = usbd_ep_read(dev, CDC_RXD_EP, &dbuf[rpos], CDC_DATA_SZ);
-            if (_t > 0) {
-                rpos += _t;
-            }
-        }
-        if (flags & WAIT_TX) break;
-        flags |= WAIT_TX;
     case usbd_evt_eptx:
-        if (rpos > 0) {
-            _t = (rpos > CDC_DATA_SZ) ? CDC_DATA_SZ : rpos;
-            _t = usbd_ep_write(dev, CDC_TXD_EP, &dbuf[0], _t);
-            memmove(&dbuf[0], &dbuf[_t], (rpos - _t));
-            rpos -= _t;
-        } else {
-            flags &= ~WAIT_TX;
-            if (flags & WAIT_RX) break;
-            flags |= WAIT_RX;
-            goto read_delayed;
+        _t = usbd_ep_write(dev, CDC_TXD_EP, &fifo[0], (fpos < CDC_DATA_SZ) ? fpos : CDC_DATA_SZ);
+        if (_t > 0) {
+            memmove(&fifo[0], &fifo[_t], fpos - _t);
+            fpos -= _t;
+        }
+    case usbd_evt_eprx:
+        if (fpos < (sizeof(fifo) - CDC_DATA_SZ)) {
+            _t = usbd_ep_read(dev, CDC_RXD_EP, &fifo[fpos], CDC_DATA_SZ);
+            if (_t > 0) {
+                fpos += _t;
+            }
         }
     default:
         break;
@@ -252,9 +236,9 @@ static usbd_respond cdc_setconf (usbd_device *dev, uint8_t cfg) {
     switch (cfg) {
     case 0:
         /* deconfiguring device */
-        usbd_ep_deconfig(dev, CDC_RXD_EP);
-        usbd_ep_deconfig(dev, CDC_TXD_EP);
         usbd_ep_deconfig(dev, CDC_NTF_EP);
+        usbd_ep_deconfig(dev, CDC_TXD_EP);
+        usbd_ep_deconfig(dev, CDC_RXD_EP);
         usbd_reg_endpoint(dev, CDC_RXD_EP, 0);
         usbd_reg_endpoint(dev, CDC_TXD_EP, 0);
         return usbd_ack;
@@ -269,8 +253,8 @@ static usbd_respond cdc_setconf (usbd_device *dev, uint8_t cfg) {
 #else
         usbd_reg_endpoint(dev, CDC_RXD_EP, cdc_rxonly);
         usbd_reg_endpoint(dev, CDC_TXD_EP, cdc_txonly);
-        usbd_ep_write(dev, CDC_TXD_EP, 0, 0);
 #endif
+        usbd_ep_write(dev, CDC_TXD_EP, 0, 0);
         return usbd_ack;
     default:
         return usbd_fail;
@@ -284,25 +268,62 @@ static void cdc_init_usbd(void) {
     usbd_reg_descr(&udev, cdc_getdesc);
 }
 
-static void cdc_init_rcc(void) {
-    BST(RCC->APB1ENR, RCC_APB1ENR_PWREN);
-    BMD(PWR->CR, PWR_CR_VOS, PWR_CR_VOS_0);
-    WBC(PWR->CSR, PWR_CSR_VOSF);
+
+static void cdc_init_rcc (void) {
+#if defined(STM32L0)
+    _BST(RCC->APB1ENR, RCC_APB1ENR_PWREN);
+    _BMD(PWR->CR, PWR_CR_VOS, PWR_CR_VOS_0);
+    _WBC(PWR->CSR, PWR_CSR_VOSF);
     /* set FLASH latency to 1 */
-#if defined(STM32L1)
-    BST(FLASH->ACR, FLASH_ACR_ACC64);
-#endif
-    BST(FLASH->ACR, FLASH_ACR_LATENCY);
-    /* set PLL clock HSI * 6/4 (24 MHz) */
-    BMD(RCC->CFGR, RCC_CFGR_PLLDIV | RCC_CFGR_PLLMUL | RCC_CFGR_PLLSRC, RCC_CFGR_PLLDIV3 | RCC_CFGR_PLLMUL6);
-    BST(RCC->CR, RCC_CR_HSION);
-    WBS(RCC->CR, RCC_CR_HSIRDY);
-    BST(RCC->CR, RCC_CR_PLLON);
-    WBS(RCC->CR, RCC_CR_PLLRDY);
+    _BST(FLASH->ACR, FLASH_ACR_LATENCY);
+    /* set clock at 32MHz PLL 6/3 HSI */
+    _BMD(RCC->CFGR, RCC_CFGR_PLLDIV | RCC_CFGR_PLLMUL | RCC_CFGR_PLLSRC, RCC_CFGR_PLLDIV3 | RCC_CFGR_PLLMUL6);
+    _BST(RCC->CR, RCC_CR_HSION);
+    _WBS(RCC->CR, RCC_CR_HSIRDY);
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
     /* switch clock to PLL */
-    BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
-    WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+
+#elif defined(STM32L1)
+    _BST(RCC->APB1ENR, RCC_APB1ENR_PWREN);
+    _BMD(PWR->CR, PWR_CR_VOS, PWR_CR_VOS_0);
+    _WBC(PWR->CSR, PWR_CSR_VOSF);
+    /* set FLASH latency to 1 */
+    _BST(FLASH->ACR, FLASH_ACR_ACC64);
+    _BST(FLASH->ACR, FLASH_ACR_LATENCY);
+    /* set clock at 32 MHz PLL 6/3 HSI */
+    _BMD(RCC->CFGR, RCC_CFGR_PLLDIV | RCC_CFGR_PLLMUL | RCC_CFGR_PLLSRC, RCC_CFGR_PLLDIV3 | RCC_CFGR_PLLMUL6);
+    _BST(RCC->CR, RCC_CR_HSION);
+    _WBS(RCC->CR, RCC_CR_HSIRDY);
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
+    /* switch clock to PLL */
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+
+#elif defined(STM32L4)
+    _BST(RCC->APB1ENR1, RCC_APB1ENR1_PWREN);
+    /* Set power Range 1 */
+    _BMD(PWR->CR1, PWR_CR1_VOS, PWR_CR1_VOS_1);
+    _WBC(PWR->SR2, PWR_SR2_VOSF);
+    /* Adjust Flash latency */
+    _BST(FLASH->ACR, FLASH_ACR_LATENCY);
+    /* set clock 48Mhz MSI */
+    _BMD(RCC->CR, RCC_CR_MSIRANGE, RCC_CR_MSIRANGE_11 | RCC_CR_MSIRGSEL);
+    /* set MSI as 48MHz USB */
+    _BMD(RCC->CCIPR, RCC_CCIPR_CLK48SEL, RCC_CCIPR_CLK48SEL_0 | RCC_CCIPR_CLK48SEL_1);
+    /* enable GPIOA clock */
+    _BST(RCC->AHB2ENR, RCC_AHB2ENR_GPIOAEN);
+    /* set GP11 and GP12 as USB data pins AF10 */
+    _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
+    _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
+#else
+    #error Not supported
+#endif
 }
+
 
 void __libc_init_array(void) {
 
@@ -311,7 +332,6 @@ void __libc_init_array(void) {
 void SystemInit(void) {
     cdc_init_rcc();
 }
-
 
 void main(void) {
     cdc_init_usbd();

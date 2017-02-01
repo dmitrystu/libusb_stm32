@@ -3,7 +3,6 @@ MEMORY
 {
 	ROM  (rx): ORIGIN = 0x08000000, LENGTH =  64K
 	RAM (rwx): ORIGIN = 0x20000000, LENGTH =  8K
-	EEP  (rw): ORIGIN = 0x08080000, LENGTH =  2K
 }
 SECTIONS
 {
@@ -70,7 +69,7 @@ SECTIONS
 		__end__ = .;
 		*(.heap*)
 		__HeapLimit = .;
-	} > RAM 
+	} > RAM
 	.stack_dummy (NOLOAD) :
 	{
 		*(.stack)

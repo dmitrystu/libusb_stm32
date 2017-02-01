@@ -17,9 +17,10 @@
     #define __ASSEMBLER__
 #endif
 
+#if defined(USE_STMV1_DRIVER)
 #include "../usb.h"
 #include "memmap.inc"
-#if defined(USE_STMV1_DRIVER)
+
 
 
 #define EP_SETUP    0x0800
@@ -85,6 +86,7 @@
     .globl  usb_stmv1a
     .align  2
 usb_stmv1a:
+    .long   0
     .long   _enable
     .long   _reset
     .long   _connect

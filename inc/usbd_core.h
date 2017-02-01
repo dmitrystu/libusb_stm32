@@ -63,6 +63,12 @@
 #define usbd_evt_count      9
 /** @} */
 
+/** \name USB HW capabilities
+ * @{ */
+#define USBD_HW_ADDRFST     (1 << 0)    /**< Set address before STATUS_OUT */
+
+/** @} */
+
 #if !defined(__ASSEMBLER__)
 
 /** USB device machine states */
@@ -265,6 +271,7 @@ struct _usbd_status {
 
 /** Represents a hardware USB driver call table */
 struct usbd_driver {
+    uint32_t                caps;               /**< HW capabilities **/
     usbd_hw_enable          enable;             /**< \copydoc usbd_hw_enable */
     usbd_hw_reset           reset;              /**< \copydoc usbd_hw_reset */
     usbd_hw_connect         connect;            /**< \copydoc usbd_hw_connect */
@@ -385,7 +392,7 @@ inline static void usbd_reg_event(usbd_device *dev, uint8_t evt, usbd_evt_callba
  * \param dev pointer to \ref usbd_device structure
  * \copydetails usbd_hw_ep_write
  */
-inline static uint16_t usbd_ep_write(usbd_device *dev, uint8_t ep, void *buf, uint16_t blen) {
+inline static int32_t usbd_ep_write(usbd_device *dev, uint8_t ep, void *buf, uint16_t blen) {
     return dev->driver->ep_write(ep, buf, blen);
 }
 
@@ -393,7 +400,7 @@ inline static uint16_t usbd_ep_write(usbd_device *dev, uint8_t ep, void *buf, ui
  * \param dev pointer to \ref usbd_device structure
  * \copydetails usbd_hw_ep_read
  */
-inline static uint16_t usbd_ep_read(usbd_device *dev, uint8_t ep, void *buf, uint16_t blen) {
+inline static int32_t usbd_ep_read(usbd_device *dev, uint8_t ep, void *buf, uint16_t blen) {
     return dev->driver->ep_read(ep, buf, blen);
 }
 
