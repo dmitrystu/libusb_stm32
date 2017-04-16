@@ -1,4 +1,4 @@
-/* This file is the part of the LUS32 project
+/* This file is the part of the Lightweight USB device Stack for STM32 microcontrollers
  *
  * Copyright ©2016 Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
  *
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 #ifndef _USB_H_
 #define _USB_H_

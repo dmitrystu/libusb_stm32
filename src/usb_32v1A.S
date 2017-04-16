@@ -1,4 +1,4 @@
-/* This file is the part of the LUS32 project
+/* This file is the part of the Lightweight USB device Stack for STM32 microcontrollers
  *
  * Copyright ©2016 Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
  *
@@ -17,11 +17,9 @@
     #define __ASSEMBLER__
 #endif
 
-#if defined(USE_STMV1_DRIVER)
 #include "../usb.h"
+#if defined(USE_STMV1_DRIVER)
 #include "memmap.inc"
-
-
 
 #define EP_SETUP    0x0800
 #define EP_TYPE     0x0600
