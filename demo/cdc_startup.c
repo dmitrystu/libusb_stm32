@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "macro.h"
 #include "stm32.h"
 
 static void cdc_init_rcc (void) {

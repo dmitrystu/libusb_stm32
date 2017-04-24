@@ -15,7 +15,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "macro.h"
 #include "stm32.h"
 #include "../usb.h"
 
