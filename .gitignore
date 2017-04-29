@@ -1,2 +1,9 @@
-src/usb_32l0.c
+obj/*
+svd/*
 html/*
+*.elf
+*.map
+*.depend
+*.ebp
+*.elay
+openocd.cfg
