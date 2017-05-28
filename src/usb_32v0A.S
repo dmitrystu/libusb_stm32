@@ -83,7 +83,7 @@
     .globl  usb_stmv0a
     .align  2
 usb_stmv0a:
-    .long   0
+    .long   USBD_HW_BC
     .long   _enable
     .long   _reset
     .long   _connect
@@ -163,12 +163,45 @@ _get_serial_desc:
     .thumb_func
     .type   _connect, %function
 _connect:
+#if 1
+    ldr     r3, =#USB_REGBASE
+    movs    r1, #0x03               //BCDEN + DCDEN
+    movs    r2, #usbd_lane_dsc
+    strh    r1, [r3, #USB_BCDR]
+    ldrh    r1, [r3, #USB_BCDR]
+    lsrs    r1, #0x05               //DCDET->CF
+    bcc     .L_connect
+    movs    r1, #0x05               //BCDEN + PDEN
+    movs    r2, #usbd_lane_unk
+    strh    r1, [r3, #USB_BCDR]
+    ldrh    r1, [r3, #USB_BCDR]
+    lsls    r1, #25                 //PS2DET->CF
+    bcs     .L_connect
+    movs    r2, #usbd_lane_sdp
+    lsls    r1, #2                  //PDET->CF
+    bcc     .L_connect
+    movs    r1, #0x09               //BCDEN + SDET
+    movs    r2, #usbd_lane_cdp
+    strh    r1, [r3, #USB_BCDR]
+    ldrh    r1, [r3, #USB_BCDR]
+    lsrs    r1, #7                  //SDET->CF
+    bcc     .L_connect
+    movs    r2, #usbd_lane_dcp
+.L_connect:
+    subs    r1, r0, #1
+    sbcs    r0, r1
+    lsls    r0, #15
+    strh    r1, [r3, #USB_BCDR]
+    mov     r0, r2
+    bx      lr
+#else
     subs    r1, r0, #1
     sbcs    r0, r1
     lsls    r0, #15
     ldr     r1, =#USB_REGBASE
     strh    r0, [r1, #USB_BCDR]      //USB->BCDR
     bx      lr
+#endif
     .size   _connect, . - _connect
 
 

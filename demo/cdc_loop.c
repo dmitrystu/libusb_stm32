@@ -283,8 +283,8 @@ static void cdc_init_usbd(void) {
 
 void main(void) {
     cdc_init_usbd();
-    usbd_control(&udev, usbd_cmd_enable);
-    usbd_control(&udev, usbd_cmd_connect);
+    usbd_enable(&udev, true);
+    usbd_connect(&udev, true);
     while(1) {
     usbd_poll(&udev);
     }

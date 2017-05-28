@@ -170,6 +170,7 @@ _connect:
     orrs    r2, r3
 .L_conn_store:
     str     r2, [r1, #SYSCFG_PMC]
+    movs    r0, #usbd_lane_unk
     bx      lr
     .size   _connect, . - _connect
 

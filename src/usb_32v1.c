@@ -161,12 +161,13 @@ void reset (void) {
     USB->CNTR &= ~USB_CNTR_FRES;
 }
 
-void connect(bool connect) {
+uint8_t connect(bool connect) {
     if (connect) {
         SYSCFG->PMC |= SYSCFG_PMC_USB_PU;
     } else {
         SYSCFG->PMC &= ~SYSCFG_PMC_USB_PU;
     }
+    return usbd_lane_unk;
 }
 
 void setaddr (uint8_t addr) {

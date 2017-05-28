@@ -48,7 +48,6 @@
 #define USB_REQ_OTHER           (3 << 0)
 /** @} */
 
-
 /** \name USB device events
  * @{ */
 #define usbd_evt_reset      0   /**< Reset */
@@ -63,10 +62,21 @@
 #define usbd_evt_count      9
 /** @} */
 
+/**\anchor USB_LANE_STATUS
+ * \name USB lanes connection states
+ * @{ */
+#define usbd_lane_unk       0   /**< Unknown or proprietary charger */
+#define usbd_lane_dsc       1   /**< Lanes disconnected */
+#define usbd_lane_sdp       2   /**< Connected to standard downstream port */
+#define usbd_lane_cdp       3   /**< Connected to charging downstream port */
+#define usbd_lane_dcp       4   /**< Connected to dedicated charging port */
+/** @} */
+
+
 /** \name USB HW capabilities
  * @{ */
 #define USBD_HW_ADDRFST     (1 << 0)    /**< Set address before STATUS_OUT */
-
+#define USBD_HW_BC          (1 << 1)    /**< Battery charging detection supported */
 /** @} */
 
 #if !defined(__ASSEMBLER__)
@@ -177,8 +187,9 @@ typedef void (*usbd_hw_reset)(void);
 
 /** Connects or disconnects USB hardware to/from usb host
  * \param connect Connects USB to host if TRUE, disconnects otherwise
+ * \return lanes connection status. \ref USB_LANES_STATUS
  */
-typedef void (*usbd_hw_connect)(bool connect);
+typedef uint8_t (*usbd_hw_connect)(bool connect);
 
 /** Sets USB hardware address
  * \param address USB address
@@ -328,7 +339,7 @@ void usbd_poll(usbd_device *dev);
  * \param dev USB device
  * \param cmd control command
  */
-void usbd_control(usbd_device *dev, enum usbd_commands cmd);
+void usbd_control(usbd_device *dev, enum usbd_commands cmd) __attribute__((deprecated));
 
 /** Register callback for all control requests
  * \param dev pointer to \ref usbd_device structure
@@ -418,6 +429,23 @@ inline static void usbd_ep_stall(usbd_device *dev, uint8_t ep) {
  */
 inline static void usbd_ep_unstall(usbd_device *dev, uint8_t ep) {
     dev->driver->ep_setstall(ep, 0);
+}
+
+/** Enables or disables USB hardware
+ * \param dev pointer to \ref usbd_device structure
+ * \param enable Enables USB when TRUE disables otherwise
+ */
+inline static void usbd_enable(usbd_device *dev, bool enable) {
+    dev->driver->enable(enable);
+}
+
+/** Connects or disconnects USB hardware to/from usb host
+ * \param dev pointer to \ref usbd_device structure
+ * \param connect Connects USB to host if TRUE, disconnects otherwise
+ * \return lanes connection status. \ref USB_LANES_STATUS
+ */
+inline static uint8_t usbd_connect(usbd_device *dev, bool connect) {
+    return dev->driver->connect(connect);
 }
 
 #endif //(__ASSEMBLER__)

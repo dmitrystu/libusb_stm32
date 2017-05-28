@@ -21,7 +21,6 @@
 #if defined(USE_STMV2_DRIVER)
 
 #define VBUS_DETECTION  0
-
 #define MAX_EP          6
 #define MAX_RX_PACKET   128
 #define MAX_CONTROL_EP  1
@@ -153,12 +152,38 @@ void reset (void) {
 }
 
 
-void connect(bool connect) {
+uint8_t connect(bool connect) {
+    uint8_t res;
+#if (VBUS_DETECTION)
+    #define SET_GCCFG(x) OTG->GCCFG = USB_OTG_GCCFG_VBDEN | (x)
+#else
+    #define SET_GCCFG(x) OTG->GCCFG = (x)
+#endif
+    SET_GCCFG(USB_OTG_GCCFG_BCDEN | USB_OTG_GCCFG_DCDEN);
+    if (OTG->GCCFG & USB_OTG_GCCFG_DCDET) {
+        SET_GCCFG(USB_OTG_GCCFG_BCDEN | USB_OTG_GCCFG_PDEN);
+        if (OTG->GCCFG & USB_OTG_GCCFG_PS2DET) {
+            res = usbd_lane_unk;
+        } else if (OTG->GCCFG & USB_OTG_GCCFG_PDET) {
+            SET_GCCFG(USB_OTG_GCCFG_BCDEN | USB_OTG_GCCFG_SDEN);
+            if (OTG->GCCFG & USB_OTG_GCCFG_SDET) {
+                res = usbd_lane_dcp;
+            } else {
+                res = usbd_lane_cdp;
+            }
+        } else {
+            res = usbd_lane_sdp;
+        }
+    } else {
+        res = usbd_lane_dsc;
+    }
+    SET_GCCFG(USB_OTG_GCCFG_PWRDWN);
     if (connect) {
         _BCL(OTGD->DCTL, USB_OTG_DCTL_SDIS);
     } else {
         _BST(OTGD->DCTL, USB_OTG_DCTL_SDIS);
     }
+    return res;
 }
 
 void setaddr (uint8_t addr) {
@@ -325,7 +350,7 @@ int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
     if ((OTG->GRXSTSR & USB_OTG_GRXSTSP_EPNUM) != ep) return -1;
     /* pop data from fifo */
     len = _FLD2VAL(USB_OTG_GRXSTSP_BCNT, OTG->GRXSTSP);
-    for (int i = 0; i < len; i +=4) {
+    for (unsigned i = 0; i < len; i +=4) {
         uint32_t _t = *fifo;
         if (blen >= 4) {
             *(__attribute__((packed))uint32_t*)buf = _t;
@@ -453,7 +478,7 @@ uint16_t get_serialno_desc(void *buffer) {
 }
 
 const struct usbd_driver usb_stmv2 = {
-    USBD_HW_ADDRFST,
+    USBD_HW_ADDRFST | USBD_HW_BC,
     enable,
     reset,
     connect,

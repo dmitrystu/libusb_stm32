@@ -158,8 +158,28 @@ void reset (void) {
     USB->CNTR &= ~USB_CNTR_FRES;
 }
 
-void connect(bool connect) {
+uint8_t connect(bool connect) {
+    uint8_t res;
+    USB->BCDR = USB_BCDR_BCDEN | USB_BCDR_DCDEN;
+    if (USB->BCDR & USB_BCDR_DCDET) {
+        USB->BCDR = USB_BCDR_BCDEN | USB_BCDR_PDEN;
+        if (USB->BCDR & USB_BCDR_PS2DET) {
+            res = usbd_lane_unk;
+        } else if (USB->BCDR & USB_BCDR_PDET) {
+            USB->BCDR = USB_BCDR_BCDEN | USB_BCDR_SDEN;
+            if (USB->BCDR & USB_BCDR_SDET) {
+                res = usbd_lane_dcp;
+            } else {
+                res = usbd_lane_cdp;
+            }
+        } else {
+            res = usbd_lane_sdp;
+        }
+    } else {
+        res = usbd_lane_dsc;
+    }
     USB->BCDR = (connect) ? USB_BCDR_DPPU : 0;
+    return res;
 }
 
 void setaddr (uint8_t addr) {
@@ -432,7 +452,7 @@ uint16_t get_serialno_desc(void *buffer) {
 }
 
 const struct usbd_driver usb_stmv0 = {
-    0,
+    USBD_HW_BC,
     enable,
     reset,
     connect,
