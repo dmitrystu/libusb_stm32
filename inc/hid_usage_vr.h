@@ -1,4 +1,4 @@
-/* This file is the part of the LUS32 project
+/* This file is the part of the Lightweight USB device Stack for STM32 microcontrollers
  *
  * Copyright ©2016 Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
  *
@@ -23,20 +23,19 @@
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
  * @{ */
 
-#define HID_PAGE_VR                     0x03
-
-#define HID_VR_BELT                     0x01
-#define HID_VR_BODY_SUIT                0x02
-#define HID_VR_FLEXTOR                  0x03
-#define HID_VR_GLOVE                    0x04
-#define HID_VR_HEAD_TRACKER             0x05
-#define HID_VR_HEAD_MOUNTED_DISPLAY     0x06
-#define HID_VR_HAND_TRACKER             0x07
-#define HID_VR_OCULOMETER               0x08
-#define HID_VR_VEST                     0x09
-#define HID_VR_ANIMATRONIC_DEVICE       0x0A
-#define HID_VR_STEREO_ENABLE            0x20
-#define HID_VR_DISPLAY_ENABLE           0x21
+#define HID_USAGE_PAGE_VR               0x03    /**<\brief VR controls usage page.*/
+#define HID_VR_BELT                     0x01    /**<\brief CA Belt device.*/
+#define HID_VR_BODY_SUIT                0x02    /**<\brief CA Body suit device.*/
+#define HID_VR_FLEXTOR                  0x03    /**<\brief CA Flextor device.*/
+#define HID_VR_GLOVE                    0x04    /**<\brief CA Clove device.*/
+#define HID_VR_HEAD_TRACKER             0x05    /**<\brief CA Head tracker device.*/
+#define HID_VR_HEAD_MOUNTED_DISPLAY     0x06    /**<\brief CA Head mounted display device.*/
+#define HID_VR_HAND_TRACKER             0x07    /**<\brief CA Hand tracker device.*/
+#define HID_VR_OCULOMETER               0x08    /**<\brief CA Oculometer device.*/
+#define HID_VR_VEST                     0x09    /**<\brief CA Vest device.*/
+#define HID_VR_ANIMATRONIC_DEVICE       0x0A    /**<\brief CA Animatronic device.*/
+#define HID_VR_STEREO_ENABLE            0x20    /**<\brief OOC Stereo enable switch.*/
+#define HID_VR_DISPLAY_ENABLE           0x21    /**<\brief OOC Display enable switch.*/
 
 /** @}  */
 

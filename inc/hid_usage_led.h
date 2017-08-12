@@ -17,7 +17,7 @@
 #define _USB_HID_USAGE_LED_H_
 
 /**\ingroup USB_HID
- * \addtogroup ISB_HID_USAGES_DEVICE HID Usages for LED's
+ * \addtogroup USB_HID_USAGES_LED HID Usages for LED's
  * \brief Contains USB HID Usages definitions for LED's Control Page
  * \details This module based on
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)

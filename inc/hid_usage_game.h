@@ -33,7 +33,7 @@
 #define HID_GAME_PITCH_FWD_BACK         0x22
 #define HID_GAME_ROLL_LEFT_RIGHT        0x23
 #define HID_GAME_MOVE_LEFT_RIGHT        0x24
-#define HID_GAME_MOVE_FWD_BACK          0x25     
+#define HID_GAME_MOVE_FWD_BACK          0x25
 #define HID_GAME_MOVE_UP_DOWN           0x26
 #define HID_GAME_LEAN_LEFT_RIGHT        0x27
 #define HID_GAME_LEAN_FWD_BACK          0x28

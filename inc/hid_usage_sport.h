@@ -1,4 +1,4 @@
-/* This file is the part of the LUS32 project
+/* This file is the part of the Lightweight USB device Stack for STM32 microcontrollers
  *
  * Copyright ©2016 Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
  *
@@ -27,7 +27,7 @@
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
  * @{ */
 
-#define HID_PAGE_SPORT                  0x04
+#define HID_USAGE_PAGE_SPORT            0x04
 
 #define HID_SPORT_BASEBALL_BAT          0x01
 #define HID_SPORT_GOLF_CLUB             0x02

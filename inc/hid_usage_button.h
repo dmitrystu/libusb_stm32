@@ -1,4 +1,4 @@
-/* This file is the part of the LUS32 project
+/* This file is the part of the Lightweight USB device Stack for STM32 microcontrollers
  *
  * Copyright ©2016 Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
  *
@@ -27,14 +27,14 @@
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
  * @{ */
 
-#define HID_PAGE_BUTTON                 0x09
+#define HID_USAGE_PAGE_BUTTON           0x09    /**<\brief HID usage page for Buttons */
 
-#define HID_BUTTON_NO_PRESSED           0x00
-#define HID_BUTTON_1                    0x01
-#define HID_BUTTON_2                    0x02
-#define HID_BUTTON_3                    0x03
-#define HID_BUTTON_4                    0x04
-#define HID_BUTTON_5                    0x05
+#define HID_BUTTON_NO_PRESSED           0x00    /**<\brief No button pressed */
+#define HID_BUTTON_1                    0x01    /**<\brief Button 1 pressed */
+#define HID_BUTTON_2                    0x02    /**<\brief Button 2 pressed */
+#define HID_BUTTON_3                    0x03    /**<\brief Button 3 pressed */
+#define HID_BUTTON_4                    0x04    /**<\brief Button 4 pressed */
+#define HID_BUTTON_5                    0x05    /**<\brief Button 5 pressed */
 
 /** @}  */
 

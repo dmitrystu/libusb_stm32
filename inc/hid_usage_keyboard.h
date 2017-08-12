@@ -1,4 +1,4 @@
-/* This file is the part of the LUS32 project
+/* This file is the part of the Lightweight USB device Stack for STM32 microcontrollers
  *
  * Copyright ©2016 Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
  *
@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef _USB_HID_USAGE_KEYBOARD_H_
 #define _USB_HID_USAGE_KEYBOARD_H_
 
 /**\ingroup USB_HID
- * \addtogroup ISB_HID_USAGES_KEYBOARD HID Usages for Keyboard
+ * \addtogroup USB_HID_USAGES_KEYBOARD HID Usages for Keyboard
  * \brief Contains USB HID Usages definitions for Keyboard/Keypad Page
  * \details This module based on
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
