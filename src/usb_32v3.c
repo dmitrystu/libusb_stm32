@@ -19,7 +19,7 @@
 #include "stm32.h"
 #include "../usb.h"
 
-#if defined(USE_STMV1_DRIVER)
+#if defined(USE_STMV3_DRIVER)
 
 #ifndef USB_PMASIZE
     #warning PMA memory size is not defined. Use 512 bytes by default
