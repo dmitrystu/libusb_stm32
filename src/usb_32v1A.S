@@ -210,7 +210,6 @@ _get_frame:
     .thumb_func
     .type   _enable, %function
 _enable:
-
     ldr     r2, =#RCC_BASE        //RCC
     movs    r3, #0x01
     lsls    r3, #23             //USBEN or USBRST
@@ -380,10 +379,9 @@ _ep_read:
     ands    r5, r0
     adds    r5, #EP_RX_SWBUF
     strh    r5, [r3]        // toggling SW_RX
-    ldrh    r5, [r3]
 .L_epr_notog:
-    mvns    r5, r5
-    lsls    r5, #8          // shift ~SW_RX to DTOG_RX
+    ldrh    r5, [r3]
+    lsls    r5, #8          // shift SW_RX to DTOG_RX
 .L_epr_iso:
     lsrs    r5, #15         // DTOG_RX -> CF
     bcc     .L_epr_sngl
@@ -456,8 +454,6 @@ _ep_write:
     lsrs    r0, #4
     cmp     r0, #0x43       // (OK) TX_VALID + ISO
     beq     .L_epw_iso
-    cmp     r0, #0x13       // (OK) TX_VALID + DBLBULK
-    beq     .L_epw_dbl
     cmp     r0, #0x12       // (OK) TX_NAK + DBLBULK
     beq     .L_epw_dbl
     cmp     r0, #0x02       // (OK) TX_NAK + BULK

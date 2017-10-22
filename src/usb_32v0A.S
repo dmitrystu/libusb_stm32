@@ -163,7 +163,6 @@ _get_serial_desc:
     .thumb_func
     .type   _connect, %function
 _connect:
-#if 1
     ldr     r3, =#USB_REGBASE
     movs    r1, #0x03               //BCDEN + DCDEN
     movs    r2, #usbd_lane_dsc
@@ -191,19 +190,10 @@ _connect:
     subs    r1, r0, #1
     sbcs    r0, r1
     lsls    r0, #15
-    strh    r1, [r3, #USB_BCDR]
+    strh    r0, [r3, #USB_BCDR]
     mov     r0, r2
     bx      lr
-#else
-    subs    r1, r0, #1
-    sbcs    r0, r1
-    lsls    r0, #15
-    ldr     r1, =#USB_REGBASE
-    strh    r0, [r1, #USB_BCDR]      //USB->BCDR
-    bx      lr
-#endif
     .size   _connect, . - _connect
-
 
     .thumb_func
     .type   _setaddr, %function
@@ -401,10 +391,9 @@ _ep_read:
     ands    r5, r0
     adds    r5, #EP_RX_SWBUF
     strh    r5, [r3]        // toggling SW_RX
-    ldrh    r5, [r3]
 .L_epr_notog:
-    mvns    r5, r5
-    lsls    r5, #8          // shift ~SW_RX to DTOG_RX
+    ldrh    r5, [r3]
+    lsls    r5, #8          // shift SW_RX to DTOG_RX
 .L_epr_iso:
     lsrs    r5, #15         // DTOG_RX -> CF
     bcc     .L_epr_sngl
@@ -477,8 +466,6 @@ _ep_write:
     lsrs    r0, #4
     cmp     r0, #0x43       // (OK) TX_VALID + ISO
     beq     .L_epw_iso
-    cmp     r0, #0x13       // (OK) TX_VALID + DBLBULK
-    beq     .L_epw_dbl
     cmp     r0, #0x12       // (OK) TX_NAK + DBLBULK
     beq     .L_epw_dbl
     cmp     r0, #0x02       // (OK) TX_NAK + BULK
