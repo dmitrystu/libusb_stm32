@@ -43,6 +43,8 @@
     #endif
 #elif defined(STM32L476xx)
     #define USE_STMV2_DRIVER
+#elif defined(STM32F303xC) || defined(STM32F303xE)
+    #define USE_STMV3_DRIVER
 #else
     #error Unsupported STM32 family
 #endif
@@ -66,6 +68,9 @@
     #elif defined(USE_STMV2_DRIVER)
         extern const struct usbd_driver usb_stmv2;
         #define usbd_hw usb_stmv2
+#elif defined(USE_STMV3_DRIVER)
+        extern const struct usbd_driver usb_stmv3;
+        #define usbd_hw usb_stmv3
     #endif
 #endif
 
