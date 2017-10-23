@@ -25,11 +25,12 @@
 /**\name Compile-time control macros
  * @{ */
 #define USBD_SOF_DISABLED   /**<\brief Disables SOF handling.*/
+#define USBD_VBUS_DETECT    /**<\brief Enables Vbus detection for V2 driver.*/
 /** @} */
 #endif
-        
+
 /**\addtogroup USBD_HW USB hardware driver
- * \brief Contains HW driver API 
+ * \brief Contains HW driver API
  * @{ */
 /**\anchor USB_EVENTS
  * \name USB device events
@@ -63,7 +64,7 @@
 /** @} */
 
 /**\addtogroup USBD_CORE USB device core
- * \brief Contains core API 
+ * \brief Contains core API
  * @{ */
 #define USB_EPTYPE_DBLBUF   0x04    /**<\brief Doublebuffered endpoint (bulk endpoint only).*/
 
@@ -186,7 +187,7 @@ typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, us
 /**\brief USB get descriptor callback function
  * \details Called when GET_DESCRIPTOR request issued
  * \param[in] req pointer to usb control request structure
- * \param[in,out] address pointer to the descriptor in memory. Points to req->data by default. You 
+ * \param[in,out] address pointer to the descriptor in memory. Points to req->data by default. You
  * can use this buffer.
  * \param[in,out] dsize descriptor size. maximum buffer size by default.
  * \return usbd_ack if you passed the correct descriptor, usbd_fail otherwise.

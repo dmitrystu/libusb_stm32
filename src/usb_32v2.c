@@ -20,7 +20,6 @@
 
 #if defined(USE_STMV2_DRIVER)
 
-#define VBUS_DETECTION  0
 #define MAX_EP          6
 #define MAX_RX_PACKET   128
 #define MAX_CONTROL_EP  1
@@ -108,7 +107,7 @@ void enable(bool enable) {
         OTG->GUSBCFG = USB_OTG_GUSBCFG_FDMOD | USB_OTG_GUSBCFG_PHYSEL |
                        _VAL2FLD(USB_OTG_GUSBCFG_TRDT, 0x06);
         /* configuring Vbus sense and powerup PHY */
-#if (VBUS_DETECTION)
+#if defined(USBD_VBUS_DETECT)
         OTG->GCCFG |= USB_OTG_GCCFG_VBDEN | USB_OTG_GCCFG_PWRDWN;
 #else
         OTG->GOTGCTL |= USB_OTG_GOTGCTL_BVALOEN | USB_OTG_GOTGCTL_BVALOVAL;
@@ -156,7 +155,7 @@ void reset (void) {
 
 uint8_t connect(bool connect) {
     uint8_t res;
-#if (VBUS_DETECTION)
+#if defined(USBD_VBUS_DETECT)
     #define SET_GCCFG(x) OTG->GCCFG = USB_OTG_GCCFG_VBDEN | (x)
 #else
     #define SET_GCCFG(x) OTG->GCCFG = (x)
