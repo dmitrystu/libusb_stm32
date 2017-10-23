@@ -125,7 +125,9 @@ void enable(bool enable) {
         OTGD->DIEPMSK = USB_OTG_DIEPMSK_XFRCM;
         /* unmask core interrupts */
         OTG->GINTMSK  = USB_OTG_GINTMSK_USBRST | USB_OTG_GINTMSK_ENUMDNEM |
+#if !defined(USBD_SOF_DISABLED)
                         USB_OTG_GINTMSK_SOFM |
+#endif
                         USB_OTG_GINTMSK_USBSUSPM | USB_OTG_GINTMSK_WUIM |
                         USB_OTG_GINTMSK_IEPINT | USB_OTG_GINTMSK_RXFLVLM;
         /* clear pending interrupts */
@@ -434,9 +436,11 @@ void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
                 OTG->GRXSTSP;
                 continue;
             }
+#if !defined(USBD_SOF_DISABLED)
         } else if (_t & USB_OTG_GINTSTS_SOF) {
             OTG->GINTSTS = USB_OTG_GINTSTS_SOF;
             evt = usbd_evt_sof;
+#endif
         } else if (_t & USB_OTG_GINTSTS_USBSUSP) {
             evt = usbd_evt_susp;
             OTG->GINTSTS = USB_OTG_GINTSTS_USBSUSP;

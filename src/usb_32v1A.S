@@ -231,8 +231,12 @@ _enable:
     orrs    r0, r3
     str     r0, [r2, #RCC_APB2ENR]
 /* setting up USB CNTR */
-    movs    r0, #0xBE
-    lsls    r0, #0x08                   // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
+#if !defined(USBD_SOF_DISABLED)
+    movs    r0, #0xBE                   // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
+#else
+    movs    r0, #0xBC                   // CTRM | ERRM | WKUPM | SUSPM | RESETM
+#endif
+    lsls    r0, #0x08
     strh    r0, [r1, #USB_CNTR]         //set USB->CNTR
     bx      lr
 .L_disable:

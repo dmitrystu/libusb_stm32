@@ -21,7 +21,13 @@
 
 /**\addtogroup USBD_HW_CORE USB Device HW driver and core API
  * @{ */
-
+#if defined(__DOXYGEN__)
+/**\name Compile-time control macros
+ * @{ */
+#define USBD_SOF_DISABLED   /**<\brief Disables SOF handling.*/
+/** @} */
+#endif
+        
 /**\addtogroup USBD_HW USB hardware driver
  * \brief Contains HW driver API 
  * @{ */
@@ -36,8 +42,7 @@
 #define usbd_evt_eprx       5   /**<\brief Data packet received.*/
 #define usbd_evt_epsetup    6   /**<\brief Setup packet received.*/
 #define usbd_evt_error      7   /**<\brief Data error.*/
-#define usbd_evt_esof       8   /**<\brief Missed SOF.*/
-#define usbd_evt_count      9
+#define usbd_evt_count      8
 /** @} */
 
 /**\anchor USB_LANES_STATUS

@@ -245,8 +245,12 @@ _enable:
     str     r0, [r2, #RCC_APB1RSTR]     //RCC->APB1RSTR |= USBRST
     bics    r0, r3
     str     r0, [r2, #RCC_APB1RSTR]     //RCC->APB1RSTR &= ~USBRST
-    movs    r0, #0xBE
-    lsls    r0, #0x08           // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
+#if !defined(USBD_SOF_DISABLED)
+    movs    r0, #0xBE                   // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
+#else
+    movs    r0, #0xBC                   // CTRM | ERRM | WKUPM | SUSPM | RESETM
+#endif
+    lsls    r0, #0x08
     strh    r0, [r1]            //set USB->CNTR
     bx      lr
 .L_disable:
@@ -722,20 +726,20 @@ _evt_poll:
     movs    r2, 0x07
     ands    r2, r0
 /* checking USB->ISTR for events */
-    lsls    r0, #17             //CTRM -> CF
-    bcs     .L_ep_ctrm
-    lsls    r0, #2              //ERRM -> CF
-    bcs     .L_ep_errm
-    lsls    r0, #1              //WKUPM -> CF
-    bcs     .L_ep_wkupm
-    lsls    r0, #1              //SUSPM -> CF
-    bcs     .L_ep_suspm
-    lsls    r0, #1              //RESETM -> CF
-    bcs     .L_ep_resetm
-    lsls    r0, #1              //SOFM -> CF
+#if !defined(USBD_SOF_DISABLED)
+    lsrs    r1, r0, #10         //SOFM -> CF
     bcs     .L_ep_sofm
-    lsls    r0, #1
-    bcs     .L_ep_esofm
+#endif
+    lsrs    r1, r0, #16         //CTRM -> CF
+    bcs     .L_ep_ctrm
+    lsrs    r1, r0, #14         //ERRM -> CF
+    bcs     .L_ep_errm
+    lsrs    r1, r0, #13         //WKUPM -> CF
+    bcs     .L_ep_wkupm
+    lsrs    r1, r0, #12         //SUSPM -> CF
+    bcs     .L_ep_suspm
+    lsrs    r1, r0, #11         //RESETM -> CF
+    bcs     .L_ep_resetm
     /* exit with no callback */
     pop     {r0, r1, r4 , r5}
     bx      lr
@@ -770,17 +774,12 @@ _evt_poll:
     movs    r1, #usbd_evt_error
     movs    r4, #ISTRBIT(13)
     b      .L_ep_clristr
-
+#if !defined(USBD_SOF_DISABLED)
 .L_ep_sofm:
     movs    r1, #usbd_evt_sof
     movs    r4, #ISTRBIT(9)
     b       .L_ep_clristr
-
-.L_ep_esofm:
-    movs    r1, #usbd_evt_esof
-    movs    r4, #ISTRBIT(8)
-    b       .L_ep_clristr
-
+#endif
 .L_ep_wkupm:
     ldrh    r1, [r3, #USB_CNTR]     //R1 USB->CNTR
     movs    r5, #0x08
@@ -829,7 +828,6 @@ _evt_poll:
     pop     {r0, r3, r4, r5 }
     bx      r3
     .size   _evt_poll, . - _evt_poll
-
 
     .pool
 
