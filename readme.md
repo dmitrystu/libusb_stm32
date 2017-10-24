@@ -14,7 +14,7 @@
 | usb_stmv1  | GCC C      | 8         | Internal S/N, Doublebuffered | STM32L1xx  |
 | usb_stmv1a | GCC ASM    | 8         | Internal S/N, Doublebuffered | STM32L1xx  |
 | usb_stmv2  | GCC C      | 6         | Internal S/N, Doublebuffered, BC1.2 | STM32L4x5 STM32L4x6 (OTG FS (Device mode)) |
-| usb_stmv3  | GCC C      | 8         | Internal S/N, Doublebuffered | STM32F303  |
+| usb_stmv3  | GCC C      | 8         | Internal S/N, Doublebuffered | STM32F1xx STM32F3xx  |
 
 1. Single physical endpoint can be used to implement
   + one bi-directional/single-buffer logical endpoint (CONTROL)
@@ -23,7 +23,7 @@
 
 2. At this moment BULK IN endpoint can use both buffers, but it is not **real** doublebuffered.
 
-3. Tested with STM32L052, STM31L100, STM32L476RG, STM32F303CC
+3. Tested with STM32L052, STM31L100, STM32L476RG, STM32F103CB, STM32F303CC
 
 ### Implemented definitions for classes ###
 1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](http://www.usb.org/developers/hidpage/HID1_11.pdf)

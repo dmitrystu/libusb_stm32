@@ -43,7 +43,12 @@
     #endif
 #elif defined(STM32L476xx)
     #define USE_STMV2_DRIVER
-#elif defined(STM32F303xC) || defined(STM32F303xE)
+#elif defined(STM32F102x6) || defined(STM32F102xB) || \
+      defined(STM32F103x6) || defined(STM32F103xB) || \
+      defined(STM32F103xE) || defined(STM32F103xG) || \
+      defined(STM32F302x8) || defined(STM32F302xC) || defined(STM32F302xE) || \
+      defined(STM32F303xC) || defined(STM32F303xE) || \
+      defined(STM32F373xC)
     #define USE_STMV3_DRIVER
 #else
     #error Unsupported STM32 family
