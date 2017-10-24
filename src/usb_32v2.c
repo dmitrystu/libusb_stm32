@@ -324,7 +324,6 @@ void ep_deconfig(uint8_t ep) {
     /* disabling endpoint */
     if ((epi->DIEPCTL & USB_OTG_DIEPCTL_EPENA) && (ep != 0)) {
         epi->DIEPCTL = USB_OTG_DIEPCTL_EPDIS;
-        _WBS(epi->DIEPINT, USB_OTG_DIEPINT_EPDISD);
     }
     /* clean EP interrupts */
     epi->DIEPINT = 0xFF;
@@ -336,7 +335,6 @@ void ep_deconfig(uint8_t ep) {
     _BCL(epo->DOEPCTL, USB_OTG_DOEPCTL_USBAEP);
     if ((epo->DOEPCTL & USB_OTG_DOEPCTL_EPENA) && (ep != 0)) {
         epo->DOEPCTL = USB_OTG_DOEPCTL_EPDIS;
-        _WBS(epo->DOEPINT, USB_OTG_DOEPINT_EPDISD);
     }
     epo->DOEPINT = 0xFF;
 }
