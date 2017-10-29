@@ -389,8 +389,8 @@ _ep_read:
 .L_epr_dbl:
     lsrs    r0, r5, #8
     eors    r0, r5
-    lsrs    r0, #6          // SW_RX ^ DTOG_RX -> CF
-    bcc     .L_epr_notog    // jmp if SW_RX != DTOG_RX (VALID)
+    lsrs    r0, #7          // SW_RX ^ DTOG_RX -> CF
+    bcs     .L_epr_notog    // jmp if SW_RX != DTOG_RX (VALID)
     ldr     r0, =#EP_NOTOG
     ands    r5, r0
     adds    r5, #EP_RX_SWBUF
@@ -400,7 +400,7 @@ _ep_read:
     lsls    r5, #8          // shift SW_RX to DTOG_RX
 .L_epr_iso:
     lsrs    r5, #15         // DTOG_RX -> CF
-    bcc     .L_epr_sngl
+    bcs     .L_epr_sngl
     subs    r4, #0x04       // set RXADDR0
 .L_epr_sngl:
     ldrh    r0, [r4, #RXCOUNT]
