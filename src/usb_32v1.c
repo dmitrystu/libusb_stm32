@@ -148,7 +148,11 @@ void enable(bool enable) {
         RCC->APB2ENR  |= RCC_APB2ENR_SYSCFGEN;
         RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
         RCC->APB1RSTR &= ~RCC_APB1RSTR_USBRST;
-        USB->CNTR = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_SOFM | USB_CNTR_ESOFM | USB_CNTR_ERRM | USB_CNTR_SUSPM | USB_CNTR_WKUPM ;
+        USB->CNTR = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_ERRM |
+#if !defined(USBD_SOF_DISABLED)
+        USB_CNTR_SOFM |
+#endif
+        USB_CNTR_SUSPM | USB_CNTR_WKUPM;
     } else if (RCC->APB1ENR & RCC_APB1ENR_USBEN) {
         SYSCFG->PMC &= ~SYSCFG_PMC_USB_PU;
         RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
@@ -392,9 +396,11 @@ void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
             ep_deconfig(i);
         }
         _ev = usbd_evt_reset;
+#if !defined(USBD_SOF_DISABLED)
     } else if (_istr & USB_ISTR_SOF) {
         _ev = usbd_evt_sof;
         USB->ISTR &= ~USB_ISTR_SOF;
+#endif
     } else if (_istr & USB_ISTR_WKUP) {
         _ev = usbd_evt_wkup;
         USB->CNTR &= ~USB_CNTR_FSUSP;
@@ -403,9 +409,6 @@ void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
         _ev = usbd_evt_susp;
         USB->CNTR |= USB_CNTR_FSUSP;
         USB->ISTR &= ~USB_ISTR_SUSP;
-    } else if (_istr & USB_ISTR_ESOF) {
-        USB->ISTR &= ~USB_ISTR_ESOF;
-        _ev = usbd_evt_esof;
     } else if (_istr & USB_ISTR_ERR) {
         USB->ISTR &= ~USB_ISTR_ERR;
         _ev = usbd_evt_error;

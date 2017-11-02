@@ -210,7 +210,6 @@ _get_frame:
     .thumb_func
     .type   _enable, %function
 _enable:
-
     ldr     r2, =#RCC_BASE        //RCC
     movs    r3, #0x01
     lsls    r3, #23             //USBEN or USBRST
@@ -232,8 +231,12 @@ _enable:
     orrs    r0, r3
     str     r0, [r2, #RCC_APB2ENR]
 /* setting up USB CNTR */
-    movs    r0, #0xBE
-    lsls    r0, #0x08                   // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
+#if !defined(USBD_SOF_DISABLED)
+    movs    r0, #0xBE                   // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
+#else
+    movs    r0, #0xBC                   // CTRM | ERRM | WKUPM | SUSPM | RESETM
+#endif
+    lsls    r0, #0x08
     strh    r0, [r1, #USB_CNTR]         //set USB->CNTR
     bx      lr
 .L_disable:
@@ -346,7 +349,7 @@ _ep_read:
     push    {r4, r5, lr}
     ldr     r3, =#USB_EPBASE
     ldr     r4, =#USB_PMABASE
-    lsls    r0,  #28
+    lsls    r0, #28
     lsrs    r0, #26
     adds    r3, r0          // *EPR -> R3
     lsls    r0, #2
@@ -374,19 +377,18 @@ _ep_read:
 .L_epr_dbl:
     lsrs    r0, r5, #8
     eors    r0, r5
-    lsrs    r0, #6          // SW_RX ^ DTOG_RX -> CF
-    bcc     .L_epr_notog    // jmp if SW_RX != DTOG_RX (VALID)
+    lsrs    r0, #7          // SW_RX ^ DTOG_RX -> CF
+    bcs     .L_epr_notog    // jmp if SW_RX != DTOG_RX (VALID)
     ldr     r0, =#EP_NOTOG
     ands    r5, r0
     adds    r5, #EP_RX_SWBUF
     strh    r5, [r3]        // toggling SW_RX
-    ldrh    r5, [r3]
 .L_epr_notog:
-    mvns    r5, r5
-    lsls    r5, #8          // shift ~SW_RX to DTOG_RX
+    ldrh    r5, [r3]
+    lsls    r5, #8          // shift SW_RX to DTOG_RX
 .L_epr_iso:
     lsrs    r5, #15         // DTOG_RX -> CF
-    bcc     .L_epr_sngl
+    bcs     .L_epr_sngl
     subs    r4, #0x08       // set RXADDR0
 .L_epr_sngl:
     ldrh    r0, [r4, #RXCOUNT]
@@ -456,8 +458,6 @@ _ep_write:
     lsrs    r0, #4
     cmp     r0, #0x43       // (OK) TX_VALID + ISO
     beq     .L_epw_iso
-    cmp     r0, #0x13       // (OK) TX_VALID + DBLBULK
-    beq     .L_epw_dbl
     cmp     r0, #0x12       // (OK) TX_NAK + DBLBULK
     beq     .L_epw_dbl
     cmp     r0, #0x02       // (OK) TX_NAK + BULK
@@ -719,20 +719,20 @@ _evt_poll:
     movs    r2, 0x07
     ands    r2, r0
 /* checking USB->ISTR for events */
-    lsls    r0, #17             //CTRM -> CF
-    bcs     .L_ep_ctrm
-    lsls    r0, #2              //ERRM -> CF
-    bcs     .L_ep_errm
-    lsls    r0, #1              //WKUPM -> CF
-    bcs     .L_ep_wkupm
-    lsls    r0, #1              //SUSPM -> CF
-    bcs     .L_ep_suspm
-    lsls    r0, #1              //RESETM -> CF
-    bcs     .L_ep_resetm
-    lsls    r0, #1              //SOFM -> CF
+#if !defined(USBD_SOF_DISABLED)
+    lsrs    r1, r0, #10         //SOFM -> CF
     bcs     .L_ep_sofm
-    lsls    r0, #1
-    bcs     .L_ep_esofm
+#endif
+    lsrs    r1, r0, #11         //RESETM -> CF
+    bcs     .L_ep_resetm
+    lsrs    r1, r0, #16         //CTRM -> CF
+    bcs     .L_ep_ctrm
+    lsrs    r1, r0, #14         //ERRM -> CF
+    bcs     .L_ep_errm
+    lsrs    r1, r0, #13         //WKUPM -> CF
+    bcs     .L_ep_wkupm
+    lsrs    r1, r0, #12         //SUSPM -> CF
+    bcs     .L_ep_suspm
     /* exit with no callback */
     pop     {r0, r1, r4 , r5}
     bx      lr
@@ -767,17 +767,12 @@ _evt_poll:
     movs    r1, #usbd_evt_error
     movs    r4, #ISTRBIT(13)
     b      .L_ep_clristr
-
+#if !defined(USBD_SOF_DISABLED)
 .L_ep_sofm:
     movs    r1, #usbd_evt_sof
     movs    r4, #ISTRBIT(9)
     b       .L_ep_clristr
-
-.L_ep_esofm:
-    movs    r1, #usbd_evt_esof
-    movs    r4, #ISTRBIT(8)
-    b       .L_ep_clristr
-
+#endif
 .L_ep_wkupm:
     ldrh    r1, [r3, #0]            //R1 USB->CNTR
     movs    r5, #0x08

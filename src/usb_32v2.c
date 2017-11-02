@@ -20,7 +20,6 @@
 
 #if defined(USE_STMV2_DRIVER)
 
-#define VBUS_DETECTION  0
 #define MAX_EP          6
 #define MAX_RX_PACKET   128
 #define MAX_CONTROL_EP  1
@@ -108,7 +107,7 @@ void enable(bool enable) {
         OTG->GUSBCFG = USB_OTG_GUSBCFG_FDMOD | USB_OTG_GUSBCFG_PHYSEL |
                        _VAL2FLD(USB_OTG_GUSBCFG_TRDT, 0x06);
         /* configuring Vbus sense and powerup PHY */
-#if (VBUS_DETECTION)
+#if defined(USBD_VBUS_DETECT)
         OTG->GCCFG |= USB_OTG_GCCFG_VBDEN | USB_OTG_GCCFG_PWRDWN;
 #else
         OTG->GOTGCTL |= USB_OTG_GOTGCTL_BVALOEN | USB_OTG_GOTGCTL_BVALOVAL;
@@ -125,7 +124,9 @@ void enable(bool enable) {
         OTGD->DIEPMSK = USB_OTG_DIEPMSK_XFRCM;
         /* unmask core interrupts */
         OTG->GINTMSK  = USB_OTG_GINTMSK_USBRST | USB_OTG_GINTMSK_ENUMDNEM |
+#if !defined(USBD_SOF_DISABLED)
                         USB_OTG_GINTMSK_SOFM |
+#endif
                         USB_OTG_GINTMSK_USBSUSPM | USB_OTG_GINTMSK_WUIM |
                         USB_OTG_GINTMSK_IEPINT | USB_OTG_GINTMSK_RXFLVLM;
         /* clear pending interrupts */
@@ -154,7 +155,7 @@ void reset (void) {
 
 uint8_t connect(bool connect) {
     uint8_t res;
-#if (VBUS_DETECTION)
+#if defined(USBD_VBUS_DETECT)
     #define SET_GCCFG(x) OTG->GCCFG = USB_OTG_GCCFG_VBDEN | (x)
 #else
     #define SET_GCCFG(x) OTG->GCCFG = (x)
@@ -323,7 +324,6 @@ void ep_deconfig(uint8_t ep) {
     /* disabling endpoint */
     if ((epi->DIEPCTL & USB_OTG_DIEPCTL_EPENA) && (ep != 0)) {
         epi->DIEPCTL = USB_OTG_DIEPCTL_EPDIS;
-        _WBS(epi->DIEPINT, USB_OTG_DIEPINT_EPDISD);
     }
     /* clean EP interrupts */
     epi->DIEPINT = 0xFF;
@@ -335,7 +335,6 @@ void ep_deconfig(uint8_t ep) {
     _BCL(epo->DOEPCTL, USB_OTG_DOEPCTL_USBAEP);
     if ((epo->DOEPCTL & USB_OTG_DOEPCTL_EPENA) && (ep != 0)) {
         epo->DOEPCTL = USB_OTG_DOEPCTL_EPDIS;
-        _WBS(epo->DOEPINT, USB_OTG_DOEPINT_EPDISD);
     }
     epo->DOEPINT = 0xFF;
 }
@@ -434,9 +433,11 @@ void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
                 OTG->GRXSTSP;
                 continue;
             }
+#if !defined(USBD_SOF_DISABLED)
         } else if (_t & USB_OTG_GINTSTS_SOF) {
             OTG->GINTSTS = USB_OTG_GINTSTS_SOF;
             evt = usbd_evt_sof;
+#endif
         } else if (_t & USB_OTG_GINTSTS_USBSUSP) {
             evt = usbd_evt_susp;
             OTG->GINTSTS = USB_OTG_GINTSTS_USBSUSP;
