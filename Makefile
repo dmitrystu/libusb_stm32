@@ -36,8 +36,7 @@ LDSCRIPT     = $(call fixpath, $(LDSCRIPT.$(MCU)))
 MODULE      ?= libusb_stm32.a
 CFLAGS      ?= $(CFLAGS.$(MCU))
 CFLAGS2      = -mthumb -Os -std=gnu99
-#DEFINES     ?= $(DEFINES.$(MCU)) FORCE_C_DRIVER
-DEFINES     ?= $(DEFINES.$(MCU))
+DEFINES     ?= $(DEFINES.$(MCU)) FORCE_C_DRIVER
 INCLUDES    ?= $(CMSISDEV) $(CMSISINC) .
 SOURCES      = $(wildcard src/*.c) $(wildcard src/*.S)
 OBJECTS      = $(addsuffix .o, $(basename $(SOURCES)))

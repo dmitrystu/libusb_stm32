@@ -49,11 +49,11 @@ make program
 ### Default values: ###
 | Variable | Default Value                       | Means                         |
 |----------|-------------------------------------|-------------------------------|
-| CMSIS    | ../../cmsis                         | path to CMSIS root folder     |
+| CMSIS    | ../../CMSIS                         | path to CMSIS root folder     |
 | MCU      | stm32l100xc                         | MCU selection for demo project|
 | CFLAGS   | -mcpu=cortex-m3 -mfloat-abi=soft    | MCU specified compiler flags  |
 | DEFINES  | STM32L1 STM32L100xC                 | MCU specified defines         |
-| INCLUDES | $(CMSIS)/device/ST $(CMSIS)/include | path to ST CMSIS includes     |
+| INCLUDES | $(CMSIS)/Device/ST $(CMSIS)/Include | path to ST CMSIS includes     |
 
 ### Useful Resources ###
 1. [USB Implementers Forum official site](http://www.usb.org/home)
