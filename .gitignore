@@ -1,10 +1,23 @@
+#compile artefacts
 obj/*
-svd/*
-html/*
+*.hex
 *.elf
 *.map
+*.a
+
+#ide/editor files
 *.depend
 *.ebp
 *.elay
+*.sublime-project
+*.sublime-workspace
+
+#debug 
+svd/*
 openocd.cfg
+
+#doxydoc artefacts
+html/*
+
+#other junk
 .DS_Store
