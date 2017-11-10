@@ -5,6 +5,10 @@
 + Completely separated USB hardware driver and usb core
 + Easy to use.
 
+### Requirements ###
+
++ [stm32.h](https://github.com/dmitrystu/stm32h) STM32 universal header
+
 ### Supported hardware ###
 
 | HW driver  | Written on | Endpoints |                     Features | MCU series |
