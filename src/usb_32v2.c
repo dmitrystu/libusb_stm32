@@ -136,7 +136,7 @@ void enable(bool enable) {
         /* setting max RX FIFO size */
         OTG->GRXFSIZ = RX_FIFO_SZ;
         /* setting up EP0 TX FIFO SZ as 64 byte */
-        OTG->GNPTXFSIZ = RX_FIFO_SZ | (0x10 << 16);
+        OTG->DIEPTXF0_HNPTXFSIZ = RX_FIFO_SZ | (0x10 << 16);
     } else {
         if (RCC->AHB2ENR & RCC_AHB2ENR_OTGFSEN) {
             _BCL(PWR->CR2, PWR_CR2_USV);
@@ -197,7 +197,7 @@ void setaddr (uint8_t addr) {
  * \return true if TX fifo is successfully set
  */
 static bool set_tx_fifo(uint8_t ep, uint16_t epsize) {
-    uint32_t _fsa = OTG->GNPTXFSIZ;
+    uint32_t _fsa = OTG->DIEPTXF0_HNPTXFSIZ;
     /* calculating initial TX FIFO address. next from EP0 TX fifo */
     _fsa = 0xFFFF & (_fsa + (_fsa >> 16));
     /* looking for next free TX fifo address */
