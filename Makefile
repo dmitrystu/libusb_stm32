@@ -1,6 +1,6 @@
 CMSIS       ?=../../CMSIS
-CMSISDEV     = $(CMSIS)/Device/ST
-CMSISINC     = $(CMSIS)/Include
+CMSISDEV    ?= $(CMSIS)/Device
+CMSISCORE   ?= $(CMSIS)/CMSIS/Include $(CMSIS)/CMSIS/Core/Include
 FLASH       ?= st-flash
 TOOLSET     ?= arm-none-eabi-
 CC           = $(TOOLSET)gcc
@@ -8,18 +8,17 @@ LD           = $(TOOLSET)gcc
 AR           = $(TOOLSET)gcc-ar
 OBJCOPY      = $(TOOLSET)objcopy
 
-
-STARTUP.stm32l052x8  = $(CMSISDEV)/STM32L0xx/Source/Templates/gcc/startup_stm32l052xx.s
+STARTUP.stm32l052x8  = $(CMSISDEV)/ST/STM32L0xx/Source/Templates/gcc/startup_stm32l052xx.s
 CFLAGS.stm32l052x8   = -mcpu=cortex-m0plus -mfloat-abi=soft
 DEFINES.stm32l052x8  = STM32L0 STM32L052xx
 LDSCRIPT.stm32l052x8 = demo/stm32l052x8.ld
 
-STARTUP.stm32l100xc  = $(CMSISDEV)/STM32L1xx/Source/Templates/gcc/startup_stm32l100xc.s
+STARTUP.stm32l100xc  = $(CMSISDEV)/ST/STM32L1xx/Source/Templates/gcc/startup_stm32l100xc.s
 CFLAGS.stm32l100xc   = -mcpu=cortex-m3 -mfloat-abi=soft
 DEFINES.stm32l100xc  = STM32L1 STM32L100xC
 LDSCRIPT.stm32l100xc = demo/stm32l100xc.ld
 
-STARTUP.stm32l476rg  = $(CMSISDEV)/STM32L4xx/Source/Templates/gcc/startup_stm32l476xx.s
+STARTUP.stm32l476rg  = $(CMSISDEV)/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l476xx.s
 CFLAGS.stm32l476rg   = -mcpu=cortex-m4
 DEFINES.stm32l476rg  = STM32L4 STM32L476xx
 LDSCRIPT.stm32l476rg = demo/stm32l476xg.ld
@@ -37,7 +36,7 @@ MODULE      ?= libusb_stm32.a
 CFLAGS      ?= $(CFLAGS.$(MCU))
 CFLAGS2      = -mthumb -Os -std=gnu99
 DEFINES     ?= $(DEFINES.$(MCU)) FORCE_C_DRIVER
-INCLUDES    ?= $(CMSISDEV) $(CMSISINC) .
+INCLUDES    ?= $(CMSISDEV)/ST $(CMSISCORE) .
 SOURCES      = $(wildcard src/*.c) $(wildcard src/*.S)
 OBJECTS      = $(addsuffix .o, $(basename $(SOURCES)))
 ARFLAGS     ?= -cvq

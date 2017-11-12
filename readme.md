@@ -7,6 +7,8 @@
 
 ### Requirements ###
 
++ [CMSIS V4](https://github.com/ARM-software/CMSIS) or [CMSIS V5](https://github.com/ARM-software/CMSIS_5).
++ Device peripheral access layer header files for STM32. See [Vendor Template](https://github.com/ARM-software/CMSIS/tree/master/Device/_Template_Vendor) for details.
 + [stm32.h](https://github.com/dmitrystu/stm32h) STM32 universal header
 
 ### Supported hardware ###
@@ -17,7 +19,7 @@
 | usb_stmv0a | GCC ASM    | 8         | Internal S/N, Doublebuffered, BC1.2 | STM32L0x2 STM32L0x3 STM32L4x2 STM32L4x3 STM32F0x2 STM32F0x8 |
 | usb_stmv1  | GCC C      | 8         | Internal S/N, Doublebuffered | STM32L1xx  |
 | usb_stmv1a | GCC ASM    | 8         | Internal S/N, Doublebuffered | STM32L1xx  |
-| usb_stmv2  | GCC C      | 6         | Internal S/N, Doublebuffered, BC1.2 | STM32L4x5 STM32L4x6 (OTG FS (Device mode)) |
+| usb_stmv2  | GCC C      | 6         | Internal S/N, Doublebuffered, BC1.2 | STM32L4x5 STM32L4x6 (OTG FS Device mode) |
 | usb_stmv3  | GCC C      | 8         | Internal S/N, Doublebuffered | STM32F1xx STM32F3xx  |
 
 1. Single physical endpoint can be used to implement
@@ -54,10 +56,11 @@ make program
 | Variable | Default Value                       | Means                         |
 |----------|-------------------------------------|-------------------------------|
 | CMSIS    | ../../CMSIS                         | path to CMSIS root folder     |
+| CMSISDEV | $(CMSIS)/Device                     | path to CMSIS device folder   |
+| CMSISCORE| $(CMSIS)/CMSIS/Include $(CMSIS)/CMSIS/Core/Include | path to CMSIS core headers |
 | MCU      | stm32l100xc                         | MCU selection for demo project|
 | CFLAGS   | -mcpu=cortex-m3 -mfloat-abi=soft    | MCU specified compiler flags  |
 | DEFINES  | STM32L1 STM32L100xC                 | MCU specified defines         |
-| INCLUDES | $(CMSIS)/Device/ST $(CMSIS)/Include | path to ST CMSIS includes     |
 
 ### Useful Resources ###
 1. [USB Implementers Forum official site](http://www.usb.org/home)
