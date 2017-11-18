@@ -170,6 +170,14 @@ void reset (void) {
 }
 
 uint8_t connect(bool connect) {
+#if defined(USBD_DP_PORT) && defined(USBD_DP_PIN)
+    uint32_t _t = USBD_DP_PORT->MODER & ~(0x03 << (2 * USBD_DP_PIN))
+    if (connect) {
+        _t |= (0x01 << (2 * USBD_DP_PIN))
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN)
+    }
+    USBD_DP_PORT->MODER = _t;
+#endif
     return usbd_lane_unk;
 }
 

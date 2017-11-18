@@ -46,6 +46,7 @@ make module MODULE=path/module.a DEFINES="mcu spcified defines" CFLAGS="cpu cpec
 make demo MCU=stm32l100xc
 make demo MCU=stm32l052x8
 make demo MCU=stm32l476rg
+make demo MCU=stm32f103x6
 ```
 + to flash demo using st-flash
 ```
