@@ -170,13 +170,33 @@ void reset (void) {
 }
 
 uint8_t connect(bool connect) {
-#if defined(USBD_DP_PORT) && defined(USBD_DP_PIN)
-    uint32_t _t = USBD_DP_PORT->MODER & ~(0x03 << (2 * USBD_DP_PIN))
+#if defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F3)
+    uint32_t _t = USBD_DP_PORT->MODER & ~(0x03 << (2 * USBD_DP_PIN));
     if (connect) {
-        _t |= (0x01 << (2 * USBD_DP_PIN))
-        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN)
+        _t |= (0x01 << (2 * USBD_DP_PIN));
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN);
     }
     USBD_DP_PORT->MODER = _t;
+#elif defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F1)
+#if (USBD_DP_PIN < 8)
+    uint32_t _t = USBD_DP_PORT->CRL & ~(0x0F << (4 * USBD_DP_PIN));
+    if (connect) {
+        _t |= (0x02 << (4 * USBD_DP_PIN));
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN);
+    } else {
+        _t |= (0x04 << (4 * USBD_DP_PIN));
+    }
+    USBD_DP_PORT->CRL = _t;
+#else
+    uint32_t _t = USBD_DP_PORT->CRH & ~(0x0F << (4 * (USBD_DP_PIN - 8)));
+    if (connect) {
+        _t |= (0x02 << (4 * (USBD_DP_PIN - 8)));
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN);
+    } else {
+       _t |= (0x04 << (4 * (USBD_DP_PIN - 8)));
+    }
+    USBD_DP_PORT->CRH = _t;
+#endif
 #endif
     return usbd_lane_unk;
 }
