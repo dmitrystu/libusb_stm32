@@ -20,7 +20,8 @@
 | usb_stmv1  | GCC C      | 8         | Internal S/N, Doublebuffered | STM32L1xx  |
 | usb_stmv1a | GCC ASM    | 8         | Internal S/N, Doublebuffered | STM32L1xx  |
 | usb_stmv2  | GCC C      | 6         | Internal S/N, Doublebuffered, BC1.2 | STM32L4x5 STM32L4x6 (OTG FS Device mode) |
-| usb_stmv3  | GCC C      | 8         | Internal S/N, Doublebuffered | STM32F1xx STM32F3xx  |
+| usb_stmv3  | GCC C      | 8         | Internal S/N, Doublebuffered, optional DP control | STM32F102 STM32F103 STM32F3xx  |
+| usb_stmv3a | GCC ASM    | 8         | Internal S/N, Doublebuffered, optional DP control | STM32F102 STM32F103 STM32F3xx  |
 
 1. Single physical endpoint can be used to implement
   + one bi-directional/single-buffer logical endpoint (CONTROL)
@@ -46,6 +47,7 @@ make module MODULE=path/module.a DEFINES="mcu spcified defines" CFLAGS="cpu cpec
 make demo MCU=stm32l100xc
 make demo MCU=stm32l052x8
 make demo MCU=stm32l476rg
+make demo MCU=stm32f103x6
 ```
 + to flash demo using st-flash
 ```

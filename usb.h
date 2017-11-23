@@ -50,6 +50,10 @@
       defined(STM32F303xC) || defined(STM32F303xE) || \
       defined(STM32F373xC)
     #define USE_STMV3_DRIVER
+    #if (defined(FORCE_ASM_DRIVER) || defined(STM32F103x6)) && !defined(FORCE_C_DRIVER)
+        #define USE_STMV3A_DRIVER
+    #endif
+
 #else
     #error Unsupported STM32 family
 #endif
@@ -73,7 +77,10 @@
     #elif defined(USE_STMV2_DRIVER)
         extern const struct usbd_driver usb_stmv2;
         #define usbd_hw usb_stmv2
-#elif defined(USE_STMV3_DRIVER)
+    #elif defined(USE_STMV3A_DRIVER)
+        extern const struct usbd_driver usb_stmv3a;
+        #define usbd_hw usb_stmv3a
+    #elif defined(USE_STMV3_DRIVER)
         extern const struct usbd_driver usb_stmv3;
         #define usbd_hw usb_stmv3
     #endif

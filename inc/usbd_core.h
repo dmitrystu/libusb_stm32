@@ -26,6 +26,8 @@
  * @{ */
 #define USBD_SOF_DISABLED   /**<\brief Disables SOF handling.*/
 #define USBD_VBUS_DETECT    /**<\brief Enables Vbus detection for V2 driver.*/
+#define USBD_DP_PORT        /**<\brief DP pullup port for F103/F303 driver.*/
+#define USBD_DP_PIN         /**<\brief DP pullup pin for F103/F303 driver.*/
 /** @} */
 #endif
 

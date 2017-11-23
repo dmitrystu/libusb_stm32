@@ -65,6 +65,19 @@ static void cdc_init_rcc (void) {
     /* set GP11 and GP12 as USB data pins AF10 */
     _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
     _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
+
+#elif defined(STM32F103x6)
+    /* set flash latency 1WS */
+    _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_1);
+    /* use PLL 48MHz clock from 8Mhz HSI */
+    _BMD(RCC->CFGR,
+         RCC_CFGR_PLLMULL | RCC_CFGR_PLLSRC | RCC_CFGR_USBPRE,
+         RCC_CFGR_PLLMULL12 | RCC_CFGR_USBPRE);
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
+    /* switch to PLL */
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
 #else
     #error Not supported
 #endif

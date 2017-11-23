@@ -23,6 +23,10 @@ CFLAGS.stm32l476rg   = -mcpu=cortex-m4
 DEFINES.stm32l476rg  = STM32L4 STM32L476xx
 LDSCRIPT.stm32l476rg = demo/stm32l476xg.ld
 
+STARTUP.stm32f103x6  = $(CMSISDEV)/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f103x6.s
+CFLAGS.stm32f103x6   = -mcpu=cortex-m3
+DEFINES.stm32f103x6  = STM32F1 STM32F103x6
+LDSCRIPT.stm32f103x6 = demo/stm32f103x6.ld
 
 MCU         ?= stm32l100xc
 LDFLAGS     ?= --specs=nano.specs -nostartfiles -Wl,--gc-sections

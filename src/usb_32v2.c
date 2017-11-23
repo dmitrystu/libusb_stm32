@@ -467,7 +467,7 @@ uint16_t get_serialno_desc(void *buffer) {
     uint32_t fnv = 2166136261;
     fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x00));
     fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x04));
-    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x14));
+    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x08));
     for (int i = 28; i >= 0; i -= 4 ) {
         uint16_t c = (fnv >> i) & 0x0F;
         c += (c < 10) ? '0' : ('A' - 10);
