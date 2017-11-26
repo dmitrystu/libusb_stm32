@@ -17,7 +17,7 @@
     #define __ASSEMBLER__
 #endif
 
-#include "../usb.h"
+#include "usb.h"
 #if defined(USE_STMV0_DRIVER)
 #include "memmap.inc"
 

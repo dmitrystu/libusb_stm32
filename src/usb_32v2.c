@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "stm32.h"
-#include "../usb.h"
+#include "usb.h"
 
 #if defined(USE_STMV2_DRIVER)
 
