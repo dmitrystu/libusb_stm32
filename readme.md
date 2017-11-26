@@ -44,14 +44,12 @@ make module MODULE=path/module.a DEFINES="mcu spcified defines" CFLAGS="cpu cpec
 ```
 + to build demo
 ```
-make demo MCU=stm32l100xc
-make demo MCU=stm32l052x8
-make demo MCU=stm32l476rg
-make demo MCU=stm32f103x6
+make bluepill program
+make stm32l052x8
 ```
-+ to flash demo using st-flash
++ to get a help
 ```
-make program
+make help
 ```
 
 ### Default values: ###
