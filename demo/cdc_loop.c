@@ -17,7 +17,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "usb.h"
-#include "inc/usb_cdc.h"
+#include "usb_cdc.h"
 
 #define CDC_EP0_SIZE    0x08
 #define CDC_RXD_EP      0x01

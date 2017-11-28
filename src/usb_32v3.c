@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "stm32.h"
-#include "../usb.h"
+#include "usb.h"
 
 #if defined(USE_STMV3_DRIVER)
 
@@ -148,22 +148,6 @@ bool ep_isstalled(uint8_t ep) {
     }
 }
 
-void enable(bool enable) {
-    if (enable) {
-        RCC->APB1ENR  |= RCC_APB1ENR_USBEN;
-        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
-        RCC->APB1RSTR &= ~RCC_APB1RSTR_USBRST;
-        USB->CNTR = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_ERRM |
-#if !defined(USBD_SOF_DISABLED)
-        USB_CNTR_SOFM |
-#endif
-        USB_CNTR_SUSPM | USB_CNTR_WKUPM;
-    } else if (RCC->APB1ENR & RCC_APB1ENR_USBEN) {
-        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
-        RCC->APB1ENR &= ~RCC_APB1ENR_USBEN;
-    }
-}
-
 void reset (void) {
     USB->CNTR |= USB_CNTR_FRES;
     USB->CNTR &= ~USB_CNTR_FRES;
@@ -199,6 +183,24 @@ uint8_t connect(bool connect) {
 #endif
 #endif
     return usbd_lane_unk;
+}
+
+void enable(bool enable) {
+    if (enable) {
+        RCC->APB1ENR  |= RCC_APB1ENR_USBEN;
+        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
+        RCC->APB1RSTR &= ~RCC_APB1RSTR_USBRST;
+        USB->CNTR = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_ERRM |
+#if !defined(USBD_SOF_DISABLED)
+        USB_CNTR_SOFM |
+#endif
+        USB_CNTR_SUSPM | USB_CNTR_WKUPM;
+    } else if (RCC->APB1ENR & RCC_APB1ENR_USBEN) {
+        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
+        RCC->APB1ENR &= ~RCC_APB1ENR_USBEN;
+        /* disconnecting DP if configured */
+        connect(0);
+    }
 }
 
 void setaddr (uint8_t addr) {
