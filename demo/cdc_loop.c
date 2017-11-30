@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include "stm32.h"
 #include "usb.h"
 #include "usb_cdc.h"
 
@@ -26,6 +27,8 @@
 #define CDC_NTF_EP      0x83
 #define CDC_NTF_SZ      0x08
 #define CDC_LOOPBACK
+
+//#define CDC_USE_IRQ   /* uncomment to build interrupt-based demo */
 
 struct cdc_config {
     struct usb_config_descriptor        config;
@@ -281,11 +284,43 @@ static void cdc_init_usbd(void) {
     usbd_reg_descr(&udev, cdc_getdesc);
 }
 
+#if defined(CDC_USE_IRQ)
+#if defined(STM32L052xx)
+    #define USB_HANDLER     USB_IRQHandler
+    #define USB_NVIC_IRQ    USB_IRQn
+#elif defined(STM32L100xC)
+    #define USB_HANDLER     USB_LP_IRQHandler
+    #define USB_NVIC_IRQ    USB_LP_IRQn
+#elif defined(STM32L476xx)
+    #define USB_HANDLER     OTG_FS_IRQHandler
+    #define USB_NVIC_IRQ    OTG_FS_IRQn
+#elif defined(STM32F103x6)
+    #define USB_HANDLER     USB_LP_CAN1_RX0_IRQHandler
+    #define USB_NVIC_IRQ    USB_LP_CAN1_RX0_IRQn
+#else
+    #error Not supported
+#endif
+
+void USB_HANDLER(void) {
+    usbd_poll(&udev);
+}
+
+void main(void) {
+    cdc_init_usbd();
+    NVIC_EnableIRQ(USB_NVIC_IRQ);
+    usbd_enable(&udev, true);
+    usbd_connect(&udev, true);
+    while(1) {
+        __WFI();
+    }
+}
+#else
 void main(void) {
     cdc_init_usbd();
     usbd_enable(&udev, true);
     usbd_connect(&udev, true);
     while(1) {
-    usbd_poll(&udev);
+        usbd_poll(&udev);
     }
 }
+#endif
