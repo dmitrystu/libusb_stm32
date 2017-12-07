@@ -21,9 +21,18 @@
 
 /**\addtogroup USBD_HW_CORE USB Device HW driver and core API
  * @{ */
+#if defined(__DOXYGEN__)
+/**\name Compile-time control macros
+ * @{ */
+#define USBD_SOF_DISABLED   /**<\brief Disables SOF handling.*/
+#define USBD_VBUS_DETECT    /**<\brief Enables Vbus detection for V2 driver.*/
+#define USBD_DP_PORT        /**<\brief DP pullup port for F103/F303 driver.*/
+#define USBD_DP_PIN         /**<\brief DP pullup pin for F103/F303 driver.*/
+/** @} */
+#endif
 
 /**\addtogroup USBD_HW USB hardware driver
- * \brief Contains HW driver API 
+ * \brief Contains HW driver API
  * @{ */
 /**\anchor USB_EVENTS
  * \name USB device events
@@ -36,8 +45,7 @@
 #define usbd_evt_eprx       5   /**<\brief Data packet received.*/
 #define usbd_evt_epsetup    6   /**<\brief Setup packet received.*/
 #define usbd_evt_error      7   /**<\brief Data error.*/
-#define usbd_evt_esof       8   /**<\brief Missed SOF.*/
-#define usbd_evt_count      9
+#define usbd_evt_count      8
 /** @} */
 
 /**\anchor USB_LANES_STATUS
@@ -58,7 +66,7 @@
 /** @} */
 
 /**\addtogroup USBD_CORE USB device core
- * \brief Contains core API 
+ * \brief Contains core API
  * @{ */
 #define USB_EPTYPE_DBLBUF   0x04    /**<\brief Doublebuffered endpoint (bulk endpoint only).*/
 
@@ -181,7 +189,7 @@ typedef usbd_respond (*usbd_ctl_callback)(usbd_device *dev, usbd_ctlreq *req, us
 /**\brief USB get descriptor callback function
  * \details Called when GET_DESCRIPTOR request issued
  * \param[in] req pointer to usb control request structure
- * \param[in,out] address pointer to the descriptor in memory. Points to req->data by default. You 
+ * \param[in,out] address pointer to the descriptor in memory. Points to req->data by default. You
  * can use this buffer.
  * \param[in,out] dsize descriptor size. maximum buffer size by default.
  * \return usbd_ack if you passed the correct descriptor, usbd_fail otherwise.

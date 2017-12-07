@@ -16,11 +16,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "stm32.h"
-#include "../usb.h"
+#include "usb.h"
 
 #if defined(USE_STMV2_DRIVER)
 
-#define VBUS_DETECTION  0
 #define MAX_EP          6
 #define MAX_RX_PACKET   128
 #define MAX_CONTROL_EP  1
@@ -108,7 +107,7 @@ void enable(bool enable) {
         OTG->GUSBCFG = USB_OTG_GUSBCFG_FDMOD | USB_OTG_GUSBCFG_PHYSEL |
                        _VAL2FLD(USB_OTG_GUSBCFG_TRDT, 0x06);
         /* configuring Vbus sense and powerup PHY */
-#if (VBUS_DETECTION)
+#if defined(USBD_VBUS_DETECT)
         OTG->GCCFG |= USB_OTG_GCCFG_VBDEN | USB_OTG_GCCFG_PWRDWN;
 #else
         OTG->GOTGCTL |= USB_OTG_GOTGCTL_BVALOEN | USB_OTG_GOTGCTL_BVALOVAL;
@@ -125,7 +124,9 @@ void enable(bool enable) {
         OTGD->DIEPMSK = USB_OTG_DIEPMSK_XFRCM;
         /* unmask core interrupts */
         OTG->GINTMSK  = USB_OTG_GINTMSK_USBRST | USB_OTG_GINTMSK_ENUMDNEM |
+#if !defined(USBD_SOF_DISABLED)
                         USB_OTG_GINTMSK_SOFM |
+#endif
                         USB_OTG_GINTMSK_USBSUSPM | USB_OTG_GINTMSK_WUIM |
                         USB_OTG_GINTMSK_IEPINT | USB_OTG_GINTMSK_RXFLVLM;
         /* clear pending interrupts */
@@ -135,7 +136,7 @@ void enable(bool enable) {
         /* setting max RX FIFO size */
         OTG->GRXFSIZ = RX_FIFO_SZ;
         /* setting up EP0 TX FIFO SZ as 64 byte */
-        OTG->GNPTXFSIZ = RX_FIFO_SZ | (0x10 << 16);
+        OTG->DIEPTXF0_HNPTXFSIZ = RX_FIFO_SZ | (0x10 << 16);
     } else {
         if (RCC->AHB2ENR & RCC_AHB2ENR_OTGFSEN) {
             _BCL(PWR->CR2, PWR_CR2_USV);
@@ -154,7 +155,7 @@ void reset (void) {
 
 uint8_t connect(bool connect) {
     uint8_t res;
-#if (VBUS_DETECTION)
+#if defined(USBD_VBUS_DETECT)
     #define SET_GCCFG(x) OTG->GCCFG = USB_OTG_GCCFG_VBDEN | (x)
 #else
     #define SET_GCCFG(x) OTG->GCCFG = (x)
@@ -196,7 +197,7 @@ void setaddr (uint8_t addr) {
  * \return true if TX fifo is successfully set
  */
 static bool set_tx_fifo(uint8_t ep, uint16_t epsize) {
-    uint32_t _fsa = OTG->GNPTXFSIZ;
+    uint32_t _fsa = OTG->DIEPTXF0_HNPTXFSIZ;
     /* calculating initial TX FIFO address. next from EP0 TX fifo */
     _fsa = 0xFFFF & (_fsa + (_fsa >> 16));
     /* looking for next free TX fifo address */
@@ -323,7 +324,6 @@ void ep_deconfig(uint8_t ep) {
     /* disabling endpoint */
     if ((epi->DIEPCTL & USB_OTG_DIEPCTL_EPENA) && (ep != 0)) {
         epi->DIEPCTL = USB_OTG_DIEPCTL_EPDIS;
-        _WBS(epi->DIEPINT, USB_OTG_DIEPINT_EPDISD);
     }
     /* clean EP interrupts */
     epi->DIEPINT = 0xFF;
@@ -335,7 +335,6 @@ void ep_deconfig(uint8_t ep) {
     _BCL(epo->DOEPCTL, USB_OTG_DOEPCTL_USBAEP);
     if ((epo->DOEPCTL & USB_OTG_DOEPCTL_EPENA) && (ep != 0)) {
         epo->DOEPCTL = USB_OTG_DOEPCTL_EPDIS;
-        _WBS(epo->DOEPINT, USB_OTG_DOEPINT_EPDISD);
     }
     epo->DOEPINT = 0xFF;
 }
@@ -434,9 +433,11 @@ void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
                 OTG->GRXSTSP;
                 continue;
             }
+#if !defined(USBD_SOF_DISABLED)
         } else if (_t & USB_OTG_GINTSTS_SOF) {
             OTG->GINTSTS = USB_OTG_GINTSTS_SOF;
             evt = usbd_evt_sof;
+#endif
         } else if (_t & USB_OTG_GINTSTS_USBSUSP) {
             evt = usbd_evt_susp;
             OTG->GINTSTS = USB_OTG_GINTSTS_USBSUSP;
@@ -466,7 +467,7 @@ uint16_t get_serialno_desc(void *buffer) {
     uint32_t fnv = 2166136261;
     fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x00));
     fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x04));
-    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x14));
+    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x08));
     for (int i = 28; i >= 0; i -= 4 ) {
         uint16_t c = (fnv >> i) & 0x0F;
         c += (c < 10) ? '0' : ('A' - 10);

@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "stm32.h"
-#include "../usb.h"
+#include "usb.h"
 
 #if defined(USE_STMV3_DRIVER)
 
@@ -148,25 +148,59 @@ bool ep_isstalled(uint8_t ep) {
     }
 }
 
-void enable(bool enable) {
-    if (enable) {
-        RCC->APB1ENR  |= RCC_APB1ENR_USBEN;
-        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
-        RCC->APB1RSTR &= ~RCC_APB1RSTR_USBRST;
-        USB->CNTR = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_SOFM | USB_CNTR_ESOFM | USB_CNTR_ERRM | USB_CNTR_SUSPM | USB_CNTR_WKUPM ;
-    } else if (RCC->APB1ENR & RCC_APB1ENR_USBEN) {
-        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
-        RCC->APB1ENR &= ~RCC_APB1ENR_USBEN;
-    }
-}
-
 void reset (void) {
     USB->CNTR |= USB_CNTR_FRES;
     USB->CNTR &= ~USB_CNTR_FRES;
 }
 
 uint8_t connect(bool connect) {
+#if defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F3)
+    uint32_t _t = USBD_DP_PORT->MODER & ~(0x03 << (2 * USBD_DP_PIN));
+    if (connect) {
+        _t |= (0x01 << (2 * USBD_DP_PIN));
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN);
+    }
+    USBD_DP_PORT->MODER = _t;
+#elif defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F1)
+#if (USBD_DP_PIN < 8)
+    uint32_t _t = USBD_DP_PORT->CRL & ~(0x0F << (4 * USBD_DP_PIN));
+    if (connect) {
+        _t |= (0x02 << (4 * USBD_DP_PIN));
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN);
+    } else {
+        _t |= (0x04 << (4 * USBD_DP_PIN));
+    }
+    USBD_DP_PORT->CRL = _t;
+#else
+    uint32_t _t = USBD_DP_PORT->CRH & ~(0x0F << (4 * (USBD_DP_PIN - 8)));
+    if (connect) {
+        _t |= (0x02 << (4 * (USBD_DP_PIN - 8)));
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN);
+    } else {
+       _t |= (0x04 << (4 * (USBD_DP_PIN - 8)));
+    }
+    USBD_DP_PORT->CRH = _t;
+#endif
+#endif
     return usbd_lane_unk;
+}
+
+void enable(bool enable) {
+    if (enable) {
+        RCC->APB1ENR  |= RCC_APB1ENR_USBEN;
+        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
+        RCC->APB1RSTR &= ~RCC_APB1RSTR_USBRST;
+        USB->CNTR = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_ERRM |
+#if !defined(USBD_SOF_DISABLED)
+        USB_CNTR_SOFM |
+#endif
+        USB_CNTR_SUSPM | USB_CNTR_WKUPM;
+    } else if (RCC->APB1ENR & RCC_APB1ENR_USBEN) {
+        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
+        RCC->APB1ENR &= ~RCC_APB1ENR_USBEN;
+        /* disconnecting DP if configured */
+        connect(0);
+    }
 }
 
 void setaddr (uint8_t addr) {
@@ -391,9 +425,11 @@ void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
             ep_deconfig(i);
         }
         _ev = usbd_evt_reset;
+#if !defined(USBD_SOF_DISABLED)
     } else if (_istr & USB_ISTR_SOF) {
         _ev = usbd_evt_sof;
         USB->ISTR &= ~USB_ISTR_SOF;
+#endif
     } else if (_istr & USB_ISTR_WKUP) {
         _ev = usbd_evt_wkup;
         USB->CNTR &= ~USB_CNTR_FSUSP;
@@ -402,9 +438,6 @@ void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
         _ev = usbd_evt_susp;
         USB->CNTR |= USB_CNTR_FSUSP;
         USB->ISTR &= ~USB_ISTR_SUSP;
-    } else if (_istr & USB_ISTR_ESOF) {
-        USB->ISTR &= ~USB_ISTR_ESOF;
-        _ev = usbd_evt_esof;
     } else if (_istr & USB_ISTR_ERR) {
         USB->ISTR &= ~USB_ISTR_ERR;
         _ev = usbd_evt_error;
@@ -429,7 +462,7 @@ uint16_t get_serialno_desc(void *buffer) {
     uint32_t fnv = 2166136261;
     fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x00));
     fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x04));
-    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x14));
+    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x08));
     for (int i = 28; i >= 0; i -= 4 ) {
         uint16_t c = (fnv >> i) & 0x0F;
         c += (c < 10) ? '0' : ('A' - 10);
