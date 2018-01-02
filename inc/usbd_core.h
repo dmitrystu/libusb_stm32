@@ -19,6 +19,8 @@
     extern "C" {
 #endif
 
+#include <stdbool.h>
+
 /**\addtogroup USBD_HW_CORE USB Device HW driver and core API
  * @{ */
 #if defined(__DOXYGEN__)
