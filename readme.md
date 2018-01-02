@@ -30,7 +30,7 @@
 
 2. At this moment BULK IN endpoint can use both buffers, but it is not **real** doublebuffered.
 
-3. Tested with STM32L052, STM31L100, STM32L476RG, STM32F103CB, STM32F303CC
+3. Tested with STM32L052, STM31L100, STM32L476RG, STM32F103CB, STM32F303CC, STM32F303RE
 
 ### Implemented definitions for classes ###
 1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](http://www.usb.org/developers/hidpage/HID1_11.pdf)

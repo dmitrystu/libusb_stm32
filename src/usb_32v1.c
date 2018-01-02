@@ -67,7 +67,6 @@ typedef union pma_table {
  */
 inline static pma_table *EPT(uint8_t ep) {
     return (pma_table*)((ep & 0x07) * 16 + USB_PMAADDR);
-
 }
 
 /** \brief Helper function. Returns pointer to the endpoint control register.
