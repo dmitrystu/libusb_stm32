@@ -45,13 +45,13 @@
       defined(STM32F303xC) || defined(STM32F303xE) || \
       defined(STM32F373xC)
 
-      #define USE_STMV3_DRIVER
+    #define USE_STMV3_DRIVER
 
 #else
     #error Unsupported STM32 family
 #endif
 
-
+#include <stdbool.h>
 #include "usbd_core.h"
 #if !defined(__ASSEMBLER__)
     #include "usb_std.h"

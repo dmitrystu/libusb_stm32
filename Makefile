@@ -111,8 +111,14 @@ $(OBJDIR)/%.o: %.s
 stm32f103x6 bluepill:
 	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f103x6.s' \
 						LDSCRIPT='demo/stm32f103x6.ld' \
-						DEFINES='STM32F1 STM32F103x6 USBD_SOF_DISABLED USBD_ASM_DRIVER' \
+						DEFINES='STM32F1 STM32F103x6 USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m3 -mthumb'
+
+stm32f303xe 32f303re-nucleo:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F3xx/Source/Templates/gcc/startup_stm32f303xe.s' \
+						LDSCRIPT='demo/stm32f303xe.ld' \
+						DEFINES='STM32F3 STM32F303xE USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4 -mthumb'
 
 stm32l052x8:
 	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32L0xx/Source/Templates/gcc/startup_stm32l052xx.s' \
