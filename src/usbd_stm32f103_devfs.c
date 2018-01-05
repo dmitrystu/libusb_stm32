@@ -19,7 +19,7 @@
 #include "stm32.h"
 #include "usb.h"
 
-#if defined(USE_STMV3_DRIVER)
+#if defined(USBD_STM32F103)
 
 #define USB_EP_SWBUF_TX     USB_EP_DTOG_RX
 #define USB_EP_SWBUF_RX     USB_EP_DTOG_TX
@@ -528,7 +528,7 @@ uint16_t get_serialno_desc(void *buffer) {
     return 18;
 }
 
-const struct usbd_driver usb_stmv3 = {
+const struct usbd_driver usbd_devfs = {
     0,
     enable,
     reset,
@@ -545,4 +545,4 @@ const struct usbd_driver usb_stmv3 = {
     get_serialno_desc,
 };
 
-#endif //USE_STM32V3_DRIVER
+#endif //USBD_STM32F103

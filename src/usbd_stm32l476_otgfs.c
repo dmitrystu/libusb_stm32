@@ -18,7 +18,7 @@
 #include "stm32.h"
 #include "usb.h"
 
-#if defined(USE_STMV2_DRIVER)
+#if defined(USBD_STM32L476)
 
 #define MAX_EP          6
 #define MAX_RX_PACKET   128
@@ -478,7 +478,7 @@ uint16_t get_serialno_desc(void *buffer) {
     return 18;
 }
 
-const struct usbd_driver usb_stmv2 = {
+const struct usbd_driver usbd_otgfs = {
     USBD_HW_ADDRFST | USBD_HW_BC,
     enable,
     reset,
@@ -495,4 +495,4 @@ const struct usbd_driver usb_stmv2 = {
     get_serialno_desc,
 };
 
-#endif //USE_STM32V2_DRIVER
+#endif //USBD_STM32L476

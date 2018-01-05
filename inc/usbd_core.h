@@ -19,8 +19,6 @@
     extern "C" {
 #endif
 
-#include <stdbool.h>
-
 /**\addtogroup USBD_HW_CORE USB Device HW driver and core API
  * @{ */
 #if defined(__DOXYGEN__)
@@ -90,6 +88,8 @@
 
 
 #if !defined(__ASSEMBLER__)
+#include <stdbool.h>
+
 /**\brief USB device machine states.*/
 enum usbd_machine_state {
     usbd_state_disabled,

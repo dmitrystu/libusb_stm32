@@ -81,9 +81,9 @@
     .thumb
 
 
-    .globl  usb_stmv1a
+    .globl  usbd_devfs_asm
     .align  2
-usb_stmv1a:
+usbd_devfs_asm:
     .long   0
     .long   _enable
     .long   _reset
@@ -98,7 +98,7 @@ usb_stmv1a:
     .long   _evt_poll
     .long   _get_frame
     .long   _get_serial_desc
-    .size   usb_stmv1a, . - usb_stmv1a
+    .size   usbd_devfs_asm, . - usbd_devfs_asm
 
 
     .thumb_func

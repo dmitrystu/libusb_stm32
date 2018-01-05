@@ -18,7 +18,7 @@
 #endif
 
 #include "usb.h"
-#if defined(USE_STMV3_DRIVER)
+#if defined(USBD_STM32F103)
 #include "memmap.inc"
 
 #define EP_SETUP    0x0800
@@ -133,9 +133,9 @@
     .thumb
 
 
-    .globl  usb_stmv3a
+    .globl  usbd_devfs_asm
     .align  2
-usb_stmv3a:
+usbd_devfs_asm:
     .long   0
     .long   _enable
     .long   _reset
@@ -150,7 +150,7 @@ usb_stmv3a:
     .long   _evt_poll
     .long   _get_frame
     .long   _get_serial_desc
-    .size   usb_stmv3a, . - usb_stmv3a
+    .size   usbd_devfs_asm, . - usbd_devfs_asm
 
 
     .thumb_func
@@ -890,4 +890,4 @@ _evt_poll:
 
    .end
 
-#endif
+#endif //USBD_STM32F103
