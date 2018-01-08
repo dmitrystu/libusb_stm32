@@ -18,7 +18,7 @@
 #endif
 
 #include "usb.h"
-#if defined(USE_STMV0_DRIVER)
+#if defined(USBD_STM32L052)
 #include "memmap.inc"
 
 #define EP_SETUP    0x0800
@@ -80,9 +80,9 @@
     .thumb
 
 
-    .globl  usb_stmv0a
+    .globl  usbd_devfs_asm
     .align  2
-usb_stmv0a:
+usbd_devfs_asm:
     .long   USBD_HW_BC
     .long   _enable
     .long   _reset
@@ -97,7 +97,7 @@ usb_stmv0a:
     .long   _evt_poll
     .long   _get_frame
     .long   _get_serial_desc
-    .size   usb_stmv0a, . - usb_stmv0a
+    .size   usbd_devfs_asm, . - usbd_devfs_asm
 
 
     .thumb_func
@@ -833,4 +833,4 @@ _evt_poll:
 
    .end
 
-#endif
+#endif //USBD_STM32L052

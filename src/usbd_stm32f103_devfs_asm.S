@@ -18,7 +18,7 @@
 #endif
 
 #include "usb.h"
-#if defined(USE_STMV1_DRIVER)
+#if defined(USBD_STM32F103)
 #include "memmap.inc"
 
 #define EP_SETUP    0x0800
@@ -46,22 +46,52 @@
 #define EP_TX_NAK   0x0020
 #define EP_TX_VAL   0x0030
 
-#define RXADDR0     0x00
-#define RXCOUNT0    0x04
-#define RXADDR1     0x08
-#define RXCOUNT1    0x0C
+#if defined(STM32F302x8) || defined(STM32F302xE) || defined(STM32F303xE)
+    #define RXADDR0     0x00
+    #define RXCOUNT0    0x02
+    #define RXADDR1     0x04
+    #define RXCOUNT1    0x06
+    #define USB_PMASZ   0x300
+    #define USB_PMASTP  0x02
 
-#define TXADDR0     0x00
-#define TXCOUNT0    0x04
-#define TXADDR1     0x08
-#define TXCOUNT1    0x0C
+    .macro GetEPT
+    add     r4, r4, r0, LSR #25     //*EPT -> R4
+    .endm
 
-#define TXADDR      0x00
-#define TXCOUNT     0x04
-#define RXADDR      0x08
-#define RXCOUNT     0x0C
+    .macro GetPMA
+    ldr     r4, =#USB_PMABASE
+    adds    r5, r4          // PMA BUFFER -> R5
+    .endm
 
+#else
+    #define RXADDR0     0x00
+    #define RXCOUNT0    0x04
+    #define RXADDR1     0x08
+    #define RXCOUNT1    0x0C
+    #define USB_PMASZ   0x200
+    #define USB_PMASTP  0x04
 
+    .macro GetEPT
+    add     r4, r4, r0, LSR #24     //*EPT -> R4
+    .endm
+
+    .macro GetPMA
+    ldr     r4, =#USB_PMABASE
+    lsls    r5, #1
+    adds    r5, r4          // PMA BUFFER -> R5
+    .endm
+
+#endif
+
+#define TXADDR0     RXADDR0
+#define TXCOUNT0    RXCOUNT0
+#define TXADDR1     RXADDR1
+#define TXCOUNT1    RXCOUNT1
+
+#define TXADDR      RXADDR0
+#define TXCOUNT     RXCOUNT0
+#define RXADDR      RXADDR1
+#define RXCOUNT     RXCOUNT1
 
 #define EP_NOTOG    (EP_RX_CTR | EP_TX_CTR | EP_SETUP | EP_TYPE | EP_KIND | EP_ADDR)
 
@@ -75,15 +105,37 @@
 #define DRX_USTALL  TGL_SET(EP_RX_STAT | EP_RX_DTOG | EP_RX_SWBUF, EP_RX_VAL | EP_RX_SWBUF)
 
 
+#if (USBD_DP_PORT == GPIOA)
+    #define RCC_GPIOxEN RCC_GPIOAEN
+#elif (USBD_DP_PORT == GPIOB)
+    #define RCC_GPIOxEN RCC_GPIOBEN
+#elif (USBD_DP_PORT == GPIOC)
+    #define RCC_GPIOxEN RCC_GPIOCEN
+#elif (USBD_DP_PORT == GPIOD)
+    #define RCC_GPIOxEN RCC_GPIODEN
+#elif (USBD_DP_PORT == GPIOE)
+    #define RCC_GPIOxEN RCC_GPIOEEN
+#elif (USBD_DP_PORT == GPIOF)
+    #define RCC_GPIOxEN RCC_GPIOFEN
+#elif (USBD_DP_PORT == GPIOG)
+    #define RCC_GPIOxEN RCC_GPIOGEN
+#elif (USBD_DP_PORT == GPIOH)
+    #define RCC_GPIOxEN RCC_GPIOHEN
+#else
+    #warning "No USB DP control used for F303"
+    #undef USBD_DP_PORT
+    #undef USBD_DP_PIN
+#endif
+
     .syntax unified
     .cpu cortex-m3
     .text
     .thumb
 
 
-    .globl  usb_stmv1a
+    .globl  usbd_devfs_asm
     .align  2
-usb_stmv1a:
+usbd_devfs_asm:
     .long   0
     .long   _enable
     .long   _reset
@@ -98,7 +150,7 @@ usb_stmv1a:
     .long   _evt_poll
     .long   _get_frame
     .long   _get_serial_desc
-    .size   usb_stmv1a, . - usb_stmv1a
+    .size   usbd_devfs_asm, . - usbd_devfs_asm
 
 
     .thumb_func
@@ -120,7 +172,7 @@ _get_serial_desc:
     bl      .L_fnv1a
     ldr     r2, [r5, 0x04]      //UID1
     bl      .L_fnv1a
-    ldr     r2, [r5, 0x14]      //UID2
+    ldr     r2, [r5, 0x08]      //UID2
     bl      .L_fnv1a
     movs    r3, #28
 .L_gsn_loop:
@@ -162,23 +214,48 @@ _get_serial_desc:
     .thumb_func
     .type   _connect, %function
 _connect:
-    ldr     r1, =#SYSCFG_BASE
-    movs    r3, #0x01
-    ldr     r2, [r1, #SYSCFG_PMC]
-    bics    r2, r3
-    cbz     r0, .L_conn_store
-    orrs    r2, r3
-.L_conn_store:
-    str     r2, [r1, #SYSCFG_PMC]
+#if defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F1)
+    #if (USBD_DP_PIN < 8)
+    #define GPIO_CRx    GPIO_CRL
+    #define DP_PIN      (4 * USBD_DP_PIN)
+    #else
+    #define GPIO_CRx    GPIO_CRH
+    #define DP_PIN      (4 * (USBD_DP_PIN - 8))
+    #endif
+    ldr     r3, =#USBD_DP_PORT
+    ldr     r2, [r3, #GPIO_CRx]
+    movs    r1, #0x0F
+    bics    r2, r2, r1, LSL #DP_PIN
+    movs    r1, #0x04
+    cbz     r0, .L_store
+    movs    r1, #0x01
+    lsls    r1, #USBD_DP_PIN
+    str     r1, [r3, #GPIO_BSRR]
+    movs    r1, #0x02
+.L_store:
+    orrs    r2, r2, r1, LSL #DP_PIN
+    str     r2, [r3, #GPIO_CRx]
+#elif defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F3)
+    ldr     r3, =#USBD_DP_PORT
+    ldr     r2, [r3, #GPIO_MODER]
+    movs    r1, #0x03
+    bics    r2, r2, r1, LSL #(2 * USBD_DP_PIN)
+    movs    r1, #0x01
+    cbz     r0, .L_store
+    orrs    r2, r2, r1, LSL #(2 * USBD_DP_PIN)
+    lsls    r1, #USBD_DP_PIN
+    str     r1, [r3, #GPIO_BSRR]
+.L_store:
+    str     r2, [r3, #GPIO_MODER]
+#endif
     movs    r0, #usbd_lane_unk
     bx      lr
     .size   _connect, . - _connect
 
-
     .thumb_func
     .type   _setaddr, %function
 _setaddr:
-    ldr     r1, =USB_REGBASE
+    ldr     r1, =#USB_REGBASE
     adds    r0, #0x80
     strh    r0, [r1, #USB_DADDR]     //USB->DADDR
     bx      lr
@@ -211,11 +288,23 @@ _get_frame:
     .type   _enable, %function
 _enable:
     ldr     r2, =#RCC_BASE        //RCC
-    movs    r3, #0x01
-    lsls    r3, #23             //USBEN or USBRST
+    movs    r1, #0x01
+    lsls    r3, r1, #23           //USBEN or USBRST
     cbz     r0, .L_disable
 .L_enable:
 /* enabling and resetting USB peripheral */
+/* enabling DP control GPIO port */
+#if defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F3)
+    lsls    r1, #RCC_GPIOxEN
+    ldr     r0, [r2, #RCC_AHBENR]
+    orrs    r0, r1
+    str     r0, [r2, #RCC_AHBENR]
+#elif defined(USBD_DP_PORT) && defined(USBD_DP_PIN)
+    lsls    r1, #RCC_GPIOxEN
+    ldr     r0, [r2, #RCC_APB2ENR]
+    orrs    r0, r1
+    str     r0, [r2, #RCC_APB2ENR]
+#endif
     ldr     r1, =#USB_REGBASE
     ldr     r0, [r2, #RCC_APB1ENR]
     orrs    r0, r3
@@ -225,11 +314,6 @@ _enable:
     str     r0, [r2, #RCC_APB1RSTR]     //RCC->APB1RSTR |= USBRST
     bics    r0, r3
     str     r0, [r2, #RCC_APB1RSTR]     //RCC->APB1RSTR &= ~USBRST
-/* enabling SYSCFG peripheral */
-    movs    r3, #0x01                   //SYSCFGEN
-    ldr     r0, [r2, #RCC_APB2ENR]
-    orrs    r0, r3
-    str     r0, [r2, #RCC_APB2ENR]
 /* setting up USB CNTR */
 #if !defined(USBD_SOF_DISABLED)
     movs    r0, #0xBE                   // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
@@ -246,13 +330,8 @@ _enable:
 /* disabling USB peripheral */
     bics    r0, r3
     str     r0, [r2, #RCC_APB1ENR]
-/* disabling USB_PU in SYSCFG_PMC */
-    movs    r3, #0x01
-    ldr     r1, =#SYSCFG_BASE
-    ldr     r0, [r1, #SYSCFG_PMC]
-    bics    r0, r3
-    str     r0, [r1, #SYSCFG_PMC]
-    bx      lr
+    movs    r0, #0
+    b       _connect                    // jump to disconnect subroutine
 .L_enable_end:
     bx      lr
     .size   _enable, . - _enable
@@ -350,16 +429,12 @@ _ep_read:
     ldr     r3, =#USB_EPBASE
     ldr     r4, =#USB_PMABASE
     lsls    r0, #28
-    lsrs    r0, #26
-    adds    r3, r0          // *EPR -> R3
-    lsls    r0, #2
-    adds    r4, r0          // *EPT -> R4
-    ldrh    r5, [r3]        // reading epr
+    add     r3, r3, r0, LSR #26     //*EPR -> R3
+    GetEPT                          //*EPT -> R4
+    ldrh    r5, [r3]                // reading epr
 /* validating endpoint */
     movs    r0, #0x37
-    lsls    r0, #0x08
-    ands    r0, r5
-    lsrs    r0, #0x08
+    ands    r0, r0, r5, LSR #8
     cmp     r0, #0x34       // (OK) RX_VALID + ISO
     beq     .L_epr_iso
     cmp     r0, #0x31       // (OK) RX_VALID + DBLBULK
@@ -375,8 +450,7 @@ _ep_read:
     b       .L_epr_exit
 /* processing */
 .L_epr_dbl:
-    lsrs    r0, r5, #8
-    eors    r0, r5
+    eors    r0, r5, r5, LSR #8
     lsrs    r0, #7          // SW_RX ^ DTOG_RX -> CF
     bcs     .L_epr_notog    // jmp if SW_RX != DTOG_RX (VALID)
     ldr     r0, =#EP_NOTOG
@@ -398,9 +472,7 @@ _ep_read:
     lsls    r0, #22
     lsrs    r0, #22         // r0 &= 0x3FF (RX count)
     ldrh    r5, [r4, #RXADDR]
-    ldr     r4, =#USB_PMABASE
-    lsls    r5, #0x01
-    adds    r5, r4          // R5 now has a physical address
+    GetPMA
     cmp     r2, r0
     blo     .L_epr_read
     mov     r2, r0          // if buffer is larger
@@ -413,7 +485,7 @@ _ep_read:
     lsrs    r4, #8
     strb    r4, [r1, #1]
     adds    r1, #2
-    adds    r5, #4
+    adds    r5, #USB_PMASTP
     subs    r2, #2
     bhi     .L_epr_read
 .L_epr_read_end:
@@ -426,8 +498,7 @@ _ep_read:
     beq     .L_epr_exit     // ep is dblbulk. no needs to set it to valid
     ldr     r2, =#TGL_SET(EP_RX_STAT , EP_RX_VAL)
     eors    r5, r2
-    lsrs    r2, #16
-    ands    r5, r2
+    and     r5, r5, r2, LSR #16
     strh    r5, [r3]        // set ep to VALID state
 .L_epr_exit:
     pop     {r4, r5, pc}
@@ -447,15 +518,11 @@ _ep_write:
     ldr     r3, =#USB_EPBASE
     ldr     r4, =#USB_PMABASE
     lsls    r0, #28
-    lsrs    r0, #26
-    adds    r3, r0          // *EPR -> R3
-    lsls    r0, #2
-    adds    r4, r0          // TXADDR0 -> R4
+    add     r3, r3, r0, LSR #26     //*EPR -> R3
+    GetEPT
     ldrh    r5, [r3]        // reading epr
     movs    r0, #0x73
-    lsls    r0, #4
-    ands    r0, r5
-    lsrs    r0, #4
+    and     r0, r0, r5, LSR #4
     cmp     r0, #0x43       // (OK) TX_VALID + ISO
     beq     .L_epw_iso
     cmp     r0, #0x12       // (OK) TX_NAK + DBLBULK
@@ -466,7 +533,7 @@ _ep_write:
     beq     .L_epw_sngl
     cmp     r0, #0x62       // (OK) TX_NAK + INTERRUPT
     beq     .L_epw_sngl
-    movs    r0, #0xFF
+    movs    r0, #0xFF       // -1 error
     sxtb    r0, r0
     b       .L_epw_exit
 .L_epw_dbl:
@@ -480,9 +547,7 @@ _ep_write:
     strh    r2, [r4, #TXCOUNT]
     mov     r0, r2          // save count for return
     ldrh    r5, [r4, #TXADDR]
-    ldr     r4, =#USB_PMABASE
-    lsls    r5, #1
-    adds    r5, r4          // PMA BUFFER -> R5
+    GetPMA
 .L_epw_write:
     cmp     r2, #1
     blo     .L_epw_write_end
@@ -493,7 +558,7 @@ _ep_write:
     orrs    r4, r6
 .L_epw_store:
     strh    r4, [r5]
-    adds    r5, #4
+    adds    r5, #USB_PMASTP
     adds    r1, #2
     subs    r2, #2
     bhi     .L_epw_write
@@ -510,8 +575,7 @@ _ep_write:
     bics    r5, r2          // clear TX_SWBUF
 .L_epw_setstate:
     eors    r5, r2
-    lsrs    r2, #16
-    ands    r5, r2
+    and     r5, r5, r2, LSR #16
     strh    r5, [r3]
 .L_epw_exit:
     pop     {r4, r5, r6, pc}
@@ -526,8 +590,7 @@ _ep_write:
 _get_next_pma:
     push    {r1, r3, r4, lr}
     movs    r1, #16
-    movs    r3, #1
-    lsls    r3, #9         //R3 MAX_PMA_SIZE 512b
+    ldr     r3, =#USB_PMASZ
     ldr     r0, =#USB_PMABASE
 .L_gnp_chkaddr:
     ldrh    r4, [r0, #0]    //txaddr
@@ -740,9 +803,7 @@ _evt_poll:
 .L_ep_ctrm:
     movs    r5, #0x80           // CTR_TX mask to R5
     ldr     r0,=#USB_EPBASE
-    lsrs    r0, #2
-    adds    r0, r2
-    lsls    r0, #2              // R0 ep register address
+    add     r0, r0, r2, LSL #2  // R0 ep register address
     ldrh    r4, [r0]            // R4 EPR valur
     lsrs    r3, r4, #8          // CTR_TX -> CF
     bcc     .L_ep_ctr_rx
@@ -807,7 +868,7 @@ _evt_poll:
     strh    r4, [r0, #RXADDR]
     strh    r4, [r0, #RXCOUNT]
     adds    r2, #0x04
-    adds    r0, #0x10
+    adds    r0, #(0x04 * USB_PMASTP)
     subs    r1, #1
     bpl     .L_ep_reset_loop
     movs    r2, #0x00
@@ -829,4 +890,4 @@ _evt_poll:
 
    .end
 
-#endif
+#endif //USBD_STM32F103

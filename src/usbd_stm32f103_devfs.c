@@ -1,6 +1,7 @@
 /* This file is the part of the Lightweight USB device Stack for STM32 microcontrollers
  *
  * Copyright ©2016 Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
+ * Copyright ©2017 Max Chan <max[at]maxchan[dot]info>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +19,10 @@
 #include "stm32.h"
 #include "usb.h"
 
-#if defined(USE_STMV1_DRIVER)
-
-#ifndef USB_PMASIZE
-    #warning PMA memory size is not defined. Use 512 bytes by default
-    #define USB_PMASIZE 0x200
-#endif
+#if defined(USBD_STM32F103)
 
 #define USB_EP_SWBUF_TX     USB_EP_DTOG_RX
 #define USB_EP_SWBUF_RX     USB_EP_DTOG_TX
-
 
 #define EP_TOGGLE_SET(epr, bits, mask) *(epr) = (*(epr) ^ (bits)) & (USB_EPREG_MASK | (mask))
 
@@ -40,14 +35,52 @@
 #define EP_TX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_TX_VALID,                   USB_EPTX_STAT)
 #define EP_RX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_RX_VALID,                   USB_EPRX_STAT)
 
-typedef struct {
-    uint16_t    addr;
-    uint16_t    :16;
-    uint16_t    cnt;
-    uint16_t    :16;
-} pma_rec;
+typedef union _pma_table pma_table;
 
-typedef union pma_table {
+#if defined(STM32F302x8) || defined(STM32F302xE) || defined(STM32F303xE)
+    #if !defined(USB_PMASIZE)
+    #warning PMA memory size is not defined. Use 768 bytes by default
+    #define USB_PMASIZE 0x300
+    #endif
+    #define PMA_STEP    1
+
+    typedef struct {
+        uint16_t    addr;
+        uint16_t    cnt;
+    } pma_rec;
+
+    inline static pma_table *EPT(uint8_t ep) {
+        return (pma_table*)((ep & 0x07) * 8 + USB_PMAADDR);
+    }
+
+    inline static uint16_t *PMA(uint16_t addr) {
+        return (uint16_t*)(USB_PMAADDR + addr);
+    }
+
+#else
+    #if !defined(USB_PMASIZE)
+    #warning PMA memory size is not defined. Use 512 bytes by default
+    #define USB_PMASIZE 0x200
+    #endif
+    #define PMA_STEP    2
+
+    typedef struct {
+        uint16_t    addr;
+        uint16_t    :16;
+        uint16_t    cnt;
+        uint16_t    :16;
+    } pma_rec;
+
+    inline static pma_table *EPT(uint8_t ep) {
+        return (pma_table*)((ep & 0x07) * 16 + USB_PMAADDR);
+    }
+
+    inline static uint16_t *PMA(uint16_t addr) {
+        return (uint16_t*)(USB_PMAADDR + 2 * addr);
+    }
+#endif
+
+union _pma_table {
     struct {
     pma_rec     tx;
     pma_rec     rx;
@@ -60,13 +93,43 @@ typedef union pma_table {
     pma_rec     rx0;
     pma_rec     rx1;
     };
-} pma_table;
+};
 
-
-/** \brief Helper function. Returns pointer to the buffer descriptor table.
+/** \brief Helper function. Enables GPIOx for DP.
+ * Looks ugly. But compiler should optimize this
+ * to single line
  */
-inline static pma_table *EPT(uint8_t ep) {
-    return (pma_table*)((ep & 0x07) * 16 + USB_PMAADDR);
+inline static void set_gpiox() {
+#if defined(STM32F1) && defined(USBD_DP_PORT)
+    if (USBD_DP_PORT == GPIOA) {RCC->APB2ENR |= RCC_APB2ENR_IOPAEN; return;}
+    if (USBD_DP_PORT == GPIOB) {RCC->APB2ENR |= RCC_APB2ENR_IOPBEN; return;}
+    if (USBD_DP_PORT == GPIOC) {RCC->APB2ENR |= RCC_APB2ENR_IOPCEN; return;}
+    if (USBD_DP_PORT == GPIOD) {RCC->APB2ENR |= RCC_APB2ENR_IOPDEN; return;}
+    #if defined(GPIOE)
+    if (USBD_DP_PORT == GPIOE) {RCC->APB2ENR |= RCC_APB2ENR_IOPEEN; return;}
+    #endif
+    #if defined(GPIOF)
+    if (USBD_DP_PORT = GPIOF) {RCC->APB2ENR |= RCC_APB2ENR_IOPFEN; return;}
+    #endif
+#elif defined(STM32F3) && defined(USBD_DP_PORT)
+    if (USBD_DP_PORT == GPIOA) {RCC->AHBENR |= RCC_AHBENR_GPIOAEN; return;}
+    if (USBD_DP_PORT == GPIOB) {RCC->AHBENR |= RCC_AHBENR_GPIOBEN; return;}
+    if (USBD_DP_PORT == GPIOC) {RCC->AHBENR |= RCC_AHBENR_GPIOCEN; return;}
+    if (USBD_DP_PORT == GPIOD) {RCC->AHBENR |= RCC_AHBENR_GPIODEN; return;}
+    #if defined(GPIOE)
+    if (USBD_DP_PORT == GPIOE) {RCC->AHBENR |= RCC_AHBENR_GPIOEEN; return;}
+    #endif
+    #if defined(GPIOF)
+    if (USBD_DP_PORT == GPIOF) {RCC->AHBENR |= RCC_AHBENR_GPIOFEN; return;}
+    #endif
+    #if defined(GPIOG)
+    if (USBD_DP_PORT == GPIOG) {RCC->AHBENR |= RCC_AHBENR_GPIOGEN; return;}
+    #endif
+    #if defined(GPIOH)
+    if (USBD_DP_PORT == GPIOH) {RCC->AHBENR |= RCC_AHBENR_GPIOHEN; return;}
+    #endif
+#endif
+    return;
 }
 
 /** \brief Helper function. Returns pointer to the endpoint control register.
@@ -74,7 +137,6 @@ inline static pma_table *EPT(uint8_t ep) {
 inline static volatile uint16_t *EPR(uint8_t ep) {
     return (uint16_t*)((ep & 0x07) * 4 + USB_BASE);
 }
-
 
 /** \brief Helper function. Returns next available PMA buffer.
  *
@@ -141,10 +203,47 @@ bool ep_isstalled(uint8_t ep) {
     }
 }
 
+void reset (void) {
+    USB->CNTR |= USB_CNTR_FRES;
+    USB->CNTR &= ~USB_CNTR_FRES;
+}
+
+uint8_t connect(bool connect) {
+#if defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F3)
+    uint32_t _t = USBD_DP_PORT->MODER & ~(0x03 << (2 * USBD_DP_PIN));
+    if (connect) {
+        _t |= (0x01 << (2 * USBD_DP_PIN));
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN);
+    }
+    USBD_DP_PORT->MODER = _t;
+#elif defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F1)
+#if (USBD_DP_PIN < 8)
+    uint32_t _t = USBD_DP_PORT->CRL & ~(0x0F << (4 * USBD_DP_PIN));
+    if (connect) {
+        _t |= (0x02 << (4 * USBD_DP_PIN));
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN);
+    } else {
+        _t |= (0x04 << (4 * USBD_DP_PIN));
+    }
+    USBD_DP_PORT->CRL = _t;
+#else
+    uint32_t _t = USBD_DP_PORT->CRH & ~(0x0F << (4 * (USBD_DP_PIN - 8)));
+    if (connect) {
+        _t |= (0x02 << (4 * (USBD_DP_PIN - 8)));
+        USBD_DP_PORT->BSRR = (0x0001 << USBD_DP_PIN);
+    } else {
+       _t |= (0x04 << (4 * (USBD_DP_PIN - 8)));
+    }
+    USBD_DP_PORT->CRH = _t;
+#endif
+#endif
+    return usbd_lane_unk;
+}
+
 void enable(bool enable) {
     if (enable) {
+        set_gpiox();
         RCC->APB1ENR  |= RCC_APB1ENR_USBEN;
-        RCC->APB2ENR  |= RCC_APB2ENR_SYSCFGEN;
         RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
         RCC->APB1RSTR &= ~RCC_APB1RSTR_USBRST;
         USB->CNTR = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_ERRM |
@@ -153,30 +252,16 @@ void enable(bool enable) {
 #endif
         USB_CNTR_SUSPM | USB_CNTR_WKUPM;
     } else if (RCC->APB1ENR & RCC_APB1ENR_USBEN) {
-        SYSCFG->PMC &= ~SYSCFG_PMC_USB_PU;
         RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
         RCC->APB1ENR &= ~RCC_APB1ENR_USBEN;
+        /* disconnecting DP if configured */
+        connect(0);
     }
-}
-
-void reset (void) {
-    USB->CNTR |= USB_CNTR_FRES;
-    USB->CNTR &= ~USB_CNTR_FRES;
-}
-
-uint8_t connect(bool connect) {
-    if (connect) {
-        SYSCFG->PMC |= SYSCFG_PMC_USB_PU;
-    } else {
-        SYSCFG->PMC &= ~SYSCFG_PMC_USB_PU;
-    }
-    return usbd_lane_unk;
 }
 
 void setaddr (uint8_t addr) {
     USB->DADDR = USB_DADDR_EF | addr;
 }
-
 
 bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
     volatile uint16_t *reg = EPR(ep);
@@ -261,7 +346,7 @@ void ep_deconfig(uint8_t ep) {
 }
 
 static uint16_t pma_read (uint8_t *buf, uint16_t blen, pma_rec *rx) {
-    uint16_t *pma = (void*)(USB_PMAADDR + 2 * rx->addr);
+    uint16_t *pma = PMA(rx->addr);
     uint16_t rxcnt = rx->cnt & 0x03FF;
     rx->cnt &= ~0x3FF;
     if (blen > rxcnt) {
@@ -273,7 +358,7 @@ static uint16_t pma_read (uint8_t *buf, uint16_t blen, pma_rec *rx) {
         *buf++ = _t & 0xFF;
         if (--blen) {
             *buf++ = _t >> 8;
-            pma += 2;
+            pma += PMA_STEP;
             blen--;
         } else break;
     }
@@ -323,11 +408,11 @@ int32_t ep_read(uint8_t ep, void *buf, uint16_t blen) {
 }
 
 static void pma_write(const uint8_t *buf, uint16_t blen, pma_rec *tx) {
-    uint16_t *pma = (void*)(USB_PMAADDR + 2 * (tx->addr));
+    uint16_t *pma = PMA(tx->addr);
     tx->cnt = blen;
     while (blen > 1) {
         *pma = buf[1] << 8 | buf[0];
-        pma += 2;
+        pma += PMA_STEP;
         buf += 2;
         blen -= 2;
     }
@@ -432,7 +517,7 @@ uint16_t get_serialno_desc(void *buffer) {
     uint32_t fnv = 2166136261;
     fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x00));
     fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x04));
-    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x14));
+    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x08));
     for (int i = 28; i >= 0; i -= 4 ) {
         uint16_t c = (fnv >> i) & 0x0F;
         c += (c < 10) ? '0' : ('A' - 10);
@@ -443,7 +528,7 @@ uint16_t get_serialno_desc(void *buffer) {
     return 18;
 }
 
-const struct usbd_driver usb_stmv1 = {
+const struct usbd_driver usbd_devfs = {
     0,
     enable,
     reset,
@@ -460,4 +545,4 @@ const struct usbd_driver usb_stmv1 = {
     get_serialno_desc,
 };
 
-#endif //USE_STM32V1_DRIVER
+#endif //USBD_STM32F103
