@@ -19,6 +19,11 @@
     extern "C" {
 #endif
 
+#include "usbd_core.h"
+#if !defined(__ASSEMBLER__)
+#include "usb_std.h"
+#endif
+
 #if defined(STM32L052xx) || defined(STM32L053xx) || \
     defined(STM32L062xx) || defined(STM32L063xx) || \
     defined(STM32L072xx) || defined(STM32L073xx) || \
@@ -30,13 +35,40 @@
     defined(STM32F070x6) || defined(STM32F070xB) || \
     defined(STM32F072xB) || defined(STM32F078xx)
 
-    #define USE_STMV0_DRIVER
+    #define USBD_STM32L052
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_devfs;
+    extern const struct usbd_driver usbd_devfs_asm;
+    #if defined(USBD_ASM_DRIVER)
+    #define usbd_hw usbd_devfs_asm
+    #else
+    #define usbd_hw usbd_devfs
+    #endif
+    #endif
 
 #elif defined(STM32L1)
-    #define USE_STMV1_DRIVER
+
+    #define USBD_STM32L100
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_devfs;
+    extern const struct usbd_driver usbd_devfs_asm;
+    #if defined(USBD_ASM_DRIVER)
+    #define usbd_hw usbd_devfs_asm
+    #else
+    #define usbd_hw usbd_devfs
+    #endif
+    #endif
 
 #elif defined(STM32L476xx)
-    #define USE_STMV2_DRIVER
+
+    #define USBD_STM32L476
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_otgfs;
+    #define usbd_hw usbd_otgfs
+    #endif
 
 #elif defined(STM32F102x6) || defined(STM32F102xB) || \
       defined(STM32F103x6) || defined(STM32F103xB) || \
@@ -45,38 +77,20 @@
       defined(STM32F303xC) || defined(STM32F303xE) || \
       defined(STM32F373xC)
 
-    #define USE_STMV3_DRIVER
+    #define USBD_STM32F103
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_devfs;
+    extern const struct usbd_driver usbd_devfs_asm;
+    #if defined(USBD_ASM_DRIVER)
+    #define usbd_hw usbd_devfs_asm
+    #else
+    #define usbd_hw usbd_devfs
+    #endif
+    #endif
 
 #else
     #error Unsupported STM32 family
-#endif
-
-#include <stdbool.h>
-#include "usbd_core.h"
-#if !defined(__ASSEMBLER__)
-    #include "usb_std.h"
-    #if defined(USE_STMV0_DRIVER) && defined(USBD_ASM_DRIVER)
-        extern const struct usbd_driver usb_stmv0a;
-        #define usbd_hw usb_stmv0a
-    #elif defined(USE_STMV0_DRIVER)
-        extern const struct usbd_driver usb_stmv0;
-        #define usbd_hw usb_stmv0
-    #elif defined(USE_STMV1_DRIVER) && defined(USBD_ASM_DRIVER)
-        extern const struct usbd_driver usb_stmv1a;
-        #define usbd_hw usb_stmv1a
-    #elif defined(USE_STMV1_DRIVER)
-        extern const struct usbd_driver usb_stmv1;
-        #define usbd_hw usb_stmv1
-    #elif defined(USE_STMV2_DRIVER)
-        extern const struct usbd_driver usb_stmv2;
-        #define usbd_hw usb_stmv2
-    #elif defined(USE_STMV3_DRIVER) && defined(USBD_ASM_DRIVER)
-        extern const struct usbd_driver usb_stmv3a;
-        #define usbd_hw usb_stmv3a
-    #elif defined(USE_STMV3_DRIVER)
-        extern const struct usbd_driver usb_stmv3;
-        #define usbd_hw usb_stmv3
-    #endif
 #endif
 
 #if defined (__cplusplus)
