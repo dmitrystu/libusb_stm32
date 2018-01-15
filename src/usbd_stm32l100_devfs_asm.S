@@ -18,7 +18,7 @@
 #endif
 
 #include "usb.h"
-#if defined(USE_STMV1_DRIVER)
+#if defined(USBD_STM32L100)
 #include "memmap.inc"
 
 #define EP_SETUP    0x0800
@@ -829,4 +829,4 @@ _evt_poll:
 
    .end
 
-#endif
+#endif //USBD_STM32L100
