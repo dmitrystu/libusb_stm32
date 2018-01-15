@@ -57,11 +57,11 @@
 1. Single physical endpoint can be used to implement
   + one bi-directional/single-buffer logical endpoint (CONTROL)
   + one uni-directional/double-buffer logical endpoint (BULK OR ISOCHRONOUS)
-  + two -directional/single-buffer logical endpoints (BULK OR INTERRUPT)
+  + two uni-directional/single-buffer logical endpoints (BULK OR INTERRUPT)
 
 2. At this moment BULK IN endpoint can use both buffers, but it is not **real** doublebuffered.
 
-3. Tested with STM32L052K8, STM31L100RC, STM32L476RG, STM32F103C8, STM32F103CB, STM32F303CC, STM32F303RE
+3. Tested with STM32L052K8, STM32L100RC, STM32L476RG, STM32F103C8, STM32F103CB, STM32F303CC, STM32F303RE
 
 ### Implemented definitions for classes ###
 1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](http://www.usb.org/developers/hidpage/HID1_11.pdf)
