@@ -357,7 +357,7 @@ int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
             buf += 4;
         } else {
             while (blen){
-                *(uint8_t*)buf = 0xFF & _t;
+                *((uint8_t*)buf++) = 0xFF & _t;
                 _t >>= 8;
                 blen --;
             }
