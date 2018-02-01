@@ -95,33 +95,34 @@ void enable(bool enable) {
     if (enable) {
         /* enabling USB_OTG in RCC */
         _BST(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
-        /* Set Vbus enabled for USB */
-//        _BST(PWR->CR2, PWR_CR2_USV);
-        /* select Internal PHY */
-        OTG->GUSBCFG |= USB_OTG_GUSBCFG_PHYSEL;
-//        /* do core soft reset */
-//        _WBS(OTG->GRSTCTL, USB_OTG_GRSTCTL_AHBIDL);
-//        _BST(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
-//        _WBC(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
+        /* do core soft reset */
+        _WBS(OTG->GRSTCTL, USB_OTG_GRSTCTL_AHBIDL);
+        _BST(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
+        _WBC(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
         /* configure OTG as device */
         OTG->GUSBCFG = USB_OTG_GUSBCFG_FDMOD | USB_OTG_GUSBCFG_PHYSEL |
                        _VAL2FLD(USB_OTG_GUSBCFG_TRDT, 0x06);
-        /* configuring Vbus sense and powerup PHY */
-#if defined(USBD_VBUS_DETECT)
-        OTG->GCCFG = USB_OTG_GCCFG_VBUSBSEN | USB_OTG_GCCFG_PWRDWN;
-//        OTG->GCCFG |= USB_OTG_GCCFG_VBDEN | USB_OTG_GCCFG_PWRDWN;
+        /* configuring Vbus sense and SOF output */
+#if defined (USBD_VBUS_DETECT) && defined(USBD_SOF_OUT)
+        OTG->GCCFG = USB_OTG_GCCFG_VBUSBSEN | USB_OTG_GCCFG_SOFOUTEN;
+#elif defined(USBD_VBUS_DETECT)
+         OTG->GCCFG = USB_OTG_GCCFG_VBUSBSEN;
+#elif defined(USBD_SOF_OUT)
+        OTG->GCCFG = USB_OTG_GCCFG_NOVBUSSENS | USB_OTG_GCCFG_SOFOUTEN;
 #else
-//        OTG->GOTGCTL |= USB_OTG_GOTGCTL_BVALOEN | USB_OTG_GOTGCTL_BVALOVAL;
-        OTG->GCCFG = USB_OTG_GCCFG_NOVBUSSENS | USB_OTG_GCCFG_PWRDWN;
+        OTG->GCCFG = USB_OTG_GCCFG_NOVBUSSENS;
 #endif
-
-        /* restart PHY*/
+        /* enable PHY clock */
         *OTGPCTL = 0;
         /* soft disconnect device */
         _BST(OTGD->DCTL, USB_OTG_DCTL_SDIS);
         /* Setup USB FS speed and frame interval */
         _BMD(OTGD->DCFG, USB_OTG_DCFG_PERSCHIVL | USB_OTG_DCFG_DSPD,
              _VAL2FLD(USB_OTG_DCFG_PERSCHIVL, 0) | _VAL2FLD(USB_OTG_DCFG_DSPD, 0x03));
+        /* setting max RX FIFO size */
+        OTG->GRXFSIZ = RX_FIFO_SZ;
+        /* setting up EP0 TX FIFO SZ as 64 byte */
+        OTG->DIEPTXF0_HNPTXFSIZ = RX_FIFO_SZ | (0x10 << 16);
         /* unmask EP interrupts */
         OTGD->DIEPMSK = USB_OTG_DIEPMSK_XFRCM;
         /* unmask core interrupts */
@@ -134,14 +135,9 @@ void enable(bool enable) {
         /* clear pending interrupts */
         OTG->GINTSTS = 0xFFFFFFFF;
         /* unmask global interrupt */
-        OTG->GAHBCFG = USB_OTG_GAHBCFG_GINT;
-        /* setting max RX FIFO size */
-        OTG->GRXFSIZ = RX_FIFO_SZ;
-        /* setting up EP0 TX FIFO SZ as 64 byte */
-        OTG->DIEPTXF0_HNPTXFSIZ = RX_FIFO_SZ | (0x10 << 16);
+        _BST(OTG->GAHBCFG, USB_OTG_GAHBCFG_GINT);
     } else {
         if (RCC->AHB2ENR & RCC_AHB2ENR_OTGFSEN) {
-//            _BCL(PWR->CR2, PWR_CR2_USV);
             _BST(RCC->AHB2RSTR, RCC_AHB2RSTR_OTGFSRST);
             _BCL(RCC->AHB2RSTR, RCC_AHB2RSTR_OTGFSRST);
             _BCL(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
@@ -154,14 +150,15 @@ void reset (void) {
    // _WBC(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
 }
 
-
 uint8_t connect(bool connect) {
     if (connect) {
-        _BCL(OTG->GCCFG, USB_OTG_GCCFG_PWRDWN);
+/* The ST made a strange thing again. Really i dont'understand what is the reason to name
+   signal as PWRDWN (Power down PHY) when it works as "Power up" */
+        _BST(OTG->GCCFG, USB_OTG_GCCFG_PWRDWN);
         _BCL(OTGD->DCTL, USB_OTG_DCTL_SDIS);
     } else {
         _BST(OTGD->DCTL, USB_OTG_DCTL_SDIS);
-        _BST(OTG->GCCFG, USB_OTG_GCCFG_PWRDWN);
+        _BCL(OTG->GCCFG, USB_OTG_GCCFG_PWRDWN);
     }
     return usbd_lane_unk;
 }
@@ -336,7 +333,7 @@ int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
             buf += 4;
         } else {
             while (blen){
-                *(uint8_t*)buf = 0xFF & _t;
+                *(uint8_t*)buf++ = 0xFF & _t;
                 _t >>= 8;
                 blen --;
             }

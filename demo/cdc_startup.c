@@ -91,6 +91,29 @@ static void cdc_init_rcc (void) {
     /* switch to PLL */
     _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+
+#elif defined(STM32F429xx)
+    /* set flash latency 2WS */
+    _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_2WS);
+    /* setting up PLL 16MHz HSI, VCO=144MHz, PLLP = 72MHz PLLQ = 48MHz  */
+    _BMD(RCC->PLLCFGR,
+        RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLQ | RCC_PLLCFGR_PLLP,
+        _VAL2FLD(RCC_PLLCFGR_PLLM, 8) | _VAL2FLD(RCC_PLLCFGR_PLLN, 72) | _VAL2FLD(RCC_PLLCFGR_PLLQ, 3));
+    /* enabling PLL */
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
+    /* switching to PLL */
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+    /* enabling GPIOA and setting PA11 and PA12 to AF10 (USB_FS) */
+    _BST(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN);
+    _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
+    _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
+
+    _BST(RCC->AHB1ENR, RCC_AHB1ENR_GPIOCEN);
+    _BMD(GPIOC->MODER, (0x03 << 18), (0x02 << 18));
+    _BMD(RCC->CFGR, RCC_CFGR_MCO2, RCC_CFGR_MCO2PRE_2);
+
 #else
     #error Not supported
 #endif

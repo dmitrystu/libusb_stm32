@@ -137,3 +137,9 @@ stm32l476xg 32l476rg-nucleo:
 						LDSCRIPT='demo/stm32l476xg.ld' \
 						DEFINES='STM32L4 STM32L476xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4 -mthumb'
+
+stm32f429xi 32f429zi-nucleo:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f429xx.s' \
+						LDSCRIPT='demo/stm32f429xi.ld' \
+						DEFINES='STM32F4 STM32F429xx USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4 -mthumb'
