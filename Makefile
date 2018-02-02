@@ -48,6 +48,8 @@ help all:
 	@echo '  32l476rg-nucleo'
 	@echo '  stm32l476rg   CDC loopback demo for STM32L476xG based boards'
 	@echo '  stm32l052x8   CDC loopback demo for STM32L052x8 based boards'
+	@echo '  32f429zi-nucleo'
+	@echo '  stm32f429xi   CDC loopback demo for STM32F429xI based boards'
 	@echo '  doc           DOXYGEN documentation'
 	@echo '  module        static library module using following envars (defaults)'
 	@echo '                MODULE  module name (libusb.a)'

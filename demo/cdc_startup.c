@@ -109,11 +109,6 @@ static void cdc_init_rcc (void) {
     _BST(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN);
     _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
     _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
-
-    _BST(RCC->AHB1ENR, RCC_AHB1ENR_GPIOCEN);
-    _BMD(GPIOC->MODER, (0x03 << 18), (0x02 << 18));
-    _BMD(RCC->CFGR, RCC_CFGR_MCO2, RCC_CFGR_MCO2PRE_2);
-
 #else
     #error Not supported
 #endif

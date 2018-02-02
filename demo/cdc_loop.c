@@ -297,6 +297,9 @@ static void cdc_init_usbd(void) {
 #elif defined(STM32F103x6)
     #define USB_HANDLER     USB_LP_CAN1_RX0_IRQHandler
     #define USB_NVIC_IRQ    USB_LP_CAN1_RX0_IRQn
+#elif defined(STM32F429xx)
+    #define USB_HANDLER     OTG_FS_IRQHandler
+    #define USB_NVIC_IRQ    OTG_FS_IRQn
 #else
     #error Not supported
 #endif
