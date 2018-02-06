@@ -316,9 +316,8 @@ void ep_deconfig(uint8_t ep) {
 }
 
 int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
-    uint32_t len;
+    int32_t len;
     volatile uint32_t *fifo = EPFIFO(0);
-    USB_OTG_OUTEndpointTypeDef* epo = EPOUT(ep);
     /* no data in RX FIFO */
     if (!(OTG->GINTSTS & USB_OTG_GINTSTS_RXFLVL)) return -1;
     ep &= 0x7F;
@@ -339,7 +338,6 @@ int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
             }
         }
     }
-    _BST(epo->DOEPCTL, USB_OTG_DOEPCTL_CNAK | USB_OTG_DOEPCTL_EPENA);
     return len;
 }
 
@@ -399,13 +397,21 @@ void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
             _t = OTG->GRXSTSR;
             ep = _t & USB_OTG_GRXSTSP_EPNUM;
             switch (_FLD2VAL(USB_OTG_GRXSTSP_PKTSTS, _t)) {
-            case 0x02:
+            case 0x02:  /* OUT recieved */
                 evt = usbd_evt_eprx;
                 break;
-            case 0x06:
+            case 0x06:  /* SETUP recieved */
+                /* flushing TX if sonething stuck in control endpoint */
+                if (EPIN(ep)->DIEPTSIZ & USB_OTG_DIEPTSIZ_PKTCNT) {
+                    Flush_TX(ep);
+                }
                 evt = usbd_evt_epsetup;
                 break;
+            case 0x03:  /* OUT completed */
+            case 0x04:  /* SETUP completed */
+                _BST(EPOUT(ep)->DOEPCTL, USB_OTG_DOEPCTL_CNAK | USB_OTG_DOEPCTL_EPENA);
             default:
+                /* pop GRXSTSP */
                 OTG->GRXSTSP;
                 continue;
             }
