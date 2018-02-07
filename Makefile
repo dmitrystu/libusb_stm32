@@ -48,6 +48,8 @@ help all:
 	@echo '  32l476rg-nucleo'
 	@echo '  stm32l476rg   CDC loopback demo for STM32L476xG based boards'
 	@echo '  stm32l052x8   CDC loopback demo for STM32L052x8 based boards'
+	@echo '  32f429zi-nucleo'
+	@echo '  stm32f429xi   CDC loopback demo for STM32F429xI based boards'
 	@echo '  doc           DOXYGEN documentation'
 	@echo '  module        static library module using following envars (defaults)'
 	@echo '                MODULE  module name (libusb.a)'
@@ -136,4 +138,10 @@ stm32l476xg 32l476rg-nucleo:
 	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l476xx.s' \
 						LDSCRIPT='demo/stm32l476xg.ld' \
 						DEFINES='STM32L4 STM32L476xx USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4 -mthumb'
+
+stm32f429xi 32f429zi-nucleo:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f429xx.s' \
+						LDSCRIPT='demo/stm32f429xi.ld' \
+						DEFINES='STM32F4 STM32F429xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4 -mthumb'

@@ -61,9 +61,18 @@
     #endif
     #endif
 
-#elif defined(STM32L476xx)
+#elif defined(STM32L475xx) || defined(STM32L476xx)
 
     #define USBD_STM32L476
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_otgfs;
+    #define usbd_hw usbd_otgfs
+    #endif
+
+#elif defined(STM32F429xx)
+
+    #define USBD_STM32F429
 
     #if !defined(__ASSEMBLER__)
     extern const struct usbd_driver usbd_otgfs;
