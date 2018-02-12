@@ -218,9 +218,6 @@ typedef usbd_respond (*usbd_cfg_callback)(usbd_device *dev, uint8_t cfg);
  */
 typedef void (*usbd_hw_enable)(bool enable);
 
-/**\brief Resets USB hardware.*/
-typedef void (*usbd_hw_reset)(void);
-
 /** Connects or disconnects USB hardware to/from usb host
  * \param connect Connects USB to host if TRUE, disconnects otherwise
  * \return lanes connection status.
@@ -296,7 +293,6 @@ typedef uint16_t (*usbd_hw_get_serialno)(void *buffer);
 struct usbd_driver {
     uint32_t                caps;               /**<\brief HW capabilities */
     usbd_hw_enable          enable;             /**<\copybrief usbd_hw_enable */
-    usbd_hw_reset           reset;              /**<\copybrief usbd_hw_reset */
     usbd_hw_connect         connect;            /**<\copybrief usbd_hw_connect */
     usbd_hw_setaddr         setaddr;            /**<\copybrief usbd_hw_setaddr */
     usbd_hw_ep_config       ep_config;          /**<\copybrief usbd_hw_ep_config */

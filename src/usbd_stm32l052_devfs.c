@@ -157,11 +157,6 @@ void enable(bool enable) {
     }
 }
 
-void reset (void) {
-    USB->CNTR |= USB_CNTR_FRES;
-    USB->CNTR &= ~USB_CNTR_FRES;
-}
-
 uint8_t connect(bool connect) {
     uint8_t res;
     USB->BCDR = USB_BCDR_BCDEN | USB_BCDR_DCDEN;
@@ -457,7 +452,6 @@ uint16_t get_serialno_desc(void *buffer) {
 const struct usbd_driver usbd_devfs = {
     USBD_HW_BC,
     enable,
-    reset,
     connect,
     setaddr,
     ep_config,

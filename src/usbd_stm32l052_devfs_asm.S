@@ -85,7 +85,6 @@
 usbd_devfs_asm:
     .long   USBD_HW_BC
     .long   _enable
-    .long   _reset
     .long   _connect
     .long   _setaddr
     .long   _ep_config
@@ -203,19 +202,6 @@ _setaddr:
     strh    r0, [r1, #USB_DADDR]     //USB->DADDR
     bx      lr
     .size   _setaddr, . - _setaddr
-
-    .thumb_func
-    .type   _reset, %function
-_reset:
-    ldr     r2, =#USB_REGBASE
-    movs    r0, #0x01           //FRES
-    ldrh    r1, [r2, #USB_CNTR] //USB->CNTR
-    orrs    r1, r0
-    strh    r1, [r2, #USB_CNTR] // set FRES
-    bics    r1, r0
-    strh    r1, [r2, #USB_CNTR] // clr FRES
-    bx      lr
-    .size   _reset, . - _reset
 
     .thumb_func
     .type   _get_frame, %function

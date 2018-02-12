@@ -145,11 +145,6 @@ void enable(bool enable) {
     }
 }
 
-void reset (void) {
-   // _BST(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
-   // _WBC(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
-}
-
 uint8_t connect(bool connect) {
     if (connect) {
 /* The ST made a strange thing again. Really i dont'understand what is the reason to name
@@ -463,7 +458,6 @@ uint16_t get_serialno_desc(void *buffer) {
 const struct usbd_driver usbd_otgfs = {
     USBD_HW_ADDRFST,
     enable,
-    reset,
     connect,
     setaddr,
     ep_config,

@@ -159,11 +159,6 @@ void enable(bool enable) {
     }
 }
 
-void reset (void) {
-    USB->CNTR |= USB_CNTR_FRES;
-    USB->CNTR &= ~USB_CNTR_FRES;
-}
-
 uint8_t connect(bool connect) {
     if (connect) {
         SYSCFG->PMC |= SYSCFG_PMC_USB_PU;
@@ -446,7 +441,6 @@ uint16_t get_serialno_desc(void *buffer) {
 const struct usbd_driver usbd_devfs = {
     0,
     enable,
-    reset,
     connect,
     setaddr,
     ep_config,

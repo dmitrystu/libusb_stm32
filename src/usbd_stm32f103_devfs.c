@@ -203,11 +203,6 @@ bool ep_isstalled(uint8_t ep) {
     }
 }
 
-void reset (void) {
-    USB->CNTR |= USB_CNTR_FRES;
-    USB->CNTR &= ~USB_CNTR_FRES;
-}
-
 uint8_t connect(bool connect) {
 #if defined(USBD_DP_PORT) && defined(USBD_DP_PIN) && defined(STM32F3)
     uint32_t _t = USBD_DP_PORT->MODER & ~(0x03 << (2 * USBD_DP_PIN));
@@ -531,7 +526,6 @@ uint16_t get_serialno_desc(void *buffer) {
 const struct usbd_driver usbd_devfs = {
     0,
     enable,
-    reset,
     connect,
     setaddr,
     ep_config,
