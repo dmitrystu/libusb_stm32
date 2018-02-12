@@ -355,28 +355,3 @@ static void usbd_process_evt(usbd_device *dev, uint8_t evt, uint8_t ep) {
 void usbd_poll(usbd_device *dev) {
     return dev->driver->poll(dev, usbd_process_evt);
 }
-
-void usbd_control(usbd_device *dev, enum usbd_commands cmd) {
-    switch (cmd) {
-    case usbd_cmd_enable:
-        dev->driver->enable(true);
-        dev->status.device_state = usbd_state_disconnected;
-        break;
-    case usbd_cmd_disable:
-        dev->driver->enable(false);
-        dev->status.device_state = usbd_state_disabled;
-        break;
-    case usbd_cmd_connect:
-        dev->driver->connect(true);
-        break;
-    case usbd_cmd_disconnect:
-        dev->driver->connect(false);
-        dev->status.device_state = usbd_state_disconnected;
-        break;
-    case usbd_cmd_reset:
-        dev->driver->reset();
-        break;
-    default:
-        break;
-    }
-}

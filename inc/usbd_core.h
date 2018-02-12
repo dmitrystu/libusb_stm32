@@ -349,12 +349,6 @@ inline static void usbd_init(usbd_device *dev, const struct usbd_driver *drv,
  */
 void usbd_poll(usbd_device *dev);
 
-/**\brief Asynchronous device control
- * \param dev dev usb device \ref _usbd_device
- * \param cmd Asynchronous control command
- */
-void usbd_control(usbd_device *dev, enum usbd_commands cmd) __attribute__((deprecated));
-
 /**\brief Register callback for all control requests
  * \param dev usb device \ref _usbd_device
  * \param callback user control callback \ref usbd_ctl_callback
