@@ -101,7 +101,7 @@ static usbd_respond usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
         req->data[1] = 0;
         return usbd_ack;
     case USB_STD_SET_ADDRESS:
-        if (dev->driver->caps & USBD_HW_ADDRFST) {
+        if (usbd_getinfo(dev) & USBD_HW_ADDRFST) {
             usbd_set_address(dev, req);
         } else {
             dev->complete_callback = usbd_set_address;

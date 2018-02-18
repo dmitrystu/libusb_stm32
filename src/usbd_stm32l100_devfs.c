@@ -28,7 +28,6 @@
 #define USB_EP_SWBUF_TX     USB_EP_DTOG_RX
 #define USB_EP_SWBUF_RX     USB_EP_DTOG_TX
 
-
 #define EP_TOGGLE_SET(epr, bits, mask) *(epr) = (*(epr) ^ (bits)) & (USB_EPREG_MASK | (mask))
 
 #define EP_TX_STALL(epr)    EP_TOGGLE_SET((epr), USB_EP_TX_STALL,                   USB_EPTX_STAT)
@@ -39,6 +38,8 @@
 #define EP_DRX_UNSTALL(epr) EP_TOGGLE_SET((epr), USB_EP_RX_VALID | USB_EP_SWBUF_RX, USB_EPRX_STAT | USB_EP_DTOG_RX | USB_EP_SWBUF_RX)
 #define EP_TX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_TX_VALID,                   USB_EPTX_STAT)
 #define EP_RX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_RX_VALID,                   USB_EPRX_STAT)
+
+#define STATUS_VAL(x)       (x)
 
 typedef struct {
     uint16_t    addr;
@@ -94,6 +95,12 @@ static uint16_t get_next_pma(uint16_t sz) {
     } else {
         return _result - sz;
     }
+}
+
+uint32_t getinfo(void) {
+    if (!(RCC->APB1ENR & RCC_APB1ENR_USBEN)) return STATUS_VAL(0);
+    if (SYSCFG->PMC & SYSCFG_PMC_USB_PU) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
+    return STATUS_VAL(USBD_HW_ENABLED);
 }
 
 void ep_setstall(uint8_t ep, bool stall) {
@@ -439,7 +446,7 @@ uint16_t get_serialno_desc(void *buffer) {
 }
 
 const struct usbd_driver usbd_devfs = {
-    0,
+    getinfo,
     enable,
     connect,
     setaddr,
