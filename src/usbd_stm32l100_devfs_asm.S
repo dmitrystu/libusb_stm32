@@ -84,7 +84,7 @@
     .globl  usbd_devfs_asm
     .align  2
 usbd_devfs_asm:
-    .long   0
+    .long   _getinfo
     .long   _enable
     .long   _connect
     .long   _setaddr
@@ -173,6 +173,23 @@ _connect:
     bx      lr
     .size   _connect, . - _connect
 
+    .thumb_func
+    .type   _getinfo, %function
+_getinfo:
+    movs    r0, 0
+    ldr     r2, =#RCC_BASE
+    ldr     r1, [r2, #RCC_APB1ENR]
+    lsrs    r1, #24                     //USBEN -> CF
+    bcc     .L_getinfo_end
+    adds    r0, #USBD_HW_ENABLED
+    ldr     r2, =#SYSCFG_BASE
+    ldr     r1, [r2, #SYSCFG_PMC]
+    lsrs    r1, #1                      //PU -> CF
+    bcc     .L_getinfo_end
+    adds    r0, #USBD_HW_SPEED_FS
+.L_getinfo_end:
+    bx      lr
+    .size   _getinfo, . - _getinfo
 
     .thumb_func
     .type   _setaddr, %function
