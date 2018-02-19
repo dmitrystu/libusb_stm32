@@ -545,7 +545,7 @@ _get_next_pma:
     bne     .L_gnp_chkaddr
     subs    r0, r3, r2
     blo     .L_gnp_exit
-    cmp     r0, #0x40       //check for the pma table overlap
+    cmp     r0, #0x20       //check for the pma table overlap
 .L_gnp_exit:
     pop     {r1, r3, r4, pc}
 

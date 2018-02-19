@@ -153,11 +153,7 @@ static uint16_t get_next_pma(uint16_t sz) {
         if ((tbl->tx.addr) && (tbl->tx.addr < _result)) _result = tbl->tx.addr;
         if ((tbl->rx.addr) && (tbl->rx.addr < _result)) _result = tbl->rx.addr;
     }
-    if ( _result < (4 * sizeof(pma_table) + sz)) {
-        return 0;
-    } else {
-        return _result - sz;
-    }
+    return (_result < (0x020 + sz)) ? 0 : (_result - sz);
 }
 
 uint32_t getinfo(void) {
