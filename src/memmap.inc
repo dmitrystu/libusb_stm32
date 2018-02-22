@@ -34,9 +34,17 @@
     #define USB_BCDR        0x18
     #define USB_PMABASE     0x40006000
     #define RCC_BASE        0x40021000
-    #define RCC_APB1RSTR    0x28
-    #define RCC_APB1ENR     0x38
-    #define UID_BASE        0x1FF80050
+    #if defined(STM32F042x6) || defined(STM32F048xx) || \
+        defined(STM32F070x6) || defined(STM32F070xB) || \
+        defined(STM32F072xB) || defined(STM32F078xx)
+        #define RCC_APB1RSTR    0x10
+        #define RCC_APB1ENR     0x1C
+        #define UID_BASE        0x1FFFF7AC
+    #else
+        #define RCC_APB1RSTR    0x28
+        #define RCC_APB1ENR     0x38
+        #define UID_BASE        0x1FF80050
+    #endif
 
 #elif defined(STM32L1)
 /* common definitions for STM31L100xx STM32L151xx STM32L152xx STM32L162xx */
