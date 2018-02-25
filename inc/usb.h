@@ -70,7 +70,10 @@
     #define usbd_hw usbd_otgfs
     #endif
 
-#elif defined(STM32F429xx)
+#elif defined(STM32F405xx) || defined(STM32F415xx) || \
+      defined(STM32F407xx) || defined(STM32F417xx) || \
+      defined(STM32F427xx) || defined(STM32F437xx) || \
+      defined(STM32F429xx) || defined(STM32F439xx)
 
     #define USBD_STM32F429
 
