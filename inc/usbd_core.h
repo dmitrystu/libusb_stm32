@@ -65,8 +65,8 @@
 #define USBD_HW_ADDRFST     (1 << 0)    /**<\brief Set address before STATUS_OUT.*/
 #define USBD_HW_BC          (1 << 1)    /**<\brief Battery charging detection supported.*/
 #define USND_HW_HS          (1 << 2)    /**<\brief High speed supported.*/
-#define USBD_HW_ENABLED     (1 << 3)    /**<\brief USB device emabled. */
-#define USBD_HW_ENUMSPEED   (2 << 4)    /**<\brief USB device enumerated speed*/
+#define USBD_HW_ENABLED     (1 << 3)    /**<\brief USB device enabled. */
+#define USBD_HW_ENUMSPEED   (2 << 4)    /**<\brief USB device enumeration speed mask.*/
 #define USBD_HW_SPEED_NC    (0 << 4)    /**<\brief Not connected */
 #define USBD_HW_SPEED_LS    (1 << 4)    /**<\brief Low speed */
 #define USBD_HW_SPEED_FS    (2 << 4)    /**<\brief Full speed */
@@ -465,8 +465,8 @@ inline static uint8_t usbd_connect(usbd_device *dev, bool connect) {
     return dev->driver->connect(connect);
 }
 
-/**<\brief Retrieves status and capabilities.
- * \return current HW status, enumeration speed and capabilities /ref USBD_HW_CAPS */
+/**\brief Retrieves status and capabilities.
+ * \return current HW status, enumeration speed and capabilities \ref USBD_HW_CAPS */
 inline static uint32_t usbd_getinfo(usbd_device *dev) {
     return dev->driver->getinfo();
 }

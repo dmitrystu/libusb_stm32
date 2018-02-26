@@ -51,7 +51,12 @@
         <td>usbd_otgfs</td>
         <td>usbd_stm32l476_otgfs.c</td>
     </tr>
-
+    <tr>
+        <td>STM32F4x5 STM32F4x7 STM32F4x9</td>
+        <td nowrap>Doublebuffered<br/>6 endpoints<br/>VBUS detection<br/>SOF output</td>
+        <td>usbd_otgfs</td>
+        <td>usbd_stm32l429_otgfs.c</td>
+    </tr>
 </table>
 
 1. Single physical endpoint can be used to implement
@@ -61,7 +66,7 @@
 
 2. At this moment BULK IN endpoint can use both buffers, but it is not **real** doublebuffered.
 
-3. Tested with STM32L052K8, STM32L100RC, STM32L476RG, STM32F072C8, STM32F103C8, STM32F103CB, STM32F303CC, STM32F303RE
+3. Tested with STM32L052K8, STM32L100RC, STM32L476RG, STM32F072C8, STM32F103C8, STM32F103CB, STM32F303CC, STM32F303RE, STM32F429ZI
 
 ### Implemented definitions for classes ###
 1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](http://www.usb.org/developers/hidpage/HID1_11.pdf)
