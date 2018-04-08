@@ -27,6 +27,8 @@
 
 #define RX_FIFO_SZ      ((4 * MAX_CONTROL_EP + 6) + ((MAX_RX_PACKET / 4) + 1) + (MAX_EP * 2) + 1)
 
+#define STATUS_VAL(x)   (USBD_HW_ADDRFST | (x))
+
 USB_OTG_GlobalTypeDef * const OTG  = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_GLOBAL_BASE);
 USB_OTG_DeviceTypeDef * const OTGD = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_DEVICE_BASE);
 volatile uint32_t * const OTGPCTL  = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_PCGCCTL_BASE);
@@ -53,6 +55,12 @@ inline static void Flush_TX(uint8_t ep) {
     _BMD(OTG->GRSTCTL, USB_OTG_GRSTCTL_TXFNUM,
          _VAL2FLD(USB_OTG_GRSTCTL_TXFNUM, ep) | USB_OTG_GRSTCTL_TXFFLSH);
     _WBC(OTG->GRSTCTL, USB_OTG_GRSTCTL_TXFFLSH);
+}
+
+uint32_t getinfo(void) {
+    if (!(RCC->AHB2ENR & RCC_AHB2ENR_OTGFSEN)) return STATUS_VAL(0);
+    if (!(OTGD->DCTL & USB_OTG_DCTL_SDIS)) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
+    return STATUS_VAL(USBD_HW_ENABLED);
 }
 
 void ep_setstall(uint8_t ep, bool stall) {
@@ -143,11 +151,6 @@ void enable(bool enable) {
             _BCL(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
         }
     }
-}
-
-void reset (void) {
-   // _BST(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
-   // _WBC(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
 }
 
 uint8_t connect(bool connect) {
@@ -461,9 +464,8 @@ uint16_t get_serialno_desc(void *buffer) {
 }
 
 const struct usbd_driver usbd_otgfs = {
-    USBD_HW_ADDRFST,
+    getinfo,
     enable,
-    reset,
     connect,
     setaddr,
     ep_config,

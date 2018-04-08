@@ -35,6 +35,8 @@
 #define EP_TX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_TX_VALID,                   USB_EPTX_STAT)
 #define EP_RX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_RX_VALID,                   USB_EPRX_STAT)
 
+#define STATUS_VAL(x)       (x)
+
 typedef union _pma_table pma_table;
 
 #if defined(STM32F302x8) || defined(STM32F302xE) || defined(STM32F303xE)
@@ -151,11 +153,17 @@ static uint16_t get_next_pma(uint16_t sz) {
         if ((tbl->tx.addr) && (tbl->tx.addr < _result)) _result = tbl->tx.addr;
         if ((tbl->rx.addr) && (tbl->rx.addr < _result)) _result = tbl->rx.addr;
     }
-    if ( _result < (4 * sizeof(pma_table) + sz)) {
-        return 0;
-    } else {
-        return _result - sz;
-    }
+    return (_result < (0x020 + sz)) ? 0 : (_result - sz);
+}
+
+uint32_t getinfo(void) {
+    if (!(RCC->APB1ENR & RCC_APB1ENR_USBEN)) return STATUS_VAL(0);
+#if defined(USBD_DP_PORT) && defined(USBD_DP_PIN)
+    if (USBD_DP_PORT->IDR && _BV(USBD_DP_PIN)) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
+    return STATUS_VAL(USBD_HW_ENABLED);
+#else
+    return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
+#endif
 }
 
 void ep_setstall(uint8_t ep, bool stall) {
@@ -201,11 +209,6 @@ bool ep_isstalled(uint8_t ep) {
     } else {
         return (USB_EP_RX_STALL == (USB_EPRX_STAT & *EPR(ep)));
     }
-}
-
-void reset (void) {
-    USB->CNTR |= USB_CNTR_FRES;
-    USB->CNTR &= ~USB_CNTR_FRES;
 }
 
 uint8_t connect(bool connect) {
@@ -529,9 +532,8 @@ uint16_t get_serialno_desc(void *buffer) {
 }
 
 const struct usbd_driver usbd_devfs = {
-    0,
+    getinfo,
     enable,
-    reset,
     connect,
     setaddr,
     ep_config,

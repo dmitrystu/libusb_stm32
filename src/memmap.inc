@@ -101,6 +101,7 @@
     #define GPIOG           0x40012000
     #define GPIO_CRL        0x00
     #define GPIO_CRH        0x04
+    #define GPIO_IDR        0x08
     #define GPIO_BSRR       0x10
 
 

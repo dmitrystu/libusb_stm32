@@ -28,7 +28,6 @@
 #define USB_EP_SWBUF_TX     USB_EP_DTOG_RX
 #define USB_EP_SWBUF_RX     USB_EP_DTOG_TX
 
-
 #define EP_TOGGLE_SET(epr, bits, mask) *(epr) = (*(epr) ^ (bits)) & (USB_EPREG_MASK | (mask))
 
 #define EP_TX_STALL(epr)    EP_TOGGLE_SET((epr), USB_EP_TX_STALL,                   USB_EPTX_STAT)
@@ -39,6 +38,8 @@
 #define EP_DRX_UNSTALL(epr) EP_TOGGLE_SET((epr), USB_EP_RX_VALID | USB_EP_SWBUF_RX, USB_EPRX_STAT | USB_EP_DTOG_RX | USB_EP_SWBUF_RX)
 #define EP_TX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_TX_VALID,                   USB_EPTX_STAT)
 #define EP_RX_VALID(epr)    EP_TOGGLE_SET((epr), USB_EP_RX_VALID,                   USB_EPRX_STAT)
+
+#define STATUS_VAL(x)   (USBD_HW_BC | (x))
 
 typedef struct {
     uint16_t    addr;
@@ -88,11 +89,13 @@ static uint16_t get_next_pma(uint16_t sz) {
         if ((tbl->rx.addr) && (tbl->rx.addr < _result)) _result = tbl->rx.addr;
         if ((tbl->tx.addr) && (tbl->tx.addr < _result)) _result = tbl->tx.addr;
     }
-    if ( _result < (8 * sizeof(pma_table) + sz)) {
-        return 0;
-    } else {
-        return _result - sz;
-    }
+    return (_result < (0x020 + sz)) ? 0 : (_result - sz);
+}
+
+uint32_t getinfo(void) {
+    if (!(RCC->APB1ENR & RCC_APB1ENR_USBEN)) return STATUS_VAL(0);
+    if (USB->BCDR & USB_BCDR_DPPU) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
+    return STATUS_VAL(USBD_HW_ENABLED);
 }
 
 void ep_setstall(uint8_t ep, bool stall) {
@@ -155,11 +158,6 @@ void enable(bool enable) {
         RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
         RCC->APB1ENR &= ~RCC_APB1ENR_USBEN;
     }
-}
-
-void reset (void) {
-    USB->CNTR |= USB_CNTR_FRES;
-    USB->CNTR &= ~USB_CNTR_FRES;
 }
 
 uint8_t connect(bool connect) {
@@ -455,9 +453,8 @@ uint16_t get_serialno_desc(void *buffer) {
 }
 
 const struct usbd_driver usbd_devfs = {
-    USBD_HW_BC,
+    getinfo,
     enable,
-    reset,
     connect,
     setaddr,
     ep_config,

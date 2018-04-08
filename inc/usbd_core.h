@@ -59,10 +59,19 @@
 #define usbd_lane_dcp       4   /**<\brief Lanes connected to dedicated charging port.*/
 /** @} */
 
-/** \name USB HW capabilities
+/**\anchor USBD_HW_CAPS
+ * \name USB HW capabilities and status
  * @{ */
 #define USBD_HW_ADDRFST     (1 << 0)    /**<\brief Set address before STATUS_OUT.*/
 #define USBD_HW_BC          (1 << 1)    /**<\brief Battery charging detection supported.*/
+#define USND_HW_HS          (1 << 2)    /**<\brief High speed supported.*/
+#define USBD_HW_ENABLED     (1 << 3)    /**<\brief USB device enabled. */
+#define USBD_HW_ENUMSPEED   (2 << 4)    /**<\brief USB device enumeration speed mask.*/
+#define USBD_HW_SPEED_NC    (0 << 4)    /**<\brief Not connected */
+#define USBD_HW_SPEED_LS    (1 << 4)    /**<\brief Low speed */
+#define USBD_HW_SPEED_FS    (2 << 4)    /**<\brief Full speed */
+#define USBD_HW_SPEED_HS    (3 << 4)    /**<\brief High speed */
+
 /** @} */
 /** @} */
 
@@ -212,14 +221,15 @@ typedef usbd_respond (*usbd_cfg_callback)(usbd_device *dev, uint8_t cfg);
 
 /**\addtogroup USBD_HW
  * @{ */
+/**\brief Get USB device status and capabilities.
+ * \return Hardware status and capabilities \ref USBD_HW_CAPS */
+
+typedef uint32_t (*usbd_hw_getinfo)(void);
 
 /**\brief Enables or disables USB hardware
  * \param enable Enables USB when TRUE disables otherwise.
  */
 typedef void (*usbd_hw_enable)(bool enable);
-
-/**\brief Resets USB hardware.*/
-typedef void (*usbd_hw_reset)(void);
 
 /** Connects or disconnects USB hardware to/from usb host
  * \param connect Connects USB to host if TRUE, disconnects otherwise
@@ -294,9 +304,8 @@ typedef uint16_t (*usbd_hw_get_serialno)(void *buffer);
 
 /**\brief Represents a hardware USB driver call table.*/
 struct usbd_driver {
-    uint32_t                caps;               /**<\brief HW capabilities */
+    usbd_hw_getinfo         getinfo;            /**<\copybrief usbd_hw_getinfo */
     usbd_hw_enable          enable;             /**<\copybrief usbd_hw_enable */
-    usbd_hw_reset           reset;              /**<\copybrief usbd_hw_reset */
     usbd_hw_connect         connect;            /**<\copybrief usbd_hw_connect */
     usbd_hw_setaddr         setaddr;            /**<\copybrief usbd_hw_setaddr */
     usbd_hw_ep_config       ep_config;          /**<\copybrief usbd_hw_ep_config */
@@ -348,12 +357,6 @@ inline static void usbd_init(usbd_device *dev, const struct usbd_driver *drv,
  * \note can be called as from main routine as from USB interrupt
  */
 void usbd_poll(usbd_device *dev);
-
-/**\brief Asynchronous device control
- * \param dev dev usb device \ref _usbd_device
- * \param cmd Asynchronous control command
- */
-void usbd_control(usbd_device *dev, enum usbd_commands cmd) __attribute__((deprecated));
 
 /**\brief Register callback for all control requests
  * \param dev usb device \ref _usbd_device
@@ -460,6 +463,12 @@ inline static void usbd_enable(usbd_device *dev, bool enable) {
  */
 inline static uint8_t usbd_connect(usbd_device *dev, bool connect) {
     return dev->driver->connect(connect);
+}
+
+/**\brief Retrieves status and capabilities.
+ * \return current HW status, enumeration speed and capabilities \ref USBD_HW_CAPS */
+inline static uint32_t usbd_getinfo(usbd_device *dev) {
+    return dev->driver->getinfo();
 }
 
 #endif //(__ASSEMBLER__)

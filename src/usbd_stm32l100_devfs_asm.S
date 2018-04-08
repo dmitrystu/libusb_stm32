@@ -84,9 +84,8 @@
     .globl  usbd_devfs_asm
     .align  2
 usbd_devfs_asm:
-    .long   0
+    .long   _getinfo
     .long   _enable
-    .long   _reset
     .long   _connect
     .long   _setaddr
     .long   _ep_config
@@ -174,6 +173,23 @@ _connect:
     bx      lr
     .size   _connect, . - _connect
 
+    .thumb_func
+    .type   _getinfo, %function
+_getinfo:
+    movs    r0, 0
+    ldr     r2, =#RCC_BASE
+    ldr     r1, [r2, #RCC_APB1ENR]
+    lsrs    r1, #24                     //USBEN -> CF
+    bcc     .L_getinfo_end
+    adds    r0, #USBD_HW_ENABLED
+    ldr     r2, =#SYSCFG_BASE
+    ldr     r1, [r2, #SYSCFG_PMC]
+    lsrs    r1, #1                      //PU -> CF
+    bcc     .L_getinfo_end
+    adds    r0, #USBD_HW_SPEED_FS
+.L_getinfo_end:
+    bx      lr
+    .size   _getinfo, . - _getinfo
 
     .thumb_func
     .type   _setaddr, %function
@@ -183,19 +199,6 @@ _setaddr:
     strh    r0, [r1, #USB_DADDR]     //USB->DADDR
     bx      lr
     .size   _setaddr, . - _setaddr
-
-    .thumb_func
-    .type   _reset, %function
-_reset:
-    ldr     r2, =#USB_REGBASE
-    movs    r0, #0x01           //FRES
-    ldrh    r1, [r2, #USB_CNTR]
-    orrs    r1, r0
-    strh    r1, [r2, #USB_CNTR]  // set FRES
-    bics    r1, r0
-    strh    r1, [r2, #USB_CNTR]  // clr FRES
-    bx      lr
-    .size   _reset, . - _reset
 
     .thumb_func
     .type   _get_frame, %function
@@ -542,7 +545,7 @@ _get_next_pma:
     bne     .L_gnp_chkaddr
     subs    r0, r3, r2
     blo     .L_gnp_exit
-    cmp     r0, #0x40       //check for the pma table overlap
+    cmp     r0, #0x20       //check for the pma table overlap
 .L_gnp_exit:
     pop     {r1, r3, r4, pc}
 
