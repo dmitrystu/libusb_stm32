@@ -71,7 +71,7 @@
     #endif
 #elif defined(STM32F102x6) || defined(STM32F102xB) || \
       defined(STM32F103x6) || defined(STM32F103xB) || \
-      defined(stm32F103xE) || defined(STM32F103xG)
+      defined(STM32F103xE) || defined(STM32F103xG)
     #define USB_EPBASE      0x40005C00
     #define USB_REGBASE     0x40005C40
     #define USB_CNTR        0x00
