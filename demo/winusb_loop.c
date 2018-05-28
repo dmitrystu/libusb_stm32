@@ -56,7 +56,7 @@ usbd_device udev;
 // USB device buffer (buffer for ep0 rx requests [usbd_ctlreq])
 // 32 bytes gives us an extra 24 bytes for an incoming data payload.
 // This can bet set as low as 2! (8 bytes to hold the setup
-uint32_t wusb_control_buffer[8]; 
+uint32_t wusb_control_buffer[8];
 
 
 // STM32CUBE RTC handle
@@ -228,31 +228,30 @@ static usbd_respond wusb_getdesc(usbd_ctlreq* req, void** address, uint16_t* len
 
 static usbd_respond wusb_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback) {
 
-    if ((req->bmRequestType == (USB_REQ_DEVTOHOST | USB_REQ_VENDOR | USB_REQ_DEVICE)) ||
-        (req->bmRequestType == (USB_REQ_DEVTOHOST | USB_REQ_VENDOR | USB_REQ_INTERFACE))) {
-        if (req->bRequest == MS_VENDOR_CODE) {
-            switch (req->wIndex) {
+    // NOTE: In-order to get Windows to request these, the device must return the 
+    //       special string descriptor at index 0xEE
+    if (req->bRequest == MS_VENDOR_CODE &&
+        req->bmRequestType == (USB_REQ_DEVTOHOST | USB_REQ_VENDOR | USB_REQ_DEVICE)) {
+        switch (req->wIndex) {
 
-            case 0x04: // Compatible ID Feature Descriptor
-                // NOTE: data_ptr and data_count are the same as the address and length params
-                // in the get descriptor request.
-                dev->status.data_ptr = (void*)&compatid_desc;
-                dev->status.data_count = sizeof(compatid_desc);
-                return usbd_ack;
+        case 0x04: // Compatible ID Feature Descriptor
+            // NOTE: data_ptr and data_count are the same as the address and length params
+            //       in the get descriptor request.
+            dev->status.data_ptr = (void*)&compatid_desc;
+            dev->status.data_count = sizeof(compatid_desc);
+            return usbd_ack;
 
-            case 0x05: // Microsoft Extended Properties Feature Descriptor
-                dev->status.data_ptr = (void*)&devguid_ext_prop_feature_desc;
-                dev->status.data_count = sizeof(devguid_ext_prop_feature_desc);
-                return usbd_ack;
+        case 0x05: // Microsoft Extended Properties Feature Descriptor
+            dev->status.data_ptr = (void*)&devguid_ext_prop_feature_desc;
+            dev->status.data_count = sizeof(devguid_ext_prop_feature_desc);
+            return usbd_ack;
 
-            default: ;
-            }
+        default: ;
         }
     }
 
     return usbd_fail;
 }
-
 
 
 static usbd_respond wusb_setconf(usbd_device* dev, uint8_t cfg) {
@@ -282,27 +281,27 @@ static usbd_respond wusb_setconf(usbd_device* dev, uint8_t cfg) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////// DEMO MAIN //////////////////////////////////////////////////
 static void cdc_loopback(usbd_device* dev, uint8_t event, uint8_t ep) {
-	int _t;
-	switch (event) {
-	case usbd_evt_eptx:
-		_t = usbd_ep_write(dev,
-		                   WUSB_EP1_TX,
-		                   &fifo[0],
-		                   (fpos < WUSB_EP1_MAXPACKET_SIZE) ? fpos : WUSB_EP1_MAXPACKET_SIZE);
-		if (_t > 0) {
-			memmove(&fifo[0], &fifo[_t], fpos - _t);
-			fpos -= _t;
-		}
-	case usbd_evt_eprx:
-		if (fpos < (sizeof(fifo) - WUSB_EP1_MAXPACKET_SIZE)) {
-			_t = usbd_ep_read(dev, WUSB_EP1_RX, &fifo[fpos], WUSB_EP1_MAXPACKET_SIZE);
-			if (_t > 0) {
-				fpos += _t;
-			}
-		}
-	default:
-		break;
-	}
+    int _t;
+    switch (event) {
+    case usbd_evt_eptx:
+        _t = usbd_ep_write(dev,
+                           WUSB_EP1_TX,
+                           &fifo[0],
+                           (fpos < WUSB_EP1_MAXPACKET_SIZE) ? fpos : WUSB_EP1_MAXPACKET_SIZE);
+        if (_t > 0) {
+            memmove(&fifo[0], &fifo[_t], fpos - _t);
+            fpos -= _t;
+        }
+    case usbd_evt_eprx:
+        if (fpos < (sizeof(fifo) - WUSB_EP1_MAXPACKET_SIZE)) {
+            _t = usbd_ep_read(dev, WUSB_EP1_RX, &fifo[fpos], WUSB_EP1_MAXPACKET_SIZE);
+            if (_t > 0) {
+                fpos += _t;
+            }
+        }
+    default:
+        break;
+    }
 }
 
 static void wusb_init_usbd(void) {
@@ -342,10 +341,11 @@ void USB_HANDLER(void) {
 }
 
 #ifdef CUBE_CALLS_MAIN
-	void wusb_main(void) {
+void wusb_main(void) {
 #else
 	void main(void) {
-#endif
+#endif
+
     wusb_init_usbd();
 
 #ifdef USB_NVIC_IRQ
