@@ -23,7 +23,7 @@ DEFINES     ?= STM32F1 STM32F103x6
 ARFLAGS      = -cvq
 LDFLAGS      = --specs=nano.specs -nostartfiles -Wl,--gc-sections
 INCLUDES     = $(CMSISDEV)/ST $(CMSISCORE) inc
-CFLAGS2      = -mthumb -Os -std=gnu99
+CFLAGS2      = -mthumb -Os -std=gnu99 -fshort-wchar
 
 OBJDIR       = obj
 SOURCES      = $(wildcard src/*.c) $(wildcard src/*.S)
