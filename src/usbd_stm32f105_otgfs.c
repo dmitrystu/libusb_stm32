@@ -481,4 +481,4 @@ const struct usbd_driver usbd_otgfs = {
     get_serialno_desc,
 };
 
-#endif //USBD_STM32L476
+#endif //USBD_STM32F105
