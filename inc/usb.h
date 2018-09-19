@@ -101,6 +101,14 @@
     #endif
     #endif
 
+#elif defined(STM32F105xC) || defined(STM32F107xC)
+    #define USBD_STM32F105
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_otgfs;
+    #define usbd_hw usbd_otgfs
+    #endif
+
 #else
     #error Unsupported STM32 family
 #endif
