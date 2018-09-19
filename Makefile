@@ -7,6 +7,7 @@ CC           = $(TOOLSET)gcc
 LD           = $(TOOLSET)gcc
 AR           = $(TOOLSET)gcc-ar
 OBJCOPY      = $(TOOLSET)objcopy
+DFU_UTIL	?= dfu-util
 
 ifeq ($(OS),Windows_NT)
 	RM = del /Q
@@ -74,7 +75,14 @@ $(OBJDIR):
 program: $(DOUT).hex
 	$(FLASH) --reset --format ihex write $(DOUT).hex
 
-demo: $(DOUT).hex
+program_dfu: $(DOUT).bin
+	$(DFU_UTIL) -d 0483:DF11 -a 0 -D $(DOUT).bin -s 0x08000000
+
+demo: $(DOUT).hex $(DOUT).bin
+
+$(DOUT).bin : $(DOUT).elf
+	@echo building $@
+	@$(OBJCOPY) -O binary $< $@
 
 $(DOUT).hex : $(DOUT).elf
 	@echo building $@
