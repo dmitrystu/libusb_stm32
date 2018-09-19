@@ -122,6 +122,19 @@ stm32f303xe 32f303re-nucleo:
 						DEFINES='STM32F3 STM32F303xE USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4 -mthumb'
 
+
+stm32f105xb:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f105xc.s' \
+						LDSCRIPT='demo/stm32f105xb.ld' \
+						DEFINES='STM32F1 STM32F105xC USBD_VBUS_DETECT USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m3 -mthumb -Wp,-w'
+
+stm32f107xb:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f107xc.s' \
+						LDSCRIPT='demo/stm32f105xb.ld' \
+						DEFINES='STM32F1 STM32F107xC HSE_25MHZ USBD_VBUS_DETECT USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m3 -mthumb -Wp,-w'
+
 stm32l052x8:
 	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32L0xx/Source/Templates/gcc/startup_stm32l052xx.s' \
 						LDSCRIPT='demo/stm32l052x8.ld' \
