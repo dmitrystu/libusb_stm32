@@ -58,7 +58,11 @@ inline static void Flush_TX(uint8_t ep) {
 }
 
 uint32_t getinfo(void) {
+#if defined(STM32F105xC) || defined(STM32F107xC)
+    if (!(RCC->AHBENR & RCC_AHBENR_OTGFSEN)) return STATUS_VAL(0);
+#else
     if (!(RCC->AHB2ENR & RCC_AHB2ENR_OTGFSEN)) return STATUS_VAL(0);
+#endif
     if (!(OTGD->DCTL & USB_OTG_DCTL_SDIS)) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
     return STATUS_VAL(USBD_HW_ENABLED);
 }
@@ -102,7 +106,11 @@ bool ep_isstalled(uint8_t ep) {
 void enable(bool enable) {
     if (enable) {
         /* enabling USB_OTG in RCC */
+#if defined(STM32F105xC) || defined(STM32F107xC)
+        _BST(RCC->AHBENR, RCC_AHBENR_OTGFSEN);
+#else
         _BST(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
+#endif
         /* do core soft reset */
         _WBS(OTG->GRSTCTL, USB_OTG_GRSTCTL_AHBIDL);
         _BST(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
@@ -116,9 +124,17 @@ void enable(bool enable) {
 #elif defined(USBD_VBUS_DETECT)
          OTG->GCCFG = USB_OTG_GCCFG_VBUSBSEN;
 #elif defined(USBD_SOF_OUT)
+#if defined(STM32F105xC) || defined(STM32F107xC)
+        OTG->GCCFG = USB_OTG_GCCFG_SOFOUTEN;
+#else
         OTG->GCCFG = USB_OTG_GCCFG_NOVBUSSENS | USB_OTG_GCCFG_SOFOUTEN;
+#endif
+#else
+#if defined(STM32F105xC) || defined(STM32F107xC)
+        OTG->GCCFG &= ~(USB_OTG_GCCFG_SOFOUTEN | USB_OTG_GCCFG_VBUSBSEN);
 #else
         OTG->GCCFG = USB_OTG_GCCFG_NOVBUSSENS;
+#endif
 #endif
         /* enable PHY clock */
         *OTGPCTL = 0;
@@ -145,11 +161,19 @@ void enable(bool enable) {
         /* unmask global interrupt */
         _BST(OTG->GAHBCFG, USB_OTG_GAHBCFG_GINT);
     } else {
+#if defined(STM32F105xC) || defined(STM32F107xC)
+        if (RCC->AHBENR & RCC_AHBENR_OTGFSEN) {
+            _BST(RCC->AHBRSTR, RCC_AHBRSTR_OTGFSRST);
+            _BCL(RCC->AHBRSTR, RCC_AHBRSTR_OTGFSRST);
+            _BCL(RCC->AHBENR, RCC_AHBENR_OTGFSEN);
+        }
+#else
         if (RCC->AHB2ENR & RCC_AHB2ENR_OTGFSEN) {
             _BST(RCC->AHB2RSTR, RCC_AHB2RSTR_OTGFSRST);
             _BCL(RCC->AHB2RSTR, RCC_AHB2RSTR_OTGFSRST);
             _BCL(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
         }
+#endif
     }
 }
 
@@ -204,7 +228,7 @@ static bool set_tx_fifo(uint8_t ep, uint16_t epsize) {
 
 bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
     if (ep == 0) {
-        /* configureing control endpoint EP0 */
+        /* configuring control endpoint EP0 */
         uint32_t mpsize;
         if (epsize <= 0x08) {
             epsize = 0x08;

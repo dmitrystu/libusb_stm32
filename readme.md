@@ -55,7 +55,13 @@
         <td>STM32F4x5 STM32F4x7 STM32F4x9</td>
         <td nowrap>Doublebuffered<br/>6 endpoints<br/>VBUS detection<br/>SOF output</td>
         <td>usbd_otgfs</td>
-        <td>usbd_stm32l429_otgfs.c</td>
+        <td>usbd_stm32f429_otgfs.c</td>
+    </tr>
+    <tr>
+        <td>STM32F105 STM32F107</td>
+        <td nowrap>Doublebuffered<br/>6 endpoints<br/>VBUS detection<br/>SOF output</td>
+        <td>usbd_otgfs</td>
+        <td>usbd_stm32f429_otgfs.c</td>
     </tr>
     <tr>
         <td>STM32F105 STM32F107</td>

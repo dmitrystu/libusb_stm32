@@ -73,7 +73,8 @@
 #elif defined(STM32F405xx) || defined(STM32F415xx) || \
       defined(STM32F407xx) || defined(STM32F417xx) || \
       defined(STM32F427xx) || defined(STM32F437xx) || \
-      defined(STM32F429xx) || defined(STM32F439xx)
+      defined(STM32F429xx) || defined(STM32F439xx) || \
+      defined(STM32F105xC) || defined(STM32F107xC)
 
     #define USBD_STM32F429
 
