@@ -531,7 +531,7 @@ uint16_t get_serialno_desc(void *buffer) {
     return 18;
 }
 
-const struct usbd_driver usbd_devfs = {
+ __attribute__((externally_visible)) const struct usbd_driver usbd_devfs = {
     getinfo,
     enable,
     connect,

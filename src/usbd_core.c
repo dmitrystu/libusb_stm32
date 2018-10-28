@@ -352,6 +352,6 @@ static void usbd_process_evt(usbd_device *dev, uint8_t evt, uint8_t ep) {
     if (dev->events[evt]) dev->events[evt](dev, evt, ep);
 }
 
-void usbd_poll(usbd_device *dev) {
+ __attribute__((externally_visible)) void usbd_poll(usbd_device *dev) {
     return dev->driver->poll(dev, usbd_process_evt);
 }
