@@ -15,7 +15,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
 #include "usb.h"
 
 #define _MIN(a, b) ((a) < (b)) ? (a) : (b)

@@ -29,6 +29,8 @@
 #define USBD_DP_PORT        /**<\brief DP pullup port for F103/F303 driver.*/
 #define USBD_DP_PIN         /**<\brief DP pullup pin for F103/F303 driver.*/
 #define USBD_SOF_OUT        /**<\brief Enables SOF output pin for F4 OTGFS. */
+#define USBD_PRIMARY_OTGHS  /**<\brief Sets OTGHS as primary interface for F4*/
+#define USBD_USE_EXT_ULPI   /**<\brief Enables external ULPI interface for OTGHS */
 /** @} */
 #endif
 

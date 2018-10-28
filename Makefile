@@ -166,3 +166,9 @@ stm32f429xi 32f429zi-nucleo:
 						LDSCRIPT='demo/stm32f429xi.ld' \
 						DEFINES='STM32F4 STM32F429xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4 -mthumb'
+
+stm32f429xi_hs 32f429zi-nucleo_hs:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f429xx.s' \
+						LDSCRIPT='demo/stm32f429xi.ld' \
+						DEFINES='STM32F4 STM32F429xx USBD_PRIMARY_OTGHS USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4 -mthumb'

@@ -75,12 +75,18 @@
       defined(STM32F427xx) || defined(STM32F437xx) || \
       defined(STM32F429xx) || defined(STM32F439xx)
 
-    #define USBD_STM32F429
+    #define USBD_STM32F429FS
+    #define USBD_STM32F429HS
 
     #if !defined(__ASSEMBLER__)
     extern const struct usbd_driver usbd_otgfs;
+    extern const struct usbd_driver usbd_otghs;
+    #if defined(USBD_PRIMARY_OTGHS)
+    #define usbd_hw usbd_otghs
+    #else
     #define usbd_hw usbd_otgfs
     #endif
+    #endif  //__ASSEMBLER__
 
 #elif defined(STM32F102x6) || defined(STM32F102xB) || \
       defined(STM32F103x6) || defined(STM32F103xB) || \
