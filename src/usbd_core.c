@@ -15,7 +15,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
 #include "usb.h"
 
 #define _MIN(a, b) ((a) < (b)) ? (a) : (b)
@@ -101,7 +100,7 @@ static usbd_respond usbd_process_devrq (usbd_device *dev, usbd_ctlreq *req) {
         req->data[1] = 0;
         return usbd_ack;
     case USB_STD_SET_ADDRESS:
-        if (dev->driver->caps & USBD_HW_ADDRFST) {
+        if (usbd_getinfo(dev) & USBD_HW_ADDRFST) {
             usbd_set_address(dev, req);
         } else {
             dev->complete_callback = usbd_set_address;
@@ -352,31 +351,6 @@ static void usbd_process_evt(usbd_device *dev, uint8_t evt, uint8_t ep) {
     if (dev->events[evt]) dev->events[evt](dev, evt, ep);
 }
 
-void usbd_poll(usbd_device *dev) {
+ __attribute__((externally_visible)) void usbd_poll(usbd_device *dev) {
     return dev->driver->poll(dev, usbd_process_evt);
-}
-
-void usbd_control(usbd_device *dev, enum usbd_commands cmd) {
-    switch (cmd) {
-    case usbd_cmd_enable:
-        dev->driver->enable(true);
-        dev->status.device_state = usbd_state_disconnected;
-        break;
-    case usbd_cmd_disable:
-        dev->driver->enable(false);
-        dev->status.device_state = usbd_state_disabled;
-        break;
-    case usbd_cmd_connect:
-        dev->driver->connect(true);
-        break;
-    case usbd_cmd_disconnect:
-        dev->driver->connect(false);
-        dev->status.device_state = usbd_state_disconnected;
-        break;
-    case usbd_cmd_reset:
-        dev->driver->reset();
-        break;
-    default:
-        break;
-    }
 }

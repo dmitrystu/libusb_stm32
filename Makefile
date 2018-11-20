@@ -7,6 +7,7 @@ CC           = $(TOOLSET)gcc
 LD           = $(TOOLSET)gcc
 AR           = $(TOOLSET)gcc-ar
 OBJCOPY      = $(TOOLSET)objcopy
+DFU_UTIL	?= dfu-util
 
 ifeq ($(OS),Windows_NT)
 	RM = del /Q
@@ -23,7 +24,7 @@ DEFINES     ?= STM32F1 STM32F103x6
 ARFLAGS      = -cvq
 LDFLAGS      = --specs=nano.specs -nostartfiles -Wl,--gc-sections
 INCLUDES     = $(CMSISDEV)/ST $(CMSISCORE) inc
-CFLAGS2      = -mthumb -Os -std=gnu99
+CFLAGS2      = -mthumb -Os -std=gnu99 -fshort-wchar
 
 OBJDIR       = obj
 SOURCES      = $(wildcard src/*.c) $(wildcard src/*.S)
@@ -48,6 +49,8 @@ help all:
 	@echo '  32l476rg-nucleo'
 	@echo '  stm32l476rg   CDC loopback demo for STM32L476xG based boards'
 	@echo '  stm32l052x8   CDC loopback demo for STM32L052x8 based boards'
+	@echo '  32f429zi-nucleo'
+	@echo '  stm32f429xi   CDC loopback demo for STM32F429xI based boards'
 	@echo '  doc           DOXYGEN documentation'
 	@echo '  module        static library module using following envars (defaults)'
 	@echo '                MODULE  module name (libusb.a)'
@@ -72,7 +75,14 @@ $(OBJDIR):
 program: $(DOUT).hex
 	$(FLASH) --reset --format ihex write $(DOUT).hex
 
-demo: $(DOUT).hex
+program_dfu: $(DOUT).bin
+	$(DFU_UTIL) -d 0483:DF11 -a 0 -D $(DOUT).bin -s 0x08000000
+
+demo: $(DOUT).hex $(DOUT).bin
+
+$(DOUT).bin : $(DOUT).elf
+	@echo building $@
+	@$(OBJCOPY) -O binary $< $@
 
 $(DOUT).hex : $(DOUT).elf
 	@echo building $@
@@ -120,6 +130,19 @@ stm32f303xe 32f303re-nucleo:
 						DEFINES='STM32F3 STM32F303xE USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4 -mthumb'
 
+
+stm32f105xb:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f105xc.s' \
+						LDSCRIPT='demo/stm32f105xb.ld' \
+						DEFINES='STM32F1 STM32F105xC USBD_VBUS_DETECT USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m3 -mthumb -Wp,-w'
+
+stm32f107xb:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f107xc.s' \
+						LDSCRIPT='demo/stm32f105xb.ld' \
+						DEFINES='STM32F1 STM32F107xC HSE_25MHZ USBD_VBUS_DETECT USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m3 -mthumb -Wp,-w'
+
 stm32l052x8:
 	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32L0xx/Source/Templates/gcc/startup_stm32l052xx.s' \
 						LDSCRIPT='demo/stm32l052x8.ld' \
@@ -136,4 +159,16 @@ stm32l476xg 32l476rg-nucleo:
 	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l476xx.s' \
 						LDSCRIPT='demo/stm32l476xg.ld' \
 						DEFINES='STM32L4 STM32L476xx USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4 -mthumb'
+
+stm32f429xi 32f429zi-nucleo:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f429xx.s' \
+						LDSCRIPT='demo/stm32f429xi.ld' \
+						DEFINES='STM32F4 STM32F429xx USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4 -mthumb'
+
+stm32f429xi_hs 32f429zi-nucleo_hs:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f429xx.s' \
+						LDSCRIPT='demo/stm32f429xi.ld' \
+						DEFINES='STM32F4 STM32F429xx USBD_PRIMARY_OTGHS USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4 -mthumb'

@@ -83,9 +83,8 @@
     .globl  usbd_devfs_asm
     .align  2
 usbd_devfs_asm:
-    .long   USBD_HW_BC
+    .long   _getinfo
     .long   _enable
-    .long   _reset
     .long   _connect
     .long   _setaddr
     .long   _ep_config
@@ -205,19 +204,6 @@ _setaddr:
     .size   _setaddr, . - _setaddr
 
     .thumb_func
-    .type   _reset, %function
-_reset:
-    ldr     r2, =#USB_REGBASE
-    movs    r0, #0x01           //FRES
-    ldrh    r1, [r2, #USB_CNTR] //USB->CNTR
-    orrs    r1, r0
-    strh    r1, [r2, #USB_CNTR] // set FRES
-    bics    r1, r0
-    strh    r1, [r2, #USB_CNTR] // clr FRES
-    bx      lr
-    .size   _reset, . - _reset
-
-    .thumb_func
     .type   _get_frame, %function
 _get_frame:
     ldr     r0, =#USB_REGBASE
@@ -270,8 +256,25 @@ _enable:
     .size   _enable, . - _enable
 
     .thumb_func
-    .type   _ep_setstall, %function
+    .type   _getinfo, %function
+_getinfo:
+    movs    r0, #USBD_HW_BC
+    ldr     r2, =#RCC_BASE
+    ldr     r1, [r2, #RCC_APB1ENR]
+    lsrs    r1, #24                     //USBEN -> CF
+    bcc     .L_getinfo_end
+    adds    r0, #USBD_HW_ENABLED
+    ldr     r2, =#USB_REGBASE
+    ldr     r1, [r2, #USB_BCDR]
+    lsrs    r1, #15                     //DPPU -> CF
+    bcc     .L_getinfo_end
+    adds    r0, #USBD_HW_SPEED_FS
+.L_getinfo_end:
+    bx      lr
+    .size   _getinfo, . - _getinfo
 
+    .thumb_func
+    .type   _ep_setstall, %function
 /*void ep_settall(uint8_t ep, bool stall)
  * in  R0 <- endpoint number
  * in  R1 <- 0 if unstall, !0 if stall
@@ -550,7 +553,7 @@ _get_next_pma:
     bhs     .L_gnp_chkaddr
     subs    r0, r3, r2
     blo     .L_gnp_exit
-    cmp     r0, #0x40       //check for the pma table overlap
+    cmp     r0, #0x20       //check for the pma table overlap
 .L_gnp_exit:
     pop     {r1, r3, r4, pc}
     .size   _get_next_pma, . - _get_next_pma

@@ -91,6 +91,82 @@ static void cdc_init_rcc (void) {
     /* switch to PLL */
     _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+
+#elif defined(STM32F429xx)
+    /* set flash latency 2WS */
+    _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_2WS);
+    /* setting up PLL 16MHz HSI, VCO=144MHz, PLLP = 72MHz PLLQ = 48MHz  */
+    _BMD(RCC->PLLCFGR,
+        RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLQ | RCC_PLLCFGR_PLLP,
+        _VAL2FLD(RCC_PLLCFGR_PLLM, 8) | _VAL2FLD(RCC_PLLCFGR_PLLN, 72) | _VAL2FLD(RCC_PLLCFGR_PLLQ, 3));
+    /* enabling PLL */
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
+    /* switching to PLL */
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+    #if defined(USBD_PRIMARY_OTGHS)
+    /* enabling GPIOB and setting PB13, PB14 and PB15 to AF11 (USB_OTG2FS) */
+    _BST(RCC->AHB1ENR, RCC_AHB1ENR_GPIOBEN);
+    #if defined(USBD_VBUS_DETECT)
+    _BST(GPIOB->AFR[1], (0x0C << 24) | (0x0C << 28) | (0x0C << 20));
+    _BMD(GPIOB->MODER, (0x03 << 28) | (0x03 << 30) | (0x03 << 26), (0x02 << 28) | (0x02 << 30) | (0x02 << 26));
+    #else //defined(USBD_VBUS_DETECT)
+    _BST(GPIOB->AFR[1], (0x0C << 24) | (0x0C << 28));
+    _BMD(GPIOB->MODER, (0x03 << 28) | (0x03 << 30), (0x02 << 28) | (0x02 << 30));
+    #endif //defined(USBD_VBUS_DETECT)
+    #else  //defined(USBD_PRIMARY_OTGHS)
+    /* enabling GPIOA and setting PA11 and PA12 to AF10 (USB_FS) */
+    _BST(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN);
+    _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
+    _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
+    #endif //defined(USBD_PRIMARY_OTGHS)
+
+#elif defined(STM32F105xC) || defined(STM32F107xC)
+    _BST(RCC->CR, RCC_CR_HSION);
+    _WBS(RCC->CR, RCC_CR_HSIRDY);
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_HSI);
+    _BMD(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_HSI);
+    /* set flash latency 1WS */
+    _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_1);
+
+    _BST(RCC->CR, RCC_CR_HSEON);
+    _WBS(RCC->CR, RCC_CR_HSERDY);
+
+    /* switch to HSE */
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_HSE);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_HSE);
+
+    #if defined(HSE_25MHZ)
+    RCC->CFGR = RCC_CFGR_PLLMULL9 | RCC_CFGR_PLLSRC | \
+                RCC_CFGR_ADCPRE_DIV8 | RCC_CFGR_PPRE2_DIV1 | \
+                RCC_CFGR_PPRE1_DIV2 | RCC_CFGR_HPRE_DIV1 | \
+                RCC_CFGR_OTGFSPRE*0;
+    /* PREDIV1SRC= PLL2, PLL2MUL = 8, PREDIV1 = 5, PREDIV2=5 */
+    RCC->CFGR2 = RCC_CFGR2_PREDIV1SRC | RCC_CFGR2_PLL2MUL8 | \
+                 RCC_CFGR2_PREDIV1_DIV5 | RCC_CFGR2_PREDIV2_DIV5;
+
+    _BST(RCC->CR, RCC_CR_PLL2ON);
+    _WBS(RCC->CR, RCC_CR_PLL2RDY);
+
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
+    #else
+    RCC->CFGR = RCC_CFGR_PLLMULL9 | RCC_CFGR_PLLSRC | RCC_CFGR_ADCPRE_DIV8 | \
+                RCC_CFGR_PPRE2_DIV1 | RCC_CFGR_PPRE1_DIV2 | RCC_CFGR_HPRE_DIV1;
+    _BMD(RCC->CFGR2, RCC_CFGR2_PREDIV1, RCC_CFGR2_PREDIV1_DIV1);
+    _BCL(RCC->CFGR2, RCC_CFGR2_PREDIV1SRC);
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
+    #endif
+
+    RCC->CFGR |= RCC_CFGR_MCO_PLLCLK_DIV2;
+
+    /* set flash latency 2WS */
+    _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_2);
+    /* switch to PLL */
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
 #else
     #error Not supported
 #endif

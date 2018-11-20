@@ -34,9 +34,17 @@
     #define USB_BCDR        0x18
     #define USB_PMABASE     0x40006000
     #define RCC_BASE        0x40021000
-    #define RCC_APB1RSTR    0x28
-    #define RCC_APB1ENR     0x38
-    #define UID_BASE        0x1FF80050
+    #if defined(STM32F042x6) || defined(STM32F048xx) || \
+        defined(STM32F070x6) || defined(STM32F070xB) || \
+        defined(STM32F072xB) || defined(STM32F078xx)
+        #define RCC_APB1RSTR    0x10
+        #define RCC_APB1ENR     0x1C
+        #define UID_BASE        0x1FFFF7AC
+    #else
+        #define RCC_APB1RSTR    0x28
+        #define RCC_APB1ENR     0x38
+        #define UID_BASE        0x1FF80050
+    #endif
 
 #elif defined(STM32L1)
 /* common definitions for STM31L100xx STM32L151xx STM32L152xx STM32L162xx */
@@ -63,7 +71,7 @@
     #endif
 #elif defined(STM32F102x6) || defined(STM32F102xB) || \
       defined(STM32F103x6) || defined(STM32F103xB) || \
-      defined(stm32F103xE) || defined(STM32F103xG)
+      defined(STM32F103xE) || defined(STM32F103xG)
     #define USB_EPBASE      0x40005C00
     #define USB_REGBASE     0x40005C40
     #define USB_CNTR        0x00
@@ -93,6 +101,7 @@
     #define GPIOG           0x40012000
     #define GPIO_CRL        0x00
     #define GPIO_CRH        0x04
+    #define GPIO_IDR        0x08
     #define GPIO_BSRR       0x10
 
 
