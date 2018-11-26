@@ -28,9 +28,6 @@
     defined(STM32L062xx) || defined(STM32L063xx) || \
     defined(STM32L072xx) || defined(STM32L073xx) || \
     defined(STM32L082xx) || defined(STM32L083xx) || \
-    defined(STM32L432xx) || defined(STM32L433xx) || \
-    defined(STM32L442xx) || defined(STM32L443xx) || \
-    defined(STM32L452xx) || defined(STM32L462xx) || \
     defined(STM32F042x6) || defined(STM32F048xx) || \
     defined(STM32F070x6) || defined(STM32F070xB) || \
     defined(STM32F072xB) || defined(STM32F078xx)
@@ -45,6 +42,22 @@
     #else
     #define usbd_hw usbd_devfs
     #endif
+    #endif
+
+#elif defined(STM32L432xx) || defined(STM32L433xx) || \
+      defined(STM32L442xx) || defined(STM32L443xx) || \
+      defined(STM32L452xx) || defined(STM32L462xx)
+
+    #define USBD_STM32L433
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_devfs;
+    //extern const struct usbd_driver usbd_devfs_asm;
+    //#if defined(USBD_ASM_DRIVER)
+    //#define usbd_hw usbd_devfs_asm
+    //#else
+    //#define usbd_hw usbd_devfs
+    //#endif
     #endif
 
 #elif defined(STM32L1)

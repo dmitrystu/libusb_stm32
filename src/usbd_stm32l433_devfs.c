@@ -18,7 +18,7 @@
 #include "stm32.h"
 #include "usb.h"
 
-#if defined(USBD_STM32L052)
+#if defined(USBD_STM32L433)
 
 #ifndef USB_PMASIZE
     #warning PMA memory size is not defined. Use 1k by default
@@ -93,7 +93,7 @@ static uint16_t get_next_pma(uint16_t sz) {
 }
 
 uint32_t getinfo(void) {
-    if (!(RCC->APB1ENR & RCC_APB1ENR_USBEN)) return STATUS_VAL(0);
+    if (!(RCC->APB1ENR1 & RCC_APB1ENR1_USBFSEN)) return STATUS_VAL(0);
     if (USB->BCDR & USB_BCDR_DPPU) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
     return STATUS_VAL(USBD_HW_ENABLED);
 }
@@ -145,18 +145,18 @@ bool ep_isstalled(uint8_t ep) {
 
 void enable(bool enable) {
     if (enable) {
-        RCC->APB1ENR  |=  RCC_APB1ENR_USBEN;
-        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
-        RCC->APB1RSTR &= ~RCC_APB1RSTR_USBRST;
+        RCC->APB1ENR1  |=  RCC_APB1ENR1_USBFSEN;
+        RCC->APB1RSTR1 |= RCC_APB1RSTR1_USBFSRST;
+        RCC->APB1RSTR1 &= ~RCC_APB1RSTR1_USBFSRST;
         USB->CNTR = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_ERRM |
 #if !defined(USBD_SOF_DISABLED)
         USB_CNTR_SOFM |
 #endif
         USB_CNTR_SUSPM | USB_CNTR_WKUPM;
-    } else if (RCC->APB1ENR & RCC_APB1ENR_USBEN) {
+    } else if (RCC->APB1ENR1 & RCC_APB1ENR1_USBFSEN) {
         USB->BCDR = 0;
-        RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
-        RCC->APB1ENR &= ~RCC_APB1ENR_USBEN;
+        RCC->APB1RSTR1 |= RCC_APB1RSTR1_USBFSRST;
+        RCC->APB1ENR1 &= ~RCC_APB1ENR1_USBFSEN;
     }
 }
 
