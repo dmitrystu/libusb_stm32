@@ -108,6 +108,9 @@ extern "C" {
 #define USB_CLASS_VENDOR            0xFF    /**<\brief Vendor specific class.*/
 #define USB_SUBCLASS_VENDOR         0xFF    /**<\brief Vendor specific subclass.*/
 #define USB_PROTO_VENDOR            0xFF    /**<\brief Vendor specific protocol.*/
+#define USB_CLASS_IAD               0xEF    /**<\brief Class defined on interface association level.*/
+#define USB_SUBCLASS_IAD            0x02    /**<\brief Subclass defined on interface association level.*/
+#define USB_PROTO_IAD               0x01    /**<\brief Protocol defined on interface association level.*/
 /** @} */
 
 /**\name USB Standard descriptor types
