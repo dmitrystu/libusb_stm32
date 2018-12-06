@@ -52,12 +52,12 @@
 
     #if !defined(__ASSEMBLER__)
     extern const struct usbd_driver usbd_devfs;
-    //extern const struct usbd_driver usbd_devfs_asm;
-    //#if defined(USBD_ASM_DRIVER)
-    //#define usbd_hw usbd_devfs_asm
-    //#else
-    //#define usbd_hw usbd_devfs
-    //#endif
+    extern const struct usbd_driver usbd_devfs_asm;
+    #if defined(USBD_ASM_DRIVER)
+    #define usbd_hw usbd_devfs_asm
+    #else
+    #define usbd_hw usbd_devfs
+    #endif
     #endif
 
 #elif defined(STM32L1)

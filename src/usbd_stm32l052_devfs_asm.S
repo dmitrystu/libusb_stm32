@@ -18,7 +18,7 @@
 #endif
 
 #include "usb.h"
-#if defined(USBD_STM32L052)
+#if defined(USBD_STM32L052) || defined(USBD_STM32L433)
 #include "memmap.inc"
 
 #define EP_SETUP    0x0800
@@ -219,7 +219,8 @@ _enable:
     ldr     r1, =#USB_REGBASE     //USB->CNTR
     ldr     r2, =#RCC_BASE        //RCC
     movs    r3, #0x01
-    lsls    r3, #23             //USBEN or USBRST
+//    lsls    r3, #23             //USBEN or USBRST
+    lsls    r3, #RCC_USBEN        //USBEN or USBRST
     tst     r0, r0
     beq     .L_disable
 .L_enable:

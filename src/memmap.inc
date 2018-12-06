@@ -17,9 +17,6 @@
     defined(STM32L062xx) || defined(STM32L063xx) || \
     defined(STM32L072xx) || defined(STM32L073xx) || \
     defined(STM32L082xx) || defined(STM32L083xx) || \
-    defined(STM32L432xx) || defined(STM32L433xx) || \
-    defined(STM32L442xx) || defined(STM32L443xx) || \
-    defined(STM32L452xx) || defined(STM32L462xx) || \
     defined(STM32F042x6) || defined(STM32F048xx) || \
     defined(STM32F070x6) || defined(STM32F070xB) || \
     defined(STM32F072xB) || defined(STM32F078xx) \
@@ -34,6 +31,7 @@
     #define USB_BCDR        0x18
     #define USB_PMABASE     0x40006000
     #define RCC_BASE        0x40021000
+    #define RCC_USBEN       23
     #if defined(STM32F042x6) || defined(STM32F048xx) || \
         defined(STM32F070x6) || defined(STM32F070xB) || \
         defined(STM32F072xB) || defined(STM32F078xx)
@@ -45,6 +43,24 @@
         #define RCC_APB1ENR     0x38
         #define UID_BASE        0x1FF80050
     #endif
+
+#elif defined(STM32L432xx) || defined(STM32L433xx) || \
+      defined(STM32L442xx) || defined(STM32L443xx) || \
+      defined(STM32L452xx) || defined(STM32L462xx)
+    #define USB_EPBASE      0x40006800
+    #define USB_REGBASE     0x40006840
+    #define USB_CNTR        0x00
+    #define USB_ISTR        0x04
+    #define USB_FNR         0x08
+    #define USB_DADDR       0x0C
+    #define USB_BTABLE      0x10
+    #define USB_BCDR        0x18
+    #define USB_PMABASE     0x40006C00
+    #define RCC_BASE        0x40021000
+    #define RCC_APB1RSTR    0x38
+    #define RCC_APB1ENR     0x58
+    #define UID_BASE        0x1FFF7590
+    #define RCC_USBEN       26
 
 #elif defined(STM32L1)
 /* common definitions for STM31L100xx STM32L151xx STM32L152xx STM32L162xx */
