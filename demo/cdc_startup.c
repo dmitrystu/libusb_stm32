@@ -49,7 +49,7 @@ static void cdc_init_rcc (void) {
     _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
 
-#elif defined(STM32L4)
+#elif defined(STM32L476xx)
     _BST(RCC->APB1ENR1, RCC_APB1ENR1_PWREN);
     /* Set power Range 1 */
     _BMD(PWR->CR1, PWR_CR1_VOS, PWR_CR1_VOS_0);
@@ -167,6 +167,23 @@ static void cdc_init_rcc (void) {
     /* switch to PLL */
     _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+#elif defined(STM32L433xx)
+    /* using HSI16 as AHB/CPU clock, HSI48 as USB PHY clock */
+    _BST(RCC->CR, RCC_CR_HSION);
+    _WBS(RCC->CR, RCC_CR_HSIRDY);
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_HSI);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_HSI);
+    _BST(RCC->CRRCR, RCC_CRRCR_HSI48ON);
+    _WBS(RCC->CRRCR, RCC_CRRCR_HSI48RDY);
+    _BMD(RCC->CCIPR, RCC_CCIPR_CLK48SEL, 0);
+    /* setup PA11 PA12 to AF10 (USB FS) */
+    _BST(RCC->AHB2ENR, RCC_AHB2ENR_GPIOAEN);
+    _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
+    _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
+    /* Disabling USB Vddusb power isolation. Vusb connected to Vdd */
+    _BST(RCC->APB1ENR1, RCC_APB1ENR1_PWREN);
+    _BST(PWR->CR2, PWR_CR2_USV);
+
 #else
     #error Not supported
 #endif
