@@ -76,12 +76,11 @@
 
     .syntax unified
     .cpu cortex-m0plus
-    .text
     .thumb
 
-
+    .align  4
+    .section .rodata.usbd_devfs_asm
     .globl  usbd_devfs_asm
-    .align  2
 usbd_devfs_asm:
     .long   _getinfo
     .long   _enable
@@ -98,7 +97,8 @@ usbd_devfs_asm:
     .long   _get_serial_desc
     .size   usbd_devfs_asm, . - usbd_devfs_asm
 
-
+    .text
+    .align 2
     .thumb_func
     .type _get_serial_desc, %function
 
