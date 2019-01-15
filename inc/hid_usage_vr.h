@@ -23,7 +23,7 @@
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
  * @{ */
 
-#define HID_USAGE_PAGE_VR               0x03    /**<\brief VR controls usage page.*/
+#define HID_PAGE_VR                     0x03    /**<\brief VR controls usage page.*/
 #define HID_VR_BELT                     0x01    /**<\brief CA Belt device.*/
 #define HID_VR_BODY_SUIT                0x02    /**<\brief CA Body suit device.*/
 #define HID_VR_FLEXTOR                  0x03    /**<\brief CA Flextor device.*/

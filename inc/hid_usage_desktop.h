@@ -27,7 +27,7 @@
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
  * @{ */
 
-#define HID_USAGE_PAGE_DESKTOP      0x01    /**<\brief Desktop usage page.*/
+#define HID_PAGE_DESKTOP      0x01    /**<\brief Desktop usage page.*/
 
 /**\name Application Usages
  * @{ */

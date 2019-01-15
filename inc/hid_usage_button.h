@@ -27,7 +27,7 @@
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
  * @{ */
 
-#define HID_USAGE_PAGE_BUTTON           0x09    /**<\brief HID usage page for Buttons */
+#define HID_PAGE_BUTTON           0x09    /**<\brief HID usage page for Buttons */
 
 #define HID_BUTTON_NO_PRESSED           0x00    /**<\brief No button pressed */
 #define HID_BUTTON_1                    0x01    /**<\brief Button 1 pressed */

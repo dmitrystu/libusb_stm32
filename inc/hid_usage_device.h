@@ -22,7 +22,7 @@
  * \details This module based on
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
  * @{ */
-#define HID_DEVICE_PAGE_DEVICE         0x06    /**<\brief Generic device control usage page.*/
+#define HID_PAGE_DEVICE                0x06    /**<\brief Generic device control usage page.*/
 #define HID_DEVICE_BATTERY_STRENGHT    0x20    /**<\brief DV Current battery status.*/
 #define HID_DEVICE_WIRELESS_CHANNEL    0x21    /**<\brief DV Logical wireless channel.*/
 #define HID_DEVICE_WIRELESS_ID         0x22    /**<\brief DV Unique wireless device ID.*/

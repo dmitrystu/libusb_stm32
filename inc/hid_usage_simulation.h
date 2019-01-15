@@ -27,7 +27,7 @@
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
  * @{ */
 
-#define HID_USAGE_PAGE_SIMULATION       0x02    /**<\brief Sumulation usage page.*/
+#define HID_PAGE_SIMULATION             0x02    /**<\brief Sumulation usage page.*/
 #define HID_SIMUL_SPORTS                0x08    /**<\brief CA Genetic sports simulation device.*/
 
 /**\name Flight Simulation Devices

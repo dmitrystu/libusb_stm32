@@ -27,7 +27,7 @@
  * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
  * @{ */
 
-#define HID_USAGE_PAGE_SPORT            0x04
+#define HID_PAGE_SPORT                  0x04
 
 #define HID_SPORT_BASEBALL_BAT          0x01
 #define HID_SPORT_GOLF_CLUB             0x02
