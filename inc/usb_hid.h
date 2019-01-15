@@ -25,6 +25,29 @@
  * \details This module based on
  * + [Device Class Definition for Human Interface Devices (HID) Version 1.11](http://www.usb.org/developers/hidpage/HID1_11.pdf)
  * + [LUFA - the Lightweight USB Framework for AVRs.](https://github.com/abcminiuser/lufa)
+ *
+ * \par Control usage types
+ *                Type     | Logical min | Logical max |                     Flags | Signal | Operation
+ *-------------------------|-------------|-------------|---------------------------|--------|----------------
+ *[LC] Linear control      | -1          | 1           | Relative, Preferred state |   Edge | Inc / Dec value
+ *                        || -Min        | Max         | Relative, Preferred state |  Level | Inc / Dec value by n
+ *                        ||  Min        | Max         | Absolute, Preferred state |   N/A  | Absolute value
+ *[OOC] ON/OFF control     | -1          | 1           | Relative, No preferred    |   Edge | 1 asserts ON; -1 assertsOFF
+ *                        || 0           | 1           | Relative, Preferred state |   Edge | 0->1 toggles ON/OFF
+ *                        || 0           | 1           | Absolute, No preferred    |  Level | 0 asserts ON; 1 asserts OFF
+ *[MC] Momentary control   | 0           | 1           | Absolute, Preferred state |  Level | 0 asserts, 1 deasserts condition
+ *[OSC] One shot control   | 0           | 1           | Relative, Preferred state |   Edge | 0->1 triggers an event
+ *[RTC] Re-trigger control | 0           | 1           | Absolute, Preferred state |  Level | 1 trigger an event
+ *
+ *\par Data usage types
+ *Type               | Flgs                         | Description
+ *-------------------|------------------------------|------------------------
+ *[SEL] Selector     | Array                        | Contained a Named Array
+ *[SV] Static value  | Constant, Variable, Absolute | Read-only multiple-bit value
+ *[SF] Static flag   | Constant, Variable, Absolute | Read-only single-bit value
+ *[DV] Dynamic value | Data, Variable, Absolute     | Read-write multiple-bit value
+ *[DF] Dynamic flag  | Data, Variable, Absolute     | Read-write single-bit value
+ *
  * @{ */
 
 /**\name USB HID class code */
@@ -53,9 +76,9 @@
 #define USB_HID_GETREPORT           0x01    /**<\brief Request to get the current HID report from the device.*/
 #define USB_HID_GETIDLE             0x02    /**<\brief Request to get the current device idle count.*/
 #define USB_HID_GETPROTOCOL         0x03    /**<\brief Request to get the current HID report protocol mode.*/
-#define USB_HID_SETREPORT           0x09    /**< Request to set the current HID report to the device.*/
+#define USB_HID_SETREPORT           0x09    /**<\brief Request to set the current HID report to the device.*/
 #define USB_HID_SETIDLE             0x0A    /**<\brief Request to set the device's idle count.*/
-#define USB_HID_SETPROTOCOL         0x0B    /**< Request to set the current HID report protocol mode.*/
+#define USB_HID_SETPROTOCOL         0x0B    /**<\brief Request to set the current HID report protocol mode.*/
 /** @} */
 
 /**\name USB HID class-specified descriptor types
@@ -104,6 +127,20 @@
 #define USB_HID_COUNTRY_TR_F        35      /**<\brief Turkish-F */
 /** @} */
 
+/**\name HID Collections types
+ * @{ */
+#define HID_PHYSICAL_COLLECTION             0x00    /**\brief A physical collection of items.*/
+#define HID_APPLICATION_COLLECTION          0x01    /**\brief Applies a name to a top level collection which the operating
+                                                     * system uses to identify a device and possibly remap to a legacy API.*/
+#define HID_LOGICAL_COLLECTION              0x02    /**\brief A logical collection of items.*/
+#define HID_REPORT_COLLECTION               0x03
+#define HID_NARY_COLLECTION                 0x04    /**\brief A collection that encompasses an array definition, naming
+                                                     * the array set or the field created by the array.*/
+#define HID_USAGE_SWITCH_COLLECTION         0x05    /**\brief Modifies the purpose or function of the usages (controls) that it contains. */
+#define HID_USAGE_MODIFIER_COLLECTION       0x06    /**\brief Modifies the purpose or function of the usages (controls) that contains it.*/
+/** @} */
+
+
 /**\brief USB HID functional descriptor */
 struct usb_hid_descriptor {
     uint8_t     bLength;            /**<\brief Size of the descriptor, in bytes. */
@@ -115,10 +152,30 @@ struct usb_hid_descriptor {
     uint16_t    wDescriptorLength0; /**<\brief 1'sr HID report descriptor length in bytes. */
 } __attribute__((packed));
 
+/**\brief USB HID functional descriptor header */
+struct usb_hid_descriptor_header {
+    uint8_t     bLength;            /**<\brief Size of the descriptor, in bytes. */
+    uint8_t     bDescriptorType;    /**<\brief Type of the descriptor, set to \ref USB_DTYPE_HID */
+    uint16_t    bcdHID;             /**<\brief BCD encoded version that the HID descriptor and device complies to. */
+    uint8_t     bCountryCode;       /**<\brief Country code of the localized device, or zero if universal. */
+    uint8_t     bNumDescriptors;    /**<\brief Total number of HID report descriptors for the interface. */
+} __attribute__((packed));
+
 /**\brief USB HID report descriptor */
 struct usb_hid_report_descriptor {
     uint8_t     bDescriptorType;   /**<\brief Type of HID report, set to \ref USB_DTYPE_HID_REPORT */
     uint16_t    wDescriptorLength; /**<\brief Length of the associated HID report descriptor, in bytes. */
+} __attribute__((packed));
+
+/**\brief Helper macro for the multireport hid descriptor */
+#define DECLARE_USB_HID_DESCRIPTOR(p)               \
+struct usb_hid_descriptor_##p {                     \
+    uint8_t     bLength;                            \
+    uint8_t     bDescriptorType;                    \
+    uint16_t    bcdHID;                             \
+    uint8_t     bCountryCode;                       \
+    uint8_t     bNumDescriptors;                    \
+    struct usb_hid_report_descriptor report[p];     \
 } __attribute__((packed));
 
 
@@ -191,8 +248,29 @@ struct usb_hid_report_descriptor {
 #define HID_RI_USAGE(DataBits, ...)             _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x00, DataBits, __VA_ARGS__)
 #define HID_RI_USAGE_MINIMUM(DataBits, ...)     _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x10, DataBits, __VA_ARGS__)
 #define HID_RI_USAGE_MAXIMUM(DataBits, ...)     _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x20, DataBits, __VA_ARGS__)
-//@}
 
+#define HID_INPUT(data)                     HID_RI_INPUT(8, data)
+#define HID_OUTPUT(data)                    HID_RI_OUTPUT(8, data)
+#define HID_COLLECTION(data)                HID_RI_COLLECTION(8, data)
+#define HID_FEATURE(data)                   HID_RI_FEATURE(8, data)
+#define HID_END_COLLECTION                  HID_RI_END_COLLECTION(0)
+#define HID_USAGE_PAGE(data)                HID_RI_USAGE_PAGE(8, data)
+#define HID_LOGICAL_MINIMUM(data)           HID_RI_LOGICAL_MINIMUM(8, data)
+#define HID_LOGICAL_MAXIMUM(data)           HID_RI_LOGICAL_MAXIMUM(8, data)
+#define HID_PHYSICAL_MINIMUM(data)          HID_RI_PHYSICAL_MINIMUM(8, data)
+#define HID_PHYSICAL_MAXIMUM(data)          HID_RI_PHYSICAL_MAXIMUM(8, data)
+#define HID_UNIT_EXPONENT(data)             HID_RI_UNIT_EXPONENT(8, data)
+#define HID_UNIT(bits, data)                HID_RI_UNIT(bits, data)
+#define HID_REPORT_SIZE(data)               HID_RI_REPORT_SIZE(8, data)
+#define HID_REPORT_ID(data)                 HID_RI_REPORT_ID(8, data)
+#define HID_REPORT_COUNT(data)              HID_RI_REPORT_COUNT(8, data)
+#define HID_PUSH                            HID_RI_PUSH(0)
+#define HID_POP                             HID_RI_POP(0)
+#define HID_USAGE(data)                     HID_RI_USAGE(8, data)
+#define HID_USAGE_MINIMUM(data)             HID_RI_USAGE_MINIMUM(8, data)
+#define HID_USAGE_MAXIMUM(data)             HID_RI_USAGE_MAXIMUM(8, data)
+
+//@}
 
 /** @}  */
 
