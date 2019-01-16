@@ -20,7 +20,7 @@
 
 #if defined(USBD_STM32F429HS)
 
-#define MAX_EP          5
+#define MAX_EP          6
 #define MAX_RX_PACKET   128
 #define MAX_CONTROL_EP  1
 #define MAX_FIFO_SZ     1024  /*in 32-bit chunks */
