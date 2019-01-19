@@ -24,7 +24,7 @@
  * \addtogroup USB_HID_USAGES_BUTTON HID Usage Tables for Button
  * \brief Contains USB HID Usages definitions for Button Page
  * \details This module based on
- * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
+ * + [HID Usage Tables Version 1.12](https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf)
  * @{ */
 
 #define HID_PAGE_BUTTON           0x09    /**<\brief HID usage page for Buttons */

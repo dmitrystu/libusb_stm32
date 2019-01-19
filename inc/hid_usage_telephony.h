@@ -24,7 +24,7 @@
  * \addtogroup USB_HID_USAGES_TELEPHONY HID Usage Tables for Telephony
  * \brief Contains USB HID Usages definitions for Telephony Page
  * \details This module based on
- * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
+ * + [HID Usage Tables Version 1.12](https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf)
  * @{ */
 
 #define HID_PAGE_TELEPHONY              0x0B

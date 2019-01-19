@@ -24,7 +24,7 @@
  * \brief This module contains USB Device Firmware Upgrade class definitions.
  * \details This module based on
  * + [USB Device Firmware Upgrade Specification, Revision 1.1]
- * (http://www.usb.org/developers/docs/devclass_docs/DFU_1.1.pdf)
+ * (https://www.usb.org/sites/default/files/DFU_1.1.pdf)
  * @{ */
 
 /**\name USB DFU class subclass and protocol definitions

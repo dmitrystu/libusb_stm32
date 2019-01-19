@@ -75,9 +75,9 @@
 3. Tested with STM32L052K8, STM32L100RC, STM32L476RG, STM32F072C8, STM32F103C8, STM32F103CB, STM32F303CC, STM32F303RE, STM32F429ZI, STM32F105RBT6, STM32F107VCT6
 
 ### Implemented definitions for classes ###
-1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](http://www.usb.org/developers/hidpage/HID1_11.pdf)
-2. USB DFU based on [USB Device Firmware Upgrade Specification, Revision 1.1](http://www.usb.org/developers/docs/devclass_docs/DFU_1.1.pdf)
-3. USB CDC based on [Class definitions for Communication Devices 1.2](http://www.usb.org/developers/docs/devclass_docs/CDC1.2_WMC1.1_012011.zip)
+1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
+2. USB DFU based on [USB Device Firmware Upgrade Specification, Revision 1.1](https://www.usb.org/sites/default/files/DFU_1.1.pdf)
+3. USB CDC based on [Class definitions for Communication Devices 1.2](https://www.usb.org/sites/default/files/CDC1.2_WMC1.1_012011.zip)
 
 ### Using makefile ###
 + to build library module
@@ -105,7 +105,7 @@ make help
 | DEFINES  | STM32L1 STM32L100xC                 | MCU specified defines         |
 
 ### Useful Resources ###
-1. [USB Implementers Forum official site](http://www.usb.org/home)
+1. [USB Implementers Forum official site](https://www.usb.org/)
 2. [USB Made Simple](http://www.usbmadesimple.co.uk/)
 3. [LUFA - the Lightweight USB Framework for AVRs.](https://github.com/abcminiuser/lufa)
 4. [Open Source ARM cortex m microcontroller library](https://github.com/libopencm3/libopencm3)

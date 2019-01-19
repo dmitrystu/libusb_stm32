@@ -24,7 +24,7 @@
  * \addtogroup USB_HID_USAGES_DESKTOP HID Usage Tables for Desktop
  * \brief Contains USB HID Usages definitions for Generic Desktop Page
  * \details This module based on
- * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
+ * + [HID Usage Tables Version 1.12](https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf)
  * @{ */
 
 #define HID_PAGE_DESKTOP      0x01    /**<\brief Desktop usage page.*/

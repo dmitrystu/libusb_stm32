@@ -20,7 +20,7 @@
  * \addtogroup USB_HID_USAGES_GAME HID Usage Tables for Game
  * \brief Contains USB HID Usages definitions for Game Controls Page
  * \details This module based on
- * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
+ * + [HID Usage Tables Version 1.12](https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf)
  * @{ */
 
 #define HID_PAGE_GAME                   0x05

@@ -20,7 +20,7 @@
  * \addtogroup USB_HID_USAGES_DEVICE HID Usages for Device
  * \brief Contains USB HID Usages definitions for Generic Device Control Page
  * \details This module based on
- * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
+ * + [HID Usage Tables Version 1.12](https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf)
  * @{ */
 #define HID_PAGE_DEVICE                0x06    /**<\brief Generic device control usage page.*/
 #define HID_DEVICE_BATTERY_STRENGHT    0x20    /**<\brief DV Current battery status.*/

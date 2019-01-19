@@ -24,7 +24,7 @@
  * \addtogroup USB_HID_USAGES_SPORT HID Usage Tables for Sport
  * \brief Contains USB HID Usages definitions for Sport Controls Page
  * \details This module based on
- * + [HID Usage Tables Version 1.12](http://www.usb.org/developers/hidpage/Hut1_12v2.pdf)
+ * + [HID Usage Tables Version 1.12](https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf)
  * @{ */
 
 #define HID_PAGE_SPORT                  0x04

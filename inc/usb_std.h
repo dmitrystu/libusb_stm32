@@ -26,7 +26,7 @@ extern "C" {
  * \brief This module contains generic USB device framework definitions
  * \details This module based on
  * + Chapter 9 of the [Universal Serial Bus Specification Revision 2.0]
- * (http://www.usb.org/developers/docs/usb20_docs/usb_20_080416.zip)
+ * (https://www.usb.org/sites/default/files/usb_20_20181221.zip)
  * + [LUFA - the Lightweight USB Framework for AVRs.](https://github.com/abcminiuser/lufa)
  * @{ */
 

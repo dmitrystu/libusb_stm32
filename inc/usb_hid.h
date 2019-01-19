@@ -23,7 +23,7 @@
 /**\addtogroup USB_HID USB HID class
  * \brief This module contains USB Human Interface Devices class definitions
  * \details This module based on
- * + [Device Class Definition for Human Interface Devices (HID) Version 1.11](http://www.usb.org/developers/hidpage/HID1_11.pdf)
+ * + [Device Class Definition for Human Interface Devices (HID) Version 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
  * + [LUFA - the Lightweight USB Framework for AVRs.](https://github.com/abcminiuser/lufa)
  *
  * \par Control usage types
