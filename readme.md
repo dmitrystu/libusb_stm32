@@ -16,8 +16,8 @@
 <table>
     <tr><th>MCU Series</th><th>Features</th><th>Driver</th><th>File</th></tr>
     <tr>
-        <td rowspan="2">STM32L0x2 STM32L0x3 STM32L4x2 STM32L4x3 STM32F0x2 STM32F0x8</td>
-        <td nowrap rowspan="2">Doublebuffered<br />8 endpoints<br /> BC1.2</td>
+        <td rowspan="2">STM32L0x2 STM32L0x3 STM32F0x2 STM32F0x8</td>
+        <td nowrap rowspan="2">Doublebuffered<sup>[2]</sup><br />8<sup>[1]</sup> endpoints<br /> BC1.2</td>
         <td>usbd_devfs</td>
         <td>usbd_stm32l052_devfs.c</td>
     </tr>
@@ -26,8 +26,18 @@
         <td>usbd_stm32l052_devfs_asm.S</td>
     </tr>
     <tr>
+        <td rowspan="2">STM32L4x2 STM32L4x3</td>
+        <td nowrap rowspan="2">Doublebuffered<sup>[2]</sup><br />8<sup>[1]</sup> endpoints<br /> BC1.2</td>
+        <td>usbd_devfs</td>
+        <td>usbd_stm32l433_devfs.c</td>
+    </tr>
+    <tr>
+        <td>usbd_devfs_asm</td>
+        <td>usbd_stm32l052_devfs_asm.S</td>
+    </tr>
+    <tr>
         <td rowspan="2">STM32L1xx</td>
-        <td nowrap rowspan="2">Doublebuffered<br />8 endpoints</td>
+        <td nowrap rowspan="2">Doublebuffered<sup>[2]</sup><br />8<sup>[1]</sup> endpoints</td>
         <td>usbd_devfs</td>
         <td>usbd_stm32l100_devfs.c</td>
     </tr>
@@ -37,7 +47,7 @@
     </tr>
     <tr>
         <td rowspan="2">STM32F102 STM32F103 STM32F302 STM32F303 STM32F373</td>
-        <td nowrap rowspan="2">Doublebuffered<br />External DP pullup<br />8 endpoints</td>
+        <td nowrap rowspan="2">Doublebuffered<sup>[2]</sup><br />External DP pullup<br />8<sup>[1]</sup> endpoints</td>
         <td>usbd_devfs</td>
         <td>usbd_stm32f103_devfs.c</td>
     </tr>
@@ -52,14 +62,19 @@
         <td>usbd_stm32l476_otgfs.c</td>
     </tr>
     <tr>
-        <td>STM32F4x5 STM32F4x7 STM32F4x9</td>
-        <td nowrap>Doublebuffered<br/>6 endpoints<br/>VBUS detection<br/>SOF output</td>
+        <td rowspan="2">STM32F4x5 STM32F4x7 STM32F4x9</td>
+        <td nowrap>Doublebuffered<br/>4 endpoints<br/>VBUS detection<br/>SOF output</td>
         <td>usbd_otgfs</td>
-        <td>usbd_stm32l429_otgfs.c</td>
+        <td>usbd_stm32f429_otgfs.c</td>
+    </tr>
+    <tr>
+        <td nowrap>Doublebuffered<br/>6 endpoints<br/>VBUS detection<br/>SOF output</td>
+        <td>usbd_otghs</td>
+        <td>usbd_stm32f429_otghs.c</td>
     </tr>
     <tr>
         <td>STM32F105 STM32F107</td>
-        <td nowrap>Doublebuffered<br/>6 endpoints<br/>VBUS detection<br/>SOF output</td>
+        <td nowrap>Doublebuffered<br/>4 endpoints<br/>VBUS detection<br/>SOF output</td>
         <td>usbd_otgfs</td>
         <td>usbd_stm32f105_otgfs.c</td>
     </tr>
@@ -72,7 +87,7 @@
 
 2. At this moment BULK IN endpoint can use both buffers, but it is not **real** doublebuffered.
 
-3. Tested with STM32L052K8, STM32L100RC, STM32L476RG, STM32F072C8, STM32F103C8, STM32F103CB, STM32F303CC, STM32F303RE, STM32F429ZI, STM32F105RBT6, STM32F107VCT6
+3. Tested with STM32L052K8, STM32L100RC, STM32L476RG, STM32F072C8, STM32F103C8, STM32F103CB, STM32F303CC, STM32F303RE, STM32F429ZI, STM32F105RBT6, STM32F107VCT6, STM32L433CCT6
 
 ### Implemented definitions for classes ###
 1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
