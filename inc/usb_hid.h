@@ -129,15 +129,15 @@
 
 /**\name HID Collections types
  * @{ */
-#define HID_PHYSICAL_COLLECTION             0x00    /**\brief A physical collection of items.*/
-#define HID_APPLICATION_COLLECTION          0x01    /**\brief Applies a name to a top level collection which the operating
+#define HID_PHYSICAL_COLLECTION             0x00    /**<\brief A physical collection of items.*/
+#define HID_APPLICATION_COLLECTION          0x01    /**<\brief Applies a name to a top level collection which the operating
                                                      * system uses to identify a device and possibly remap to a legacy API.*/
-#define HID_LOGICAL_COLLECTION              0x02    /**\brief A logical collection of items.*/
+#define HID_LOGICAL_COLLECTION              0x02    /**<\brief A logical collection of items.*/
 #define HID_REPORT_COLLECTION               0x03
-#define HID_NARY_COLLECTION                 0x04    /**\brief A collection that encompasses an array definition, naming
+#define HID_NARY_COLLECTION                 0x04    /**<\brief A collection that encompasses an array definition, naming
                                                      * the array set or the field created by the array.*/
-#define HID_USAGE_SWITCH_COLLECTION         0x05    /**\brief Modifies the purpose or function of the usages (controls) that it contains. */
-#define HID_USAGE_MODIFIER_COLLECTION       0x06    /**\brief Modifies the purpose or function of the usages (controls) that contains it.*/
+#define HID_USAGE_SWITCH_COLLECTION         0x05    /**<\brief Modifies the purpose or function of the usages (controls) that it contains. */
+#define HID_USAGE_MODIFIER_COLLECTION       0x06    /**<\brief Modifies the purpose or function of the usages (controls) that contains it.*/
 /** @} */
 
 
@@ -269,6 +269,98 @@ struct usb_hid_descriptor_##p {                     \
 #define HID_USAGE(data)                     HID_RI_USAGE(8, data)
 #define HID_USAGE_MINIMUM(data)             HID_RI_USAGE_MINIMUM(8, data)
 #define HID_USAGE_MAXIMUM(data)             HID_RI_USAGE_MAXIMUM(8, data)
+//@}
+
+/**\name Macros for the units encoding */
+//@{
+#define HID_UNIT_NONE                       0x00                    /**<No system. */
+#define HID_UNIT_CGS_LINEAR                 0x01                    /**<Centimeter-Gram-Second metric linear system.*/
+#define HID_UNIT_CGS_ROTATION               0x02                    /**<Centimeter-Gram-Second metric rotation system.*/
+#define HID_UNIT_IMPERIAL_LINEAR            0x03                    /**<Imperial linear system.*/
+#define HID_UNIT_IMPERIAL_ROTATION          0x04                    /**<Imperial rotation system.*/
+#define HID_UNIT_LENGTH(exp)                ((exp & 0x0F) << 4)     /**<Length, position, distance unit. cm (CGS), inch (Imperial) */
+#define HID_UNIT_ANGLE(exp)                 ((exp & 0x0F) << 4)     /**<Angle unit. radians(CGS), degree (Imperial) */
+#define HID_UNIT_MASS(exp)                  ((exp & 0x0F) << 8)     /**<Mass unit. gram (CGS), slug (Imperial) */
+#define HID_UNIT_TIME(exp)                  ((exp & 0x0F) << 12)    /**<Time unit. secound. */
+#define HID_UNIT_TEMPERATURE(exp)           ((exp & 0x0F) << 16)    /**<Temperature unit. Kelvin (CGS), Fahrenheit (Imperial) */
+#define HID_UNIT_CURRENT(exp)               ((exp & 0x0F) << 20)    /**<Current unit. Ampere */
+#define HID_UNIT_LUMINOUS(exp)              ((exp & 0x0F) << 24)    /**<Luminous intensity unit. Candela */
+//@}
+
+/**\name Macros for the some SI named units */
+//@{
+/** SI length. m = 1E2 * cm */
+#define HID_UNIT_METER(exp) \
+    HID_UNIT(8, HID_UNIT_CGS_LINEAR | HID_UNIT_LENGTH(1)), \
+    HID_UNIT_EXPONENT(exp + 2)
+/** SI mass. kg = 1E3 * g */
+#define HID_UNIT_KG(exp) \
+    HID_UNIT(16, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(1), \
+    HID_UNIT_EXPONENT(exp + 3)
+/** SI time. 1s */
+#define HID_UNIT_SECOND(exp) \
+    HID_UNIT(16, HID_UNIT_CGS_LINEAR | HID_UNIT_TIME(1), \
+    HID_UNIT_EXPONENT(exp + 0)
+/** SI velocity. m/s = 1E2 * cm/s */
+#define HID_UNIT_MPS(exp) \
+    HID_UNIT(16, HID_UNIT_CGS_LINEAR | HID_UNIT_LENGTH(1) | HID_UNIT_TIME(-1)), \
+    HID_UNIT_EXPONENT(exp + 2)
+/** SI acceleration. m/s^2 = 1E2 * cm/s^2*/
+#define HID_UNIT_MPS2(exp) \
+    HID_UNIT(16, HID_UNIT_CGS_LINEAR | HID_UNIT_LENGTH(1) | HID_UNIT_TIME(-2)), \
+    HID_UNIT_EXPONENT(exp + 2)
+/** SI force. N = 1E5 * g * cm / s^2 */
+#define HID_UNIT_NEWTON(exp) \
+    HID_UNIT(16, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(1) | HID_UNIT_LENGTH(1) | HID_UNIT_TIME(-2)), \
+    HID_UNIT_EXPONENT(exp + 5)
+/** SI energy. J = 1E7 * g * cm^2 / s^2 */
+#define HID_UNIT_JOULE(exp) \
+    HID_UNIT(16, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(1) | HID_UNIT_LENGTH(2) | HID_UNIT_TIME(-2)), \
+    HID_UNIT_EXPONENT(exp + 7)
+/** SI power. W = 1E7 * g * cm^2 / s^3 */
+#define HID_UNIT_WATT(exp) \
+    HID_UNIT(16, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(1) | HID_UNIT_LENGTH(2) | HID_UNIT_TIME(-3)), \
+    HID_UNIT_EXPONENT(exp + 7)
+/** SI pressure. Pa = 1E1 * g / (cm * s^2) */
+#define HID_UNIT_PASCAL(exp) \
+    HID_UNIT(16, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(1) | HID_UNIT_LENGTH(-1) | HID_UNIT_TIME(-2)), \
+    HID_UNIT_EXPONENT(exp + 1)
+/** SI frequency. Hz = 1 / s */
+#define HID_UNIT_HERTZ(exp) \
+    HID_UNIT(16, HID_UNIT_CGS_LINEAR | HID_UNIT_TIME(-1)), \
+    HID_UNIT_EXPONENT(exp + 0)
+/** SI current. A */
+#define HID_UNIT_AMPERE(exp) \
+    HID_UNIT(32, HID_UNIT_CGS_LINEAR | HID_UNIT_CURRENT(1)), \
+    HID_UNIT_EXPONENT(exp)
+/** SI voltage. V = W / A  = 1E7 * g * cm^2 / (s^3 * A) */
+#define HID_UNIT_VOLT(exp) \
+    HID_UNIT(32, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(1) | HID_UNIT_LENGTH(2) |  HID_UNIT_TIME(-3) | HID_UNIT_CURRENT(-1)), \
+    HID_UNIT_EXPONENT(exp + 7)
+/** SI resistance. Ohm = 1E7 * g * cm^2 / (s^3 * A^2) */
+#define HID_UNIT_OHM(exp) \
+    HID_UNIT(32, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(1) | HID_UNIT_LENGTH(2) |  HID_UNIT_TIME(-3) | HID_UNIT_CURRENT(-2)), \
+    HID_UNIT_EXPONENT(exp + 7)
+/** SI inductance. H = 1E7 * g * cm^2 / (s^2 * A^2) */
+#define HID_UNIT_HENRY(exp) \
+    HID_UNIT(32, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(1) | HID_UNIT_LENGTH(2) |  HID_UNIT_TIME(-2) | HID_UNIT_CURRENT(-2)), \
+    HID_UNIT_EXPONENT(exp + 7)
+/** SI  capacitance. F = 1E-7 * s^4 * A^2 / (cm^2 * g) */
+#define HID_UNIT_FARAD(exp) \
+    HID_UNIT(32, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(-1) | HID_UNIT_LENGTH(-2) |  HID_UNIT_TIME(4) | HID_UNIT_CURRENT(2)), \
+    HID_UNIT_EXPONENT(exp - 7)
+/** SI  electric charge. C = s * A */
+#define HID_UNIT_COULOMB(exp) \
+    HID_UNIT(32, HID_UNIT_CGS_LINEAR | HID_UNIT_TIME(1) | HID_UNIT_CURRENT(1)), \
+    HID_UNIT_EXPONENT(exp)
+/** SI  magnetic flux density. T = 1E3 * g / (s^2 * A) */
+#define HID_UNIT_TESLA(exp) \
+    HID_UNIT(32, HID_UNIT_CGS_LINEAR | HID_UNIT_MASS(1) | HID_UNIT_TIME(-2) | HID_UNIT_CURRENT(-1)), \
+    HID_UNIT_EXPONENT(exp)
+/** SI  illuminance. lx = 1E4 * cd / cm^2 */
+#define HID_UNIT_LUX(exp) \
+    HID_UNIT(32, HID_UNIT_CGS_LINEAR | HID_UNIT_LENGTH(-1) | HID_UNIT_LUMINOUS(1)), \
+    HID_UNIT_EXPONENT(exp)
 
 //@}
 
