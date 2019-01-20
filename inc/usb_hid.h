@@ -248,6 +248,13 @@ struct usb_hid_descriptor_##p {                     \
 #define HID_RI_USAGE(DataBits, ...)             _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x00, DataBits, __VA_ARGS__)
 #define HID_RI_USAGE_MINIMUM(DataBits, ...)     _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x10, DataBits, __VA_ARGS__)
 #define HID_RI_USAGE_MAXIMUM(DataBits, ...)     _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x20, DataBits, __VA_ARGS__)
+#define HID_RI_DESIGNATOR_INDEX(DataBits, ...)  _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x30, DataBits, __VA_ARGS__)
+#define HID_RI_DESIGNATOR_MIN(DataBits, ...)    _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x40, DataBits, __VA_ARGS__)
+#define HID_RI_DESIGNATOR_MAX(DataBits, ...)    _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x50, DataBits, __VA_ARGS__)
+#define HID_RI_STRING_INDEX(DataBits, ...)      _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x70, DataBits, __VA_ARGS__)
+#define HID_RI_STRING_MINIMUM(DataBits, ...)    _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x80, DataBits, __VA_ARGS__)
+#define HID_RI_STRING_MAXIMUM(DataBits, ...)    _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x90, DataBits, __VA_ARGS__)
+#define HID_RI_DELIMITER(DataBits, ...)         _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0xA0, DataBits, __VA_ARGS__)
 
 #define HID_INPUT(data)                     HID_RI_INPUT(8, data)
 #define HID_OUTPUT(data)                    HID_RI_OUTPUT(8, data)
