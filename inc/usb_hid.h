@@ -206,79 +206,116 @@ struct usb_hid_descriptor_##p {                     \
 /* Macros: */
 /** \name HID Input, Output and Feature Report Descriptor Item Flags */
 //@{
-#define HID_IOF_CONSTANT                        (1 << 0)
-#define HID_IOF_DATA                            (0 << 0)
-#define HID_IOF_VARIABLE                        (1 << 1)
-#define HID_IOF_ARRAY                           (0 << 1)
-#define HID_IOF_RELATIVE                        (1 << 2)
-#define HID_IOF_ABSOLUTE                        (0 << 2)
-#define HID_IOF_WRAP                            (1 << 3)
-#define HID_IOF_NO_WRAP                         (0 << 3)
-#define HID_IOF_NON_LINEAR                      (1 << 4)
-#define HID_IOF_LINEAR                          (0 << 4)
-#define HID_IOF_NO_PREFERRED_STATE              (1 << 5)
-#define HID_IOF_PREFERRED_STATE                 (0 << 5)
-#define HID_IOF_NULLSTATE                       (1 << 6)
-#define HID_IOF_NO_NULL_POSITION                (0 << 6)
-#define HID_IOF_VOLATILE                        (1 << 7)
-#define HID_IOF_NON_VOLATILE                    (0 << 7)
-#define HID_IOF_BUFFERED_BYTES                  (1 << 8)
-#define HID_IOF_BITFIELD                        (0 << 8)
+#define HID_IOF_CONSTANT                        (1 << 0)    /**<Item is a static read-only field in a report and cannot be modified.*/
+#define HID_IOF_DATA                            (0 << 0)    /**<Item contains a modifiable device data.*/
+#define HID_IOF_VARIABLE                        (1 << 1)    /**<Each field represents data from a physical control.*/
+#define HID_IOF_ARRAY                           (0 << 1)    /**<Array returns an index in each field that corresponds to the pressed button.*/
+#define HID_IOF_RELATIVE                        (1 << 2)    /**<Data is relative (indicating the change in value from the last report).*/
+#define HID_IOF_ABSOLUTE                        (0 << 2)    /**<Data is absolute (based on a fixed origin).*/
+#define HID_IOF_WRAP                            (1 << 3)    /**<Data “rolls over” when reaching either the extreme high or low value.*/
+#define HID_IOF_NO_WRAP                         (0 << 3)    /**<Data not “rolls over” when reaching either the extreme high or low value. */
+#define HID_IOF_NON_LINEAR                      (1 << 4)    /**<Noninear relationship between logical and physical units.*/
+#define HID_IOF_LINEAR                          (0 << 4)    /**<Linear relationship between logical and physical units.*/
+#define HID_IOF_NO_PREFERRED_STATE              (1 << 5)    /**<Control has no preferred state.*/
+#define HID_IOF_PREFERRED_STATE                 (0 << 5)    /**<Control has a preferred state to which it will return when the user is
+                                                             * not physically interacting with the control. */
+#define HID_IOF_NULLSTATE                       (1 << 6)    /**<Control has a state in which it is not sending meaningful data.*/
+#define HID_IOF_NO_NULL_POSITION                (0 << 6)    /**<Control has no nullstate.*/
+#define HID_IOF_VOLATILE                        (1 << 7)    /**<Data may be changed by device itself. (Output and Feature) */
+#define HID_IOF_NON_VOLATILE                    (0 << 7)    /**<Data can be changed by host only. (Output and Feature) */
+#define HID_IOF_BUFFERED_BYTES                  (1 << 8)    /**<Indicates that the control emits a fixed-size stream of bytes.*/
+#define HID_IOF_BITFIELD                        (0 << 8)    /**<Data is a fixed bitfield.*/
 //@}
 
-/** \name HID Report Descriptor Item Macros */
+/** \name HID Report Descriptor Main items */
 //@{
+/** Describes information about the data provided by one or more physical controls. */
 #define HID_RI_INPUT(DataBits, ...)             _HID_RI_ENTRY(HID_RI_TYPE_MAIN  , 0x80, DataBits, __VA_ARGS__)
+/** similar to an Input item except it describes data sent to the device—for example, LED states. */
 #define HID_RI_OUTPUT(DataBits, ...)            _HID_RI_ENTRY(HID_RI_TYPE_MAIN  , 0x90, DataBits, __VA_ARGS__)
+/** identifies a relationship between two or more data (Input, Output, or Feature.) */
 #define HID_RI_COLLECTION(DataBits, ...)        _HID_RI_ENTRY(HID_RI_TYPE_MAIN  , 0xA0, DataBits, __VA_ARGS__)
+/** describe device configuration information that can be sent to the device. */
 #define HID_RI_FEATURE(DataBits, ...)           _HID_RI_ENTRY(HID_RI_TYPE_MAIN  , 0xB0, DataBits, __VA_ARGS__)
+/** closes a collection */
 #define HID_RI_END_COLLECTION(DataBits, ...)    _HID_RI_ENTRY(HID_RI_TYPE_MAIN  , 0xC0, DataBits, __VA_ARGS__)
+//@}
+/** \name HID Report Descriptor Global items */
+//@{
+/** Unsigned integer specifying the current Usage Page. */
 #define HID_RI_USAGE_PAGE(DataBits, ...)        _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x00, DataBits, __VA_ARGS__)
+/** Defines a minimum value that a variable or array item will report. */
 #define HID_RI_LOGICAL_MINIMUM(DataBits, ...)   _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x10, DataBits, __VA_ARGS__)
+/** Defines a maximum value that a variable or array item will report. */
 #define HID_RI_LOGICAL_MAXIMUM(DataBits, ...)   _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x20, DataBits, __VA_ARGS__)
+/** Defines a minimum value for the physical extent of a variable item */
 #define HID_RI_PHYSICAL_MINIMUM(DataBits, ...)  _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x30, DataBits, __VA_ARGS__)
+/** Defines a maximum value for the physical extent of a variable item */
 #define HID_RI_PHYSICAL_MAXIMUM(DataBits, ...)  _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x40, DataBits, __VA_ARGS__)
+/** Value of the unit exponent in base 10. */
 #define HID_RI_UNIT_EXPONENT(DataBits, ...)     _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x50, DataBits, __VA_ARGS__)
+/** Encoded unit value \see \ref HID_UNITS_ENCODE */
 #define HID_RI_UNIT(DataBits, ...)              _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x60, DataBits, __VA_ARGS__)
+/** Unsigned integer specifying the size of the report fields in bits. */
 #define HID_RI_REPORT_SIZE(DataBits, ...)       _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x70, DataBits, __VA_ARGS__)
+/** Unsigned value that specifies the Report ID. */
 #define HID_RI_REPORT_ID(DataBits, ...)         _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x80, DataBits, __VA_ARGS__)
+/** Unsigned integer specifying the number of data fields for the item */
 #define HID_RI_REPORT_COUNT(DataBits, ...)      _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x90, DataBits, __VA_ARGS__)
+/** Places a copy of the global item state table on the stack. */
 #define HID_RI_PUSH(DataBits, ...)              _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0xA0, DataBits, __VA_ARGS__)
+/** Replaces the item state table with the top structure from the stack. */
 #define HID_RI_POP(DataBits, ...)               _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0xB0, DataBits, __VA_ARGS__)
+//@}
+/** \name HID Report Descriptor Local items */
+//@{
+/** Represents a suggested usage for the item or collection. */
 #define HID_RI_USAGE(DataBits, ...)             _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x00, DataBits, __VA_ARGS__)
+/** Defines the starting usage associated with an array or bitmap */
 #define HID_RI_USAGE_MINIMUM(DataBits, ...)     _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x10, DataBits, __VA_ARGS__)
+/** Defines the ending usage associated with an array or bitmap. */
 #define HID_RI_USAGE_MAXIMUM(DataBits, ...)     _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x20, DataBits, __VA_ARGS__)
+/** Determines the body part used for a control. */
 #define HID_RI_DESIGNATOR_INDEX(DataBits, ...)  _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x30, DataBits, __VA_ARGS__)
+/** Defines the index of the starting designator associated with an array or bitmap. */
 #define HID_RI_DESIGNATOR_MIN(DataBits, ...)    _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x40, DataBits, __VA_ARGS__)
+/** Defines the index of the ending designator associated with an array or bitmap. */
 #define HID_RI_DESIGNATOR_MAX(DataBits, ...)    _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x50, DataBits, __VA_ARGS__)
+/** String index for a String descriptor; allows a string to be associated with a particular item or control. */
 #define HID_RI_STRING_INDEX(DataBits, ...)      _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x70, DataBits, __VA_ARGS__)
+/** Specifies the first string index when assigning a group of sequential strings to controls in an array or bitmap. */
 #define HID_RI_STRING_MINIMUM(DataBits, ...)    _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x80, DataBits, __VA_ARGS__)
+/** Specifies the last string index when assigning a group of sequential strings to controls in an array or bitmap. */
 #define HID_RI_STRING_MAXIMUM(DataBits, ...)    _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0x90, DataBits, __VA_ARGS__)
+/** Defines the beginning or end of a set of local items (1 = open set, 0 = close set). */
 #define HID_RI_DELIMITER(DataBits, ...)         _HID_RI_ENTRY(HID_RI_TYPE_LOCAL , 0xA0, DataBits, __VA_ARGS__)
-
-#define HID_INPUT(data)                     HID_RI_INPUT(8, data)
-#define HID_OUTPUT(data)                    HID_RI_OUTPUT(8, data)
-#define HID_COLLECTION(data)                HID_RI_COLLECTION(8, data)
-#define HID_FEATURE(data)                   HID_RI_FEATURE(8, data)
-#define HID_END_COLLECTION                  HID_RI_END_COLLECTION(0)
-#define HID_USAGE_PAGE(data)                HID_RI_USAGE_PAGE(8, data)
-#define HID_LOGICAL_MINIMUM(data)           HID_RI_LOGICAL_MINIMUM(8, data)
-#define HID_LOGICAL_MAXIMUM(data)           HID_RI_LOGICAL_MAXIMUM(8, data)
-#define HID_PHYSICAL_MINIMUM(data)          HID_RI_PHYSICAL_MINIMUM(8, data)
-#define HID_PHYSICAL_MAXIMUM(data)          HID_RI_PHYSICAL_MAXIMUM(8, data)
-#define HID_UNIT_EXPONENT(data)             HID_RI_UNIT_EXPONENT(8, data)
-#define HID_UNIT(bits, data)                HID_RI_UNIT(bits, data)
-#define HID_REPORT_SIZE(data)               HID_RI_REPORT_SIZE(8, data)
-#define HID_REPORT_ID(data)                 HID_RI_REPORT_ID(8, data)
-#define HID_REPORT_COUNT(data)              HID_RI_REPORT_COUNT(8, data)
-#define HID_PUSH                            HID_RI_PUSH(0)
-#define HID_POP                             HID_RI_POP(0)
-#define HID_USAGE(data)                     HID_RI_USAGE(8, data)
-#define HID_USAGE_MINIMUM(data)             HID_RI_USAGE_MINIMUM(8, data)
-#define HID_USAGE_MAXIMUM(data)             HID_RI_USAGE_MAXIMUM(8, data)
+//@}
+/** \name HID Report Descriptor for most common cases */
+//@{
+#define HID_INPUT(data)                     HID_RI_INPUT(8, data)               /**<\copydoc HID_RI_INPUT */
+#define HID_OUTPUT(data)                    HID_RI_OUTPUT(8, data)              /**<\copydoc HID_RI_OUTPUT */
+#define HID_COLLECTION(data)                HID_RI_COLLECTION(8, data)          /**<\copydoc HID_RI_COLLECTION */
+#define HID_FEATURE(data)                   HID_RI_FEATURE(8, data)             /**<\copydoc HID_RI_FEATURE */
+#define HID_END_COLLECTION                  HID_RI_END_COLLECTION(0)            /**<\copydoc HID_RI_END_COLLECTION */
+#define HID_USAGE_PAGE(data)                HID_RI_USAGE_PAGE(8, data)          /**<Range [0; 0xFF]; \copydoc HID_RI_USAGE_PAGE */
+#define HID_LOGICAL_MINIMUM(data)           HID_RI_LOGICAL_MINIMUM(8, data)     /**<Range [-127; 127]; \copydoc HID_RI_LOGICAL_MINIMUM */
+#define HID_LOGICAL_MAXIMUM(data)           HID_RI_LOGICAL_MAXIMUM(8, data)     /**<Range [-127; 127]; \copydoc HID_RI_LOGICAL_MAXIMUM */
+#define HID_PHYSICAL_MINIMUM(data)          HID_RI_PHYSICAL_MINIMUM(16, data)   /**<Range [-32767; 32767]; \copydoc HID_RI_PHYSICAL_MINIMUM */
+#define HID_PHYSICAL_MAXIMUM(data)          HID_RI_PHYSICAL_MAXIMUM(16, data)   /**<Range [-32767; 32767]; \copydoc HID_RI_PHYSICAL_MAXIMUM */
+#define HID_UNIT_EXPONENT(data)             HID_RI_UNIT_EXPONENT(8, data)       /**<Range [-127; 127]; \copydoc HID_RI_UNIT_EXPONENT */
+#define HID_UNIT(bits, data)                HID_RI_UNIT(bits, data)             /**<\copydoc HID_RI_UNIT */
+#define HID_REPORT_SIZE(data)               HID_RI_REPORT_SIZE(8, data)         /**<Range [0; 0xFF]; \copydoc HID_RI_REPORT_SIZE */
+#define HID_REPORT_ID(data)                 HID_RI_REPORT_ID(8, data)           /**<Range [0; 0xFF]; \copydoc HID_RI_REPORT_ID */
+#define HID_REPORT_COUNT(data)              HID_RI_REPORT_COUNT(8, data)        /**<Range [0; 0xFF]; \copydoc HID_RI_REPORT_COUNT */
+#define HID_PUSH                            HID_RI_PUSH(0)                      /**<\copydoc HID_RI_PUSH */
+#define HID_POP                             HID_RI_POP(0)                       /**<\copydoc HID_RI_POP */
+#define HID_USAGE(data)                     HID_RI_USAGE(8, data)               /**<Range [0; 0xFF]; \copydoc HID_RI_USAGE */
+#define HID_USAGE_MINIMUM(data)             HID_RI_USAGE_MINIMUM(8, data)       /**<Range [0; 0xFF]; \copydoc HID_RI_USAGE_MINIMUM */
+#define HID_USAGE_MAXIMUM(data)             HID_RI_USAGE_MAXIMUM(8, data)       /**<Range [0; 0xFF]; \copydoc HID_RI_USAGE_MAXIMUM */
 //@}
 
-/**\name Macros for the units encoding */
+/**\name Macros for the units encoding
+ * \anchor HID_UNITS_ENCODE */
 //@{
 #define HID_UNIT_NONE                       0x00                    /**<No system. */
 #define HID_UNIT_CGS_LINEAR                 0x01                    /**<Centimeter-Gram-Second metric linear system.*/
