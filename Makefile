@@ -8,6 +8,7 @@ LD           = $(TOOLSET)gcc
 AR           = $(TOOLSET)gcc-ar
 OBJCOPY      = $(TOOLSET)objcopy
 DFU_UTIL	?= dfu-util
+STPROG_CLI  ?= ~/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI
 
 ifeq ($(OS),Windows_NT)
 	RM = del /Q
@@ -78,6 +79,9 @@ program: $(DOUT).hex
 program_dfu: $(DOUT).bin
 	$(DFU_UTIL) -d 0483:DF11 -a 0 -D $(DOUT).bin -s 0x08000000
 
+program_stcube: $(DOUT).hex
+	$(STPROG_CLI) -c port=SWD reset=HWrst -d $(DOUT).hex -hardRst
+
 demo: $(DOUT).hex $(DOUT).bin
 
 $(DOUT).bin : $(DOUT).elf
@@ -116,7 +120,7 @@ $(OBJDIR)/%.o: %.s
 	@echo assembling $<
 	@$(CC) $(CFLAGS) $(CFLAGS2) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
 
-.PHONY: module doc demo clean program help all
+.PHONY: module doc demo clean program help all program_stcube
 
 stm32f103x6 bluepill:
 	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f103x6.s' \
