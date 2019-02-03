@@ -252,7 +252,9 @@ struct usb_hid_descriptor_##p {                     \
 #define HID_RI_PHYSICAL_MINIMUM(DataBits, ...)  _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x30, DataBits, __VA_ARGS__)
 /** Defines a maximum value for the physical extent of a variable item */
 #define HID_RI_PHYSICAL_MAXIMUM(DataBits, ...)  _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x40, DataBits, __VA_ARGS__)
-/** Value of the unit exponent in base 10. */
+/** Value of the unit exponent in base 10.
+ * \note The USB-HID specification is unclear about Unit exponent usage. Practically it's limited by 1 nibble.
+*/
 #define HID_RI_UNIT_EXPONENT(DataBits, ...)     _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x50, DataBits, __VA_ARGS__)
 /** Encoded unit value \see \ref HID_UNITS_ENCODE */
 #define HID_RI_UNIT(DataBits, ...)              _HID_RI_ENTRY(HID_RI_TYPE_GLOBAL, 0x60, DataBits, __VA_ARGS__)
@@ -318,8 +320,8 @@ struct usb_hid_descriptor_##p {                     \
  * \anchor HID_UNITS_ENCODE */
 //@{
 #define HID_UNIT_NONE                       0x00                    /**<No system. */
-#define HID_UNIT_CGS_LINEAR                 0x01                    /**<Centimeter-Gram-Second metric linear system.*/
-#define HID_UNIT_CGS_ROTATION               0x02                    /**<Centimeter-Gram-Second metric rotation system.*/
+#define HID_UNIT_CGS_LINEAR                 0x01                    /**<Centimeter-Gram-Second metric linear system. \note USB-HID defines this as SI linear.*/
+#define HID_UNIT_CGS_ROTATION               0x02                    /**<Centimeter-Gram-Second metric rotation system. \note USB-HID defines this as SI rotation.*/
 #define HID_UNIT_IMPERIAL_LINEAR            0x03                    /**<Imperial linear system.*/
 #define HID_UNIT_IMPERIAL_ROTATION          0x04                    /**<Imperial rotation system.*/
 #define HID_UNIT_LENGTH(exp)                ((exp & 0x0F) << 4)     /**<Length, position, distance unit. cm (CGS), inch (Imperial) */
