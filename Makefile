@@ -9,6 +9,7 @@ AR           = $(TOOLSET)gcc-ar
 OBJCOPY      = $(TOOLSET)objcopy
 DFU_UTIL	?= dfu-util
 STPROG_CLI  ?= ~/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI
+OPTFLAGS    ?= -Os
 
 ifeq ($(OS),Windows_NT)
 	RM = del /Q
@@ -25,7 +26,7 @@ DEFINES     ?= STM32F1 STM32F103x6
 ARFLAGS      = -cvq
 LDFLAGS      = --specs=nano.specs -nostartfiles -Wl,--gc-sections
 INCLUDES     = $(CMSISDEV)/ST $(CMSISCORE) inc
-CFLAGS2      = -mthumb -Os -std=gnu99 -fshort-wchar
+CFLAGS2      = -mthumb -std=gnu99 -fshort-wchar $(OPTFLAGS)
 
 OBJDIR       = obj
 SOURCES      = $(wildcard src/*.c) $(wildcard src/*.S)

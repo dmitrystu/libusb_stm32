@@ -119,6 +119,7 @@ make help
 | CFLAGS   | -mcpu=cortex-m3 -mfloat-abi=soft    | MCU specified compiler flags  |
 | DEFINES  | STM32L1 STM32L100xC                 | MCU specified defines         |
 | STPROG_CLI | ~/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI | Path to the ST Cube Programmer CLI |
+| OPTFLAFS | -Os | Code optimization flags |
 
 ### Useful Resources ###
 1. [USB Implementers Forum official site](https://www.usb.org/)
