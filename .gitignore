@@ -4,6 +4,7 @@ obj/*
 *.elf
 *.map
 *.a
+*.bin
 
 #ide/editor files
 *.depend
@@ -11,8 +12,9 @@ obj/*
 *.elay
 *.sublime-project
 *.sublime-workspace
+.vscode
 
-#debug 
+#debug
 svd/*
 openocd.cfg
 
