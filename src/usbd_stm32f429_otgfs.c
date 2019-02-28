@@ -103,13 +103,12 @@ void enable(bool enable) {
     if (enable) {
         /* enabling USB_OTG in RCC */
         _BST(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
-        /* do core soft reset */
+        /* waiting AHB ready */
         _WBS(OTG->GRSTCTL, USB_OTG_GRSTCTL_AHBIDL);
-        _BST(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
-        _WBC(OTG->GRSTCTL, USB_OTG_GRSTCTL_CSRST);
         /* configure OTG as device */
-        OTG->GUSBCFG = USB_OTG_GUSBCFG_FDMOD | USB_OTG_GUSBCFG_PHYSEL |
-                       _VAL2FLD(USB_OTG_GUSBCFG_TRDT, 0x06);
+        _BMD(OTG->GUSBCFG,
+             USB_OTG_GUSBCFG_SRPCAP | _VAL2FLD(USB_OTG_GUSBCFG_TRDT, 0x0F),
+             USB_OTG_GUSBCFG_FDMOD  | _VAL2FLD(USB_OTG_GUSBCFG_TRDT, 0x06));
         /* configuring Vbus sense and SOF output */
 #if defined (USBD_VBUS_DETECT) && defined(USBD_SOF_OUT)
         OTG->GCCFG = USB_OTG_GCCFG_VBUSBSEN | USB_OTG_GCCFG_SOFOUTEN;
