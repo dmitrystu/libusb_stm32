@@ -111,7 +111,7 @@ inline static void set_gpiox() {
     if (USBD_DP_PORT == GPIOE) {RCC->APB2ENR |= RCC_APB2ENR_IOPEEN; return;}
     #endif
     #if defined(GPIOF)
-    if (USBD_DP_PORT = GPIOF) {RCC->APB2ENR |= RCC_APB2ENR_IOPFEN; return;}
+    if (USBD_DP_PORT == GPIOF) {RCC->APB2ENR |= RCC_APB2ENR_IOPFEN; return;}
     #endif
 #elif defined(STM32F3) && defined(USBD_DP_PORT)
     if (USBD_DP_PORT == GPIOA) {RCC->AHBENR |= RCC_AHBENR_GPIOAEN; return;}
