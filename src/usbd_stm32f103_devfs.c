@@ -159,7 +159,7 @@ static uint16_t get_next_pma(uint16_t sz) {
 uint32_t getinfo(void) {
     if (!(RCC->APB1ENR & RCC_APB1ENR_USBEN)) return STATUS_VAL(0);
 #if defined(USBD_DP_PORT) && defined(USBD_DP_PIN)
-    if (USBD_DP_PORT->IDR & _BV(USBD_DP_PIN)) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
+    if (USBD_DP_PORT->IDR & (1UL << USBD_DP_PIN)) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
     return STATUS_VAL(USBD_HW_ENABLED);
 #else
     return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
