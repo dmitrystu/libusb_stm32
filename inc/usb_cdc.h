@@ -39,6 +39,7 @@
 
 /**\name Communications Class Protocol Codes
  * @{ */
+#define USB_CDC_PROTO_NONE              0x00    /**<\brief No class specific protocol required */
 #define USB_CDC_PROTO_V25TER            0x01    /**<\brief AT Commands: V.250 etc.*/
  /** @} */
 

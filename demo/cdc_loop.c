@@ -35,6 +35,7 @@
 #define CDC_LOOPBACK
 #define ENABLE_HID_COMBO
 
+//#define SIGNAL_MODEM  /* uncomment to signal modem capabilities */
 //#define CDC_USE_IRQ   /* uncomment to build interrupt-based demo */
 
 /* Declaration of the report descriptor */
@@ -124,7 +125,11 @@ static const struct cdc_config config_desc = {
         .bNumEndpoints          = 1,
         .bInterfaceClass        = USB_CLASS_CDC,
         .bInterfaceSubClass     = USB_CDC_SUBCLASS_ACM,
+        #ifdef SIGNAL_MODEM
         .bInterfaceProtocol     = USB_CDC_PROTO_V25TER,
+        #else
+        .bInterfaceProtocol     = USB_CDC_PROTO_NONE,
+        #endif
         .iInterface             = NO_DESCRIPTOR,
     },
     .cdc_hdr = {
