@@ -178,8 +178,8 @@ static void cdc_init_rcc (void) {
     _BMD(RCC->CCIPR, RCC_CCIPR_CLK48SEL, 0);
     /* setup PA11 PA12 to AF10 (USB FS) */
     _BST(RCC->AHB2ENR, RCC_AHB2ENR_GPIOAEN);
-    _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
     _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
+    _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
     /* Disabling USB Vddusb power isolation. Vusb connected to Vdd */
     _BST(RCC->APB1ENR1, RCC_APB1ENR1_PWREN);
     _BST(PWR->CR2, PWR_CR2_USV);
