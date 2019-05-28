@@ -389,6 +389,7 @@ static void cdc_loopback(usbd_device *dev, uint8_t event, uint8_t ep) {
             memmove(&fifo[0], &fifo[_t], fpos - _t);
             fpos -= _t;
         }
+        break;
     case usbd_evt_eprx:
         if (fpos < (sizeof(fifo) - CDC_DATA_SZ)) {
             _t = usbd_ep_read(dev, CDC_RXD_EP, &fifo[fpos], CDC_DATA_SZ);
