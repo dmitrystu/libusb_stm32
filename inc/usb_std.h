@@ -438,7 +438,7 @@ struct usb_string_descriptor {
     uint8_t  bDescriptorType;       /**<\brief String descriptor type.*/
     uint16_t wString[];             /**<\brief String data, as unicode characters or array of
                                      * \ref USB_STD_LANGID codes. */
-} __attribute__((packed));
+} __attribute__((packed, aligned(2)));
 
 /**\brief USB debug descriptor
  * \details This descriptor is used to describe certain characteristics of the device that the host
