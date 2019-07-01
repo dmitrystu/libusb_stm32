@@ -79,6 +79,9 @@ static const uint8_t hid_report_desc[] = {
             HID_REPORT_SIZE(1),
             HID_REPORT_COUNT(5),
             HID_INPUT(HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE ),
+            HID_REPORT_SIZE(1),
+            HID_REPORT_COUNT(3),
+            HID_INPUT(HID_IOF_CONSTANT),
         HID_END_COLLECTION,
     HID_END_COLLECTION,
 };
