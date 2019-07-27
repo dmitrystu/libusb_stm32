@@ -38,9 +38,16 @@
 //#define SIGNAL_MODEM  /* uncomment to signal modem capabilities */
 //#define CDC_USE_IRQ   /* uncomment to build interrupt-based demo */
 
+#if defined(SIGNAL_MODEM)
+#define CDC_PROTOCOL USB_CDC_PROTO_V25TER
+#else
+#define CDC_PROTOCOL USB_PROTO_NONE
+#endif
+
 /* Declaration of the report descriptor */
 struct cdc_config {
     struct usb_config_descriptor        config;
+    struct usb_iad_descriptor           comm_iad;
     struct usb_interface_descriptor     comm;
     struct usb_cdc_header_desc          cdc_hdr;
     struct usb_cdc_call_mgmt_desc       cdc_mgmt;
@@ -120,6 +127,16 @@ static const struct cdc_config config_desc = {
         .bmAttributes           = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
         .bMaxPower              = USB_CFG_POWER_MA(100),
     },
+    .comm_iad = {
+        .bLength = sizeof(struct usb_iad_descriptor),
+        .bDescriptorType        = USB_DTYPE_INTERFASEASSOC,
+        .bFirstInterface        = 0,
+        .bInterfaceCount        = 2,
+        .bFunctionClass         = USB_CLASS_CDC,
+        .bFunctionSubClass      = USB_CDC_SUBCLASS_ACM,
+        .bFunctionProtocol      = CDC_PROTOCOL,
+        .iFunction              = NO_DESCRIPTOR,
+    },
     .comm = {
         .bLength                = sizeof(struct usb_interface_descriptor),
         .bDescriptorType        = USB_DTYPE_INTERFACE,
@@ -128,11 +145,7 @@ static const struct cdc_config config_desc = {
         .bNumEndpoints          = 1,
         .bInterfaceClass        = USB_CLASS_CDC,
         .bInterfaceSubClass     = USB_CDC_SUBCLASS_ACM,
-        #ifdef SIGNAL_MODEM
-        .bInterfaceProtocol     = USB_CDC_PROTO_V25TER,
-        #else
-        .bInterfaceProtocol     = USB_CDC_PROTO_NONE,
-        #endif
+        .bInterfaceProtocol     = CDC_PROTOCOL,
         .iInterface             = NO_DESCRIPTOR,
     },
     .cdc_hdr = {
