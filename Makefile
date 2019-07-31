@@ -188,4 +188,4 @@ stm32f070xb:
 	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F0xx/Source/Templates/gcc/startup_stm32f070xb.s' \
 						LDSCRIPT='demo/stm32f070xb.ld' \
 						DEFINES='STM32F0 STM32F070xB USBD_SOF_DISABLED' \
-						CFLAGS='-mcpu=cortex-m0plus -mthumb'
+						CFLAGS='-mcpu=cortex-m0 -mthumb'

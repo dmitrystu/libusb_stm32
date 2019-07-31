@@ -464,7 +464,7 @@ static void cdc_init_usbd(void) {
 }
 
 #if defined(CDC_USE_IRQ)
-#if defined(STM32L052xx)
+#if defined(STM32L052xx) || defined(STM32F070xB)
     #define USB_HANDLER     USB_IRQHandler
     #define USB_NVIC_IRQ    USB_IRQn
 #elif defined(STM32L100xC)
