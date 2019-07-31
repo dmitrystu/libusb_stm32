@@ -183,7 +183,19 @@ static void cdc_init_rcc (void) {
     /* Disabling USB Vddusb power isolation. Vusb connected to Vdd */
     _BST(RCC->APB1ENR1, RCC_APB1ENR1_PWREN);
     _BST(PWR->CR2, PWR_CR2_USV);
-
+#elif defined(STM32F070xB)
+    /* set flash latency 1WS */
+    _BST(FLASH->ACR, FLASH_ACR_LATENCY);
+    /* use PLL 48MHz clock from 8Mhz HSI */
+    _BMD(RCC->CFGR,
+        RCC_CFGR_PLLMUL | RCC_CFGR_PLLSRC | RCC_CFGR_USBPRE,
+        RCC_CFGR_PLLMUL12 | RCC_CFGR_USBPRE);
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
+    /* switch to PLL */
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+    _BST(RCC->CFGR3, RCC_CFGR3_USBSW_PLLCLK);
 #else
     #error Not supported
 #endif

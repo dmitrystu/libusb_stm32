@@ -183,3 +183,9 @@ stm32l433cc:
 						LDSCRIPT='demo/stm32l433xc.ld' \
 						DEFINES='STM32L4 STM32L433xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4 -mthumb'
+
+stm32f070xb:
+	@$(MAKE) clean demo STARTUP='$(CMSISDEV)/ST/STM32F0xx/Source/Templates/gcc/startup_stm32f070xb.s' \
+						LDSCRIPT='demo/stm32f070xb.ld' \
+						DEFINES='STM32F0 STM32F070xB USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m0plus -mthumb'
