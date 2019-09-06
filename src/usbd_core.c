@@ -271,8 +271,8 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
         }
         break;
     case usbd_ctl_statusout:
-        /* reading STATUS OUT data to buffer */
-        dev->driver->ep_read(ep, dev->status.data_ptr, dev->status.data_maxsize);
+        /* fake reading STATUS OUT */
+        dev->driver->ep_read(ep, 0, 0);
         dev->status.control_state = usbd_ctl_idle;
         return usbd_process_callback(dev);
     default:
