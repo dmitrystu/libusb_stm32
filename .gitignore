@@ -1,5 +1,6 @@
 #compile artefacts
 obj/*
+html/*
 *.hex
 *.elf
 *.map
