@@ -1,6 +1,6 @@
 /* This file is the part of the Lightweight USB device Stack for STM32 microcontrollers
  *
- * Copyright ©2016 Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
+ * Copyright Â©2016 Dmitry Filimonchuk <dmitrystu[at]gmail[dot]com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
     defined(STM32L082xx) || defined(STM32L083xx) || \
     defined(STM32F042x6) || defined(STM32F048xx) || \
     defined(STM32F070x6) || defined(STM32F070xB) || \
-    defined(STM32F072xB) || defined(STM32F078xx) \
+    defined(STM32F072xB) || defined(STM32F078xx)
 
     #define USB_EPBASE      0x40005C00
     #define USB_REGBASE     0x40005C40
@@ -47,6 +47,7 @@
 #elif defined(STM32L432xx) || defined(STM32L433xx) || \
       defined(STM32L442xx) || defined(STM32L443xx) || \
       defined(STM32L452xx) || defined(STM32L462xx)
+
     #define USB_EPBASE      0x40006800
     #define USB_REGBASE     0x40006840
     #define USB_CNTR        0x00
@@ -61,6 +62,23 @@
     #define RCC_APB1ENR     0x58
     #define UID_BASE        0x1FFF7590
     #define RCC_USBEN       26
+
+#elif defined(STM32G4)
+
+    #define USB_EPBASE      0x40005C00
+    #define USB_REGBASE     0x40005C40
+    #define USB_CNTR        0x00
+    #define USB_ISTR        0x04
+    #define USB_FNR         0x08
+    #define USB_DADDR       0x0C
+    #define USB_BTABLE      0x10
+    #define USB_BCDR        0x18
+    #define USB_PMABASE     0x40006000
+    #define RCC_BASE        0x40021000
+    #define RCC_APB1RSTR    0x38
+    #define RCC_APB1ENR     0x58
+    #define UID_BASE        0x1FFF7590
+    #define RCC_USBEN       23
 
 #elif defined(STM32L1)
 /* common definitions for STM31L100xx STM32L151xx STM32L152xx STM32L162xx */

@@ -46,7 +46,8 @@
 
 #elif defined(STM32L432xx) || defined(STM32L433xx) || \
       defined(STM32L442xx) || defined(STM32L443xx) || \
-      defined(STM32L452xx) || defined(STM32L462xx)
+      defined(STM32L452xx) || defined(STM32L462xx) || \
+      defined(STM32G4)
 
     #define USBD_STM32L433
 

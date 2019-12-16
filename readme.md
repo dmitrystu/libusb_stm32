@@ -26,7 +26,7 @@
         <td>usbd_stm32l052_devfs_asm.S</td>
     </tr>
     <tr>
-        <td rowspan="2">STM32L4x2 STM32L4x3</td>
+        <td rowspan="2">STM32L4x2 STM32L4x3 STM32G4 series</td>
         <td nowrap rowspan="2">Doublebuffered<sup>[2]</sup><br />8<sup>[1]</sup> endpoints<br /> BC1.2</td>
         <td>usbd_devfs</td>
         <td>usbd_stm32l433_devfs.c</td>
@@ -87,7 +87,7 @@
 
 2. At this moment BULK IN endpoint can use both buffers, but it is not **real** doublebuffered.
 
-3. Tested with STM32L052K8, STM32L100RC, STM32L476RG, STM32F072C8, STM32F103C8, STM32F103CB, STM32F303CC, STM32F303RE, STM32F429ZI, STM32F105RBT6, STM32F107VCT6, STM32L433CCT6, STM32F070CBT6
+3. Tested with STM32L052K8, STM32L100RC, STM32L476RG, STM32F072C8, STM32F103C8, STM32F103CB, STM32F303CC, STM32F303RE, STM32F429ZI, STM32F105RBT6, STM32F107VCT6, STM32L433CCT6, STM32F070CBT6, STM32G431RB
 
 ### Implemented definitions for classes ###
 1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
