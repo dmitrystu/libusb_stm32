@@ -398,23 +398,18 @@ static void hid_mouse_move(usbd_device *dev, uint8_t event, uint8_t ep) {
 /* CDC loop callback. Both for the Data IN and Data OUT endpoint */
 static void cdc_loopback(usbd_device *dev, uint8_t event, uint8_t ep) {
     int _t;
-    switch (event) {
-    case usbd_evt_eptx:
+    if (fpos < (sizeof(fifo) - CDC_DATA_SZ)) {
+        _t = usbd_ep_read(dev, CDC_RXD_EP, &fifo[fpos], CDC_DATA_SZ);
+        if (_t > 0) {
+            fpos += _t;
+        }
+    }
+    if (fpos > 0) {
         _t = usbd_ep_write(dev, CDC_TXD_EP, &fifo[0], (fpos < CDC_DATA_SZ) ? fpos : CDC_DATA_SZ);
         if (_t > 0) {
             memmove(&fifo[0], &fifo[_t], fpos - _t);
             fpos -= _t;
         }
-        break;
-    case usbd_evt_eprx:
-        if (fpos < (sizeof(fifo) - CDC_DATA_SZ)) {
-            _t = usbd_ep_read(dev, CDC_RXD_EP, &fifo[fpos], CDC_DATA_SZ);
-            if (_t > 0) {
-                fpos += _t;
-            }
-        }
-    default:
-        break;
     }
 }
 
