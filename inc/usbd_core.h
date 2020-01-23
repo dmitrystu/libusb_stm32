@@ -124,15 +124,6 @@ enum usbd_ctl_state {
     usbd_ctl_statusout,         /**<\brief STATUS-OUT stage.*/
 };
 
-/**\brief Asynchronous device control commands.*/
-enum usbd_commands {
-    usbd_cmd_enable,            /**<\brief Enables device.*/
-    usbd_cmd_disable,           /**<\brief Disables device.*/
-    usbd_cmd_connect,           /**<\brief Connects device to host.*/
-    usbd_cmd_disconnect,        /**<\brief Disconnects device from host.*/
-    usbd_cmd_reset,             /**<\brief Resets device.*/
-};
-
 /**\brief Reporting status results.*/
 typedef enum _usbd_respond {
     usbd_fail,                  /**<\brief Function has an error, STALLPID will be issued.*/
