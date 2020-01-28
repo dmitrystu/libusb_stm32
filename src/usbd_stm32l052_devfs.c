@@ -234,12 +234,10 @@ bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
         uint16_t _pma;
         if (epsize > 62) {
             if (epsize & 0x1F) {
-                epsize &= 0x1F;
-            } else {
-                epsize -= 0x20;
+                epsize &= ~0x1F;
+                epsize += 0x20;
             }
-            _rxcnt = 0x8000 | (epsize << 5);
-            epsize += 0x20;
+            _rxcnt = 0x8000 - 0x20 + (epsize << 5);
         } else {
             _rxcnt = epsize << 9;
         }
