@@ -31,6 +31,9 @@
 #define USBD_SOF_OUT        /**<\brief Enables SOF output pin for F4 OTGFS. */
 #define USBD_PRIMARY_OTGHS  /**<\brief Sets OTGHS as primary interface for F4*/
 #define USBD_USE_EXT_ULPI   /**<\brief Enables external ULPI interface for OTGHS */
+#define USB_PMA_SIZE        /**<\brief PMA memoty size in bytes. Adjust this for
+                              * the devices that shares PMA memory with CAN in case
+                              * of both USB and CAN in use to avoid data corruption.
 /** @} */
 #endif
 

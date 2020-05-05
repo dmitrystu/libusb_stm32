@@ -21,7 +21,7 @@
 #if defined(USBD_STM32L433)
 
 #ifndef USB_PMASIZE
-    #warning PMA memory size is not defined. Use 1k by default
+    #pragma message "PMA memory size is not defined. Use 1k by default"
     #define USB_PMASIZE 0x400
 #endif
 

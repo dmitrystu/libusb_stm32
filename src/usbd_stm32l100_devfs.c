@@ -21,7 +21,7 @@
 #if defined(USBD_STM32L100)
 
 #ifndef USB_PMASIZE
-    #warning PMA memory size is not defined. Use 512 bytes by default
+    #pragma message "PMA memory size is not defined. Use 512 bytes by default"
     #define USB_PMASIZE 0x200
 #endif
 

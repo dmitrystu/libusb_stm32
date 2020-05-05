@@ -41,7 +41,7 @@ typedef union _pma_table pma_table;
 
 #if defined(STM32F302x8) || defined(STM32F302xE) || defined(STM32F303xE)
     #if !defined(USB_PMASIZE)
-    #warning PMA memory size is not defined. Use 768 bytes by default
+    #pragma message "PMA memory size is not defined. Use 768 bytes by default"
     #define USB_PMASIZE 0x300
     #endif
     #define PMA_STEP    1
@@ -61,7 +61,7 @@ typedef union _pma_table pma_table;
 
 #else
     #if !defined(USB_PMASIZE)
-    #warning PMA memory size is not defined. Use 512 bytes by default
+    #pragma message "PMA memory size is not defined. Use 512 bytes by default"
     #define USB_PMASIZE 0x200
     #endif
     #define PMA_STEP    2
