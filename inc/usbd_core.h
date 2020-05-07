@@ -24,6 +24,7 @@
 #if defined(__DOXYGEN__)
 /**\name Compile-time control macros
  * @{ */
+#define USBD_PINS_REMAP     /**<\brief Remap USB pins for uC with low pin count packages.*/
 #define USBD_SOF_DISABLED   /**<\brief Disables SOF handling.*/
 #define USBD_VBUS_DETECT    /**<\brief Enables Vbus detection for L4/F4 driver.*/
 #define USBD_DP_PORT        /**<\brief DP pullup port for F103/F303 driver.*/

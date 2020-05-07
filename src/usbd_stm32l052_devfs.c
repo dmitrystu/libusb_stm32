@@ -148,6 +148,10 @@ void enable(bool enable) {
         RCC->APB1ENR  |=  RCC_APB1ENR_USBEN;
         RCC->APB1RSTR |= RCC_APB1RSTR_USBRST;
         RCC->APB1RSTR &= ~RCC_APB1RSTR_USBRST;
+#if defined(USBD_PINS_REMAP) && (defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F070x6))
+        RCC->APB2ENR  |= RCC_APB2ENR_SYSCFGCOMPEN;
+        SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP;	// remap USB pins for small packages
+#endif
         USB->CNTR = USB_CNTR_CTRM | USB_CNTR_RESETM | USB_CNTR_ERRM |
 #if !defined(USBD_SOF_DISABLED)
         USB_CNTR_SOFM |
