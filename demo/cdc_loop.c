@@ -253,7 +253,7 @@ static const struct usb_string_descriptor *const dtable[] = {
 
 usbd_device udev;
 uint32_t	ubuf[0x20];
-uint8_t     fifo[0x200];
+uint8_t     fifo[0x40];
 uint32_t    fpos = 0;
 
 static struct usb_cdc_line_coding cdc_line = {
@@ -398,7 +398,7 @@ static void hid_mouse_move(usbd_device *dev, uint8_t event, uint8_t ep) {
 /* CDC loop callback. Both for the Data IN and Data OUT endpoint */
 static void cdc_loopback(usbd_device *dev, uint8_t event, uint8_t ep) {
     int _t;
-    if (fpos < (sizeof(fifo) - CDC_DATA_SZ)) {
+    if (fpos <= (sizeof(fifo) - CDC_DATA_SZ)) {
         _t = usbd_ep_read(dev, CDC_RXD_EP, &fifo[fpos], CDC_DATA_SZ);
         if (_t > 0) {
             fpos += _t;
