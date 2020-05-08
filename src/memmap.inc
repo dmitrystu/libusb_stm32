@@ -37,11 +37,19 @@
         defined(STM32F072xB) || defined(STM32F078xx)
         #define RCC_APB1RSTR    0x10
         #define RCC_APB1ENR     0x1C
+        #define RCC_APB2ENR     0x18
         #define UID_BASE        0x1FFFF7AC
     #else
         #define RCC_APB1RSTR    0x28
         #define RCC_APB1ENR     0x38
         #define UID_BASE        0x1FF80050
+    #endif
+
+    #if defined(STM32F042x6) || defined(STM32F048xx) || \
+        defined(STM32F070x6) 
+
+        #define SYSCFG_BASE     0x40010000
+        #define SYSCFG_USBREMAP 4
     #endif
 
 #elif defined(STM32L432xx) || defined(STM32L433xx) || \

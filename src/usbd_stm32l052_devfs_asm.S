@@ -232,6 +232,20 @@ _enable:
     str     r0, [r2, #RCC_APB1RSTR]     //RCC->APB1RSTR |= USBRST
     bics    r0, r3
     str     r0, [r2, #RCC_APB1RSTR]     //RCC->APB1RSTR &= ~USBRST
+
+#if defined(USBD_PINS_REMAP) && (defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F070x6))
+    ldr     r0, [r2, #RCC_APB2ENR]
+    movs    r3, #0x01
+    orrs    r0, r3
+    str     r0, [r2, #RCC_APB2ENR]      //RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN
+
+    ldr     r2, =#SYSCFG_BASE           //SYSCFG->CFGR1
+    ldr     r0, [r2]
+    lsls    r3, #SYSCFG_USBREMAP
+    orrs    r0, r3
+    str     r0, [r2]                    //SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP;	// remap USB pins for small packages
+#endif
+
 #if !defined(USBD_SOF_DISABLED)
     movs    r0, #0xBE                   // CTRM | ERRM | WKUPM | SUSPM | RESETM | SOFM
 #else
