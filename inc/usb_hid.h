@@ -66,9 +66,9 @@
 #define USB_HID_PROTO_MOUSE         0x02    /**<\brief Mouse boot protocol.*/
 /** @} */
 
-#define USB_HID_REPORT_IN           0x00    /**<\brief Indicates that the item is an IN report type.*/
-#define USB_HID_REPORT_OUT          0x01    /**<\brief Indicates that the item is an OUT report type.*/
-#define USB_HID_REPORT_FEATURE      0x02    /**<\brief Indicates that the item is a FEATURE report type.*/
+#define USB_HID_REPORT_IN           0x01    /**<\brief Indicates that the item is an IN report type.*/
+#define USB_HID_REPORT_OUT          0x02    /**<\brief Indicates that the item is an OUT report type.*/
+#define USB_HID_REPORT_FEATURE      0x03    /**<\brief Indicates that the item is a FEATURE report type.*/
 
 
 /**\name USB HID class-specified requests
