@@ -253,7 +253,7 @@ static const struct usb_string_descriptor *const dtable[] = {
 
 usbd_device udev;
 uint32_t	ubuf[0x20];
-uint8_t     fifo[0x40];
+uint8_t     fifo[0x200];
 uint32_t    fpos = 0;
 
 static struct usb_cdc_line_coding cdc_line = {
@@ -363,6 +363,14 @@ static void cdc_txonly(usbd_device *dev, uint8_t event, uint8_t ep) {
     usbd_ep_write(dev, ep, fifo, CDC_DATA_SZ);
 }
 
+static void cdc_rxtx(usbd_device *dev, uint8_t event, uint8_t ep) {
+    if (event == usbd_evt_eptx) {
+        cdc_txonly(dev, event, ep);
+    } else {
+        cdc_rxonly(dev, event, ep);
+    }
+}
+
 /* HID mouse IN endpoint callback */
 static void hid_mouse_move(usbd_device *dev, uint8_t event, uint8_t ep) {
     static uint8_t t = 0;
@@ -435,6 +443,9 @@ static usbd_respond cdc_setconf (usbd_device *dev, uint8_t cfg) {
 #if defined(CDC_LOOPBACK)
         usbd_reg_endpoint(dev, CDC_RXD_EP, cdc_loopback);
         usbd_reg_endpoint(dev, CDC_TXD_EP, cdc_loopback);
+#elif ((CDC_TXD_EP & 0x7F) == (CDC_RXD_EP & 0x7F))
+        usbd_reg_endpoint(dev, CDC_RXD_EP, cdc_rxtx);
+        usbd_reg_endpoint(dev, CDC_TXD_EP, cdc_rxtx);
 #else
         usbd_reg_endpoint(dev, CDC_RXD_EP, cdc_rxonly);
         usbd_reg_endpoint(dev, CDC_TXD_EP, cdc_txonly);
