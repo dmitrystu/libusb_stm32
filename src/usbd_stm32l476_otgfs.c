@@ -354,7 +354,7 @@ int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
     for (unsigned i = 0; i < len; i +=4) {
         uint32_t _t = *fifo;
         if (blen >= 4) {
-            *(__attribute__((packed))uint32_t*)buf = _t;
+            *(uint32_t*)buf = _t;
             blen -= 4;
             buf += 4;
         } else {
@@ -384,7 +384,7 @@ int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     epi->DIEPTSIZ = (1 << 19) + blen;
     _BMD(epi->DIEPCTL, USB_OTG_DIEPCTL_STALL, USB_OTG_DOEPCTL_EPENA | USB_OTG_DOEPCTL_CNAK);
     while (_len--) {
-        *_fifo = *(__attribute__((packed)) uint32_t*)buf;
+        *_fifo = *(uint32_t*)buf;
         buf += 4;
     }
     return blen;

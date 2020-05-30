@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include "stm32.h"
 #include "usb.h"
 
@@ -329,14 +330,16 @@ int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
     for (unsigned i = 0; i < len; i +=4) {
         uint32_t _t = *fifo;
         if (blen >= 4) {
-            *(__attribute__((packed))uint32_t*)buf = _t;
+            /* Cortex M3, M4 supports unaligned access */
+            *(uint32_t*)buf = _t;
             blen -= 4;
             buf += 4;
         } else {
             while (blen){
-                *(uint8_t*)buf++ = 0xFF & _t;
+                *(uint8_t*)buf = 0xFF & _t;
                 _t >>= 8;
                 blen --;
+                buf++;
             }
         }
     }
@@ -358,7 +361,9 @@ int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     epi->DIEPTSIZ = (1 << 19) + blen;
     _BMD(epi->DIEPCTL, USB_OTG_DIEPCTL_STALL, USB_OTG_DOEPCTL_EPENA | USB_OTG_DOEPCTL_CNAK);
     while (_len--) {
-        *_fifo = *(__attribute__((packed)) uint32_t*)buf;
+        /* Cortex M3, M4 supports unaligned access */
+        uint32_t _t = *(uint32_t*)buf;
+        *_fifo = _t;
         buf += 4;
     }
     return blen;
