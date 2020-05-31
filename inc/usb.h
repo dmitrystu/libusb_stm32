@@ -105,7 +105,17 @@
 #elif defined(STM32F411xE)
 
     #define USBD_STM32F429FS
+    #if !defined(__ASSEMBLER__)
     extern const struct usbd_driver usbd_otgfs;
+    #endif
+    #define usbd_hw usbd_otgfs
+
+#elif defined(STM32F446xx)
+    #define USBD_STM32F446FS
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_otgfs;
+    #endif
     #define usbd_hw usbd_otgfs
 
 #elif defined(STM32F102x6) || defined(STM32F102xB) || \
