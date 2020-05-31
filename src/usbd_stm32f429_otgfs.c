@@ -15,7 +15,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
 #include "stm32.h"
 #include "usb.h"
 
@@ -483,4 +482,4 @@ uint16_t get_serialno_desc(void *buffer) {
     get_serialno_desc,
 };
 
-#endif //USBD_STM32L476
+#endif //USBD_STM32F429FS
