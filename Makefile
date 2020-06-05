@@ -7,7 +7,7 @@ CC           = $(TOOLSET)gcc
 LD           = $(TOOLSET)gcc
 AR           = $(TOOLSET)gcc-ar
 OBJCOPY      = $(TOOLSET)objcopy
-DFU_UTIL	?= dfu-util
+DFU_UTIL    ?= dfu-util
 STPROG_CLI  ?= ~/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI
 OPTFLAGS    ?= -Os
 
@@ -97,7 +97,7 @@ $(DOUT).elf : $(OBJDIR) $(DOBJ) $(OBJECTS)
 	@echo building $@
 	@$(LD) $(CFLAGS2) $(LDFLAGS) -Wl,--script='$(LDSCRIPT)' -Wl,-Map=$(DOUT).map $(DOBJ) $(OBJECTS) -o $@
 
-clean:
+clean: $(OBJDIR)
 	@$(RM) $(DOUT).*
 	@$(RM) $(call fixpath, $(OBJDIR)/*.*)
 
