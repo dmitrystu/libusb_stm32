@@ -84,13 +84,34 @@ static void cdc_init_rcc (void) {
     _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_1);
     /* use PLL 48MHz clock from 8Mhz HSI */
     _BMD(RCC->CFGR,
-         RCC_CFGR_PLLMUL | RCC_CFGR_PLLSRC | RCC_CFGR_USBPRE ,
+         RCC_CFGR_PLLMUL | RCC_CFGR_PLLSRC | RCC_CFGR_USBPRE,
          RCC_CFGR_PLLMUL12 | RCC_CFGR_USBPRE);
     _BST(RCC->CR, RCC_CR_PLLON);
     _WBS(RCC->CR, RCC_CR_PLLRDY);
     /* switch to PLL */
     _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+
+#elif defined(STM32F373xC)
+    /* set flash latency 1WS */
+    _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_1);
+    _BMD(RCC->CFGR,
+         RCC_CFGR_PLLMUL | RCC_CFGR_PLLSRC | RCC_CFGR_USBPRE | RCC_CFGR_PPRE1,
+         RCC_CFGR_PLLMUL12  | RCC_CFGR_USBPRE | RCC_CFGR_PPRE1_DIV2);
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
+    /* switch to PLL */
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+
+    /* Enabling USB PA11 PA12 AF 0x0E.
+     * This is still undocumented in the 7th!! revision of the datasheet.
+     * Thank you, mo***rs from ST for extra 5 hrs of debugging.
+     */
+    _BST(RCC->AHBENR, RCC_AHBENR_GPIOAEN);
+    _BST(GPIOA->AFR[1], (0x0E << 12) | (0x0E << 16));
+    _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24)); // MCO
+
 
 #elif defined(STM32F429xx)
     /* set flash latency 2WS */

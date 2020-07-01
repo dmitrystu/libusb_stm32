@@ -46,7 +46,7 @@
     #endif
 
     #if defined(STM32F042x6) || defined(STM32F048xx) || \
-        defined(STM32F070x6) 
+        defined(STM32F070x6)
 
         #define SYSCFG_BASE     0x40010000
         #define SYSCFG_USBREMAP 4
@@ -148,7 +148,7 @@
 
 
 #elif defined(STM32F303x8) || defined(STM32F303xC) || \
-      defined(STM32F303xE)
+      defined(STM32F303xE) || defined(STM32F373xC)
 
     #define USB_EPBASE      0x40005C00
     #define USB_REGBASE     0x40005C40

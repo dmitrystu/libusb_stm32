@@ -202,3 +202,9 @@ stm32f446xc:  clean
 						LDSCRIPT='demo/stm32f446xc.ld' \
 						DEFINES='STM32F4 STM32F446xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4'
+
+stm32f373xc: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F3xx/Source/Templates/gcc/startup_stm32f373xc.s' \
+						LDSCRIPT='demo/stm32f373xc.ld' \
+						DEFINES='STM32F3 STM32F373xC USBD_SOF_DISABLED USBD_ASM_DRIVER' \
+						CFLAGS='-mcpu=cortex-m4'
