@@ -1,4 +1,4 @@
-CMSIS       ?=../../CMSIS
+CMSIS       ?= CMSIS
 CMSISDEV    ?= $(CMSIS)/Device
 CMSISCORE   ?= $(CMSIS)/CMSIS/Include $(CMSIS)/CMSIS/Core/Include
 FLASH       ?= st-flash
@@ -53,6 +53,7 @@ help all:
 	@echo '  stm32l052x8   CDC loopback demo for STM32L052x8 based boards'
 	@echo '  32f429zi-nucleo'
 	@echo '  stm32f429xi   CDC loopback demo for STM32F429xI based boards'
+	@echo '  cmsis         Download CMSIS 5 and stm32.h into a $$(CMSIS) directory'
 	@echo '  doc           DOXYGEN documentation'
 	@echo '  module        static library module using following envars (defaults)'
 	@echo '                MODULE  module name ($(MODULE))'
@@ -70,6 +71,11 @@ help all:
 	@echo 'Examples:'
 	@echo '  make bluepill program'
 	@echo '  make module MODULE="usbd.a" CFLAGS="-mcpu=cotrex-m4" DEFINES="STM32L4 STM32L476xx USBD_VBUS_DETECT"'
+
+.PHONY: cmsis
+cmsis:
+	@git clone --depth 1 https://github.com/ARM-software/CMSIS_5.git $(CMSIS)
+	@git clone --recurse-submodules --depth 1 https://github.com/dmitrystu/stm32h.git $(CMSISDEV)/ST
 
 $(OBJDIR):
 	@mkdir $@
