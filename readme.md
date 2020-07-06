@@ -8,8 +8,10 @@
 ### Requirements ###
 
 + [CMSIS V4](https://github.com/ARM-software/CMSIS) or [CMSIS V5](https://github.com/ARM-software/CMSIS_5).
-+ Device peripheral access layer header files for STM32. See [Vendor Template](https://github.com/ARM-software/CMSIS/tree/master/Device/_Template_Vendor) for details.
 + [stm32.h](https://github.com/dmitrystu/stm32h) STM32 universal header
+
+All requirements can be downloaded into a directory specified in environment variable `CMSIS` using
+`make cmsis` command.
 
 ### Supported hardware ###
 
