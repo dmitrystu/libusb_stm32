@@ -72,10 +72,13 @@ help all:
 	@echo '  make bluepill program'
 	@echo '  make module MODULE="usbd.a" CFLAGS="-mcpu=cotrex-m4" DEFINES="STM32L4 STM32L476xx USBD_VBUS_DETECT"'
 
-.PHONY: cmsis
-cmsis:
-	@git clone --depth 1 https://github.com/ARM-software/CMSIS_5.git $(CMSIS)
-	@git clone --recurse-submodules --depth 1 https://github.com/dmitrystu/stm32h.git $(CMSISDEV)/ST
+cmsis: $(CMSISDEV)/ST
+
+$(CMSISDEV)/ST: $(CMSIS)
+	@git clone --recurse-submodules --depth 1 https://github.com/dmitrystu/stm32h.git $@
+
+$(CMSIS):
+	@git clone --depth 1 https://github.com/ARM-software/CMSIS_5.git $@
 
 $(OBJDIR):
 	@mkdir $@
@@ -128,7 +131,7 @@ $(OBJDIR)/%.o: %.s
 	@echo assembling $<
 	@$(CC) $(CFLAGS2) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
 
-.PHONY: module doc demo clean program help all program_stcube
+.PHONY: module doc demo clean program help all program_stcube cmsis
 
 stm32f103x6 bluepill: clean
 	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f103x6.s' \
