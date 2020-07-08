@@ -1,3 +1,5 @@
+![Travis (.org) branch](https://img.shields.io/travis/dmitrystu/libusb_stm32/master?logo=travis)
+
 ### Lightweight USB Device Stack ###
 
 + Lightweight and fast
