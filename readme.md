@@ -98,6 +98,7 @@ STM32F411CEUx
 1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
 2. USB DFU based on [USB Device Firmware Upgrade Specification, Revision 1.1](https://www.usb.org/sites/default/files/DFU_1.1.pdf)
 3. USB CDC based on [Class definitions for Communication Devices 1.2](https://www.usb.org/sites/default/files/CDC1.2_WMC1.1_012011.zip)
+4. USB TMC based on [USB Device Test and Measurement Class Specification, Revision 1.0](https://www.usb.org/sites/default/files/USBTMC_1_006a.zip)
 
 ### Using makefile ###
 + to build library module
