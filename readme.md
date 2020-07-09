@@ -117,7 +117,7 @@ make help
 ### Default values: ###
 | Variable | Default Value                       | Means                         |
 |----------|-------------------------------------|-------------------------------|
-| CMSIS    | ../../CMSIS                         | path to CMSIS root folder     |
+| CMSIS    | ./CMSIS                             | path to CMSIS root folder     |
 | CMSISDEV | $(CMSIS)/Device                     | path to CMSIS device folder   |
 | CMSISCORE| $(CMSIS)/CMSIS/Include $(CMSIS)/CMSIS/Core/Include | path to CMSIS core headers |
 | MCU      | stm32l100xc                         | MCU selection for demo project|
