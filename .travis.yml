@@ -1,0 +1,58 @@
+
+language: c
+
+matrix:
+  include:
+    - os: linux
+      install:
+      - export GCC_URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update
+      - pushd $HOME
+      - mkdir arm-gcc-toolchain
+      - wget -O $HOME/arm-gcc-toolchain/gcc.tar.bz2 $GCC_URL
+      - cd arm-gcc-toolchain
+      - tar -jxf gcc.tar.bz2 --strip=1
+      - export PATH=$HOME/arm-gcc-toolchain/bin:$PATH
+      - export GMAKE=make
+      - popd
+
+    - os: windows
+      install:
+      - export GCC_URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-win32.zip?revision=2f0fd855-d015-423c-9c76-c953ae7e730b?product=GNU%20Arm%20Embedded%20Toolchain,ZIP,,Windows,8-2019-q3-update
+      - pushd $HOME
+      - mkdir arm-gcc-toolchain
+      - wget --no-check-certificate -O arm-gcc.zip $GCC_URL
+      - 7z x arm-gcc.zip -oarm-gcc-toolchain -r -y
+      - export PATH=$HOME/arm-gcc-toolchain/bin:$PATH
+      - export GMAKE="mingw32-make SHELL=cmd"
+      - popd
+
+    - os: osx
+      install:
+      - export GCC_URL=https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-mac.tar.bz2?revision=6a06dd2b-bb98-4708-adac-f4c630c33f4f?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Mac%20OS%20X,8-2019-q3-update
+      - pushd $HOME
+      - mkdir arm-gcc-toolchain
+      - wget -O ./arm-gcc-toolchain/gcc.tar.bz2 $GCC_URL
+      - cd arm-gcc-toolchain
+      - tar -jxf gcc.tar.bz2 --strip=1
+      - export PATH=$HOME/arm-gcc-toolchain/bin:$PATH
+      - export GMAKE=make
+      - popd
+
+before_script:
+  - $GMAKE -v
+  - arm-none-eabi-gcc --version
+
+script:
+  - $GMAKE cmsis
+  - $GMAKE stm32f103x6
+  - $GMAKE stm32f303xe
+  - $GMAKE stm32f105xb
+  - $GMAKE stm32l052x8
+  - $GMAKE stm32l100xc
+  - $GMAKE stm32l476xg
+  - $GMAKE stm32f429xi
+  - $GMAKE stm32l433cc
+  - $GMAKE stm32f070xb
+  - $GMAKE stm32g431xb
+  - $GMAKE stm32f446xc
+  - $GMAKE stm32f373xc

@@ -47,7 +47,7 @@
                                                  * solicit firmware from the device.*/
 #define USB_DFU_GETSTATUS               0x03    /**<\brief The host employs this request to facilitate
                                                  * synchronization with the device.*/
-#define USB_DFU_CLRSTATAUS              0x04    /**<\brief This request resets DFU machine state to
+#define USB_DFU_CLRSTATUS               0x04    /**<\brief This request resets DFU machine state to
                                                  * DFU_IDLE.*/
 #define USB_DFU_GETSTATE                0x05    /**<\brief This request solicits a report about the
                                                  * state of the device.*/
