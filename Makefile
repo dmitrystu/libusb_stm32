@@ -24,7 +24,7 @@ CFLAGS      ?= -mcpu=cortex-m3
 DEFINES     ?= STM32F1 STM32F103x6
 
 ARFLAGS      = -cvq
-LDFLAGS      = --specs=nano.specs -nostartfiles -Wl,--gc-sections
+LDFLAGS      = --specs=nano.specs -nostartfiles -Wl,--gc-sections -L demo
 INCLUDES     = $(CMSISDEV)/ST $(CMSISCORE) inc
 CFLAGS2     ?= $(CFLAGS) -mthumb -std=gnu99 $(OPTFLAGS)
 
