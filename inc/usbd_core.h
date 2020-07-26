@@ -259,6 +259,7 @@ typedef void (*usbd_hw_ep_deconfig)(uint8_t ep);
  * \param buf pointer to read buffer
  * \param blen size of the read buffer in bytes
  * \return size of the actually received data, -1 on error.
+ * \note if data does not fit buffer it will be truncated
  */
 typedef int32_t (*usbd_hw_ep_read)(uint8_t ep, void *buf, uint16_t blen);
 

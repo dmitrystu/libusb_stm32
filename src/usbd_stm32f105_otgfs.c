@@ -35,15 +35,15 @@ USB_OTG_DeviceTypeDef * const OTGD = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_DE
 volatile uint32_t * const OTGPCTL  = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_PCGCCTL_BASE);
 
 
-inline static volatile uint32_t* EPFIFO(uint8_t ep) {
+inline static uint32_t* EPFIFO(uint32_t ep) {
     return (uint32_t*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_FIFO_BASE + (ep << 12));
 }
 
-inline static USB_OTG_INEndpointTypeDef* EPIN(uint8_t ep) {
+inline static USB_OTG_INEndpointTypeDef* EPIN(uint32_t ep) {
     return (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_IN_ENDPOINT_BASE + (ep << 5));
 }
 
-inline static USB_OTG_OUTEndpointTypeDef* EPOUT(uint8_t ep) {
+inline static USB_OTG_OUTEndpointTypeDef* EPOUT(uint32_t ep) {
     return (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_OUT_ENDPOINT_BASE + (ep << 5));
 }
 
@@ -321,7 +321,7 @@ void ep_deconfig(uint8_t ep) {
 }
 
 int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
-    int32_t len;
+    uint32_t len, tmp;
     volatile uint32_t *fifo = EPFIFO(0);
     /* no data in RX FIFO */
     if (!(OTG->GINTSTS & USB_OTG_GINTSTS_RXFLVL)) return -1;
@@ -329,40 +329,41 @@ int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
     if ((OTG->GRXSTSR & USB_OTG_GRXSTSP_EPNUM) != ep) return -1;
     /* pop data from fifo */
     len = _FLD2VAL(USB_OTG_GRXSTSP_BCNT, OTG->GRXSTSP);
-    for (unsigned i = 0; i < len; i +=4) {
-        uint32_t _t = *fifo;
-        if (blen >= 4) {
-            *(__attribute__((packed))uint32_t*)buf = _t;
-            blen -= 4;
-            buf += 4;
-        } else {
-            while (blen){
-                *(uint8_t*)buf++ = 0xFF & _t;
-                _t >>= 8;
-                blen --;
-            }
+    for (int idx = 0; idx < len; idx++) {
+        if ((idx & 0x03) == 0x00) {
+            tmp = *fifo;
+        }
+        if (idx < blen) {
+            ((uint8_t*)buf)[idx] = tmp & 0xFF;
+            tmp >>= 8;
         }
     }
-    return len;
+    return (len < blen) ? len : blen;
 }
 
 int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
+    uint32_t len, tmp;
     ep &= 0x7F;
-    volatile uint32_t* _fifo = EPFIFO(ep);
+    volatile uint32_t* fifo = EPFIFO(ep);
     USB_OTG_INEndpointTypeDef* epi = EPIN(ep);
     /* transfer data size in 32-bit words */
-    uint32_t  _len = (blen + 3) >> 2;
+    len = (blen + 3) >> 2;
     /* no enough space in TX fifo */
-    if (_len > epi->DTXFSTS) return -1;
+    if (len > epi->DTXFSTS) return -1;
     if (ep != 0 && epi->DIEPCTL & USB_OTG_DIEPCTL_EPENA) {
         return -1;
     }
     epi->DIEPTSIZ = 0;
     epi->DIEPTSIZ = (1 << USB_OTG_DIEPTSIZ_PKTCNT_Pos) + blen;
     _BMD(epi->DIEPCTL, USB_OTG_DIEPCTL_STALL, USB_OTG_DOEPCTL_EPENA | USB_OTG_DOEPCTL_CNAK);
-    while (_len--) {
-        *_fifo = *(__attribute__((packed)) uint32_t*)buf;
-        buf += 4;
+    /* push data to FIFO */
+    tmp = 0;
+    for (int idx = 0; idx < blen; idx++) {
+        tmp |= (uint32_t)((uint8_t*)buf)[idx] << ((idx & 0x03) << 3);
+        if ((idx & 0x03) == 0x03 || (idx + 1) == blen) {
+            *fifo = tmp;
+            tmp = 0;
+        }
     }
     return blen;
 }
