@@ -215,5 +215,11 @@ stm32f446xc:  clean
 stm32f373xc: clean
 	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F3xx/Source/Templates/gcc/startup_stm32f373xc.s' \
 						LDSCRIPT='demo/stm32f373xc.ld' \
-						DEFINES='STM32F3 STM32F373xC USBD_SOF_DISABLED USBD_ASM_DRIVER' \
+						DEFINES='STM32F3 STM32F373xC USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4'
+
+stm32l053x8 32l053r8-nucleo: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32L0xx/Source/Templates/gcc/startup_stm32l053xx.s' \
+						LDSCRIPT='demo/stm32l052x8.ld' \
+						DEFINES='STM32L0 STM32L053xx USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m0plus'
