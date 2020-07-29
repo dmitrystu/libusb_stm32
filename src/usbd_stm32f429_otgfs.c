@@ -29,9 +29,9 @@
 
 #define STATUS_VAL(x)   (USBD_HW_ADDRFST | (x))
 
-USB_OTG_GlobalTypeDef * const OTG  = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_GLOBAL_BASE);
-USB_OTG_DeviceTypeDef * const OTGD = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_DEVICE_BASE);
-volatile uint32_t * const OTGPCTL  = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_PCGCCTL_BASE);
+static USB_OTG_GlobalTypeDef * const OTG  = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_GLOBAL_BASE);
+static USB_OTG_DeviceTypeDef * const OTGD = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_DEVICE_BASE);
+static volatile uint32_t * const OTGPCTL  = (void*)(USB_OTG_FS_PERIPH_BASE + USB_OTG_PCGCCTL_BASE);
 
 
 inline static uint32_t* EPFIFO(uint32_t ep) {
@@ -57,13 +57,13 @@ inline static void Flush_TX(uint8_t ep) {
     _WBC(OTG->GRSTCTL, USB_OTG_GRSTCTL_TXFFLSH);
 }
 
-uint32_t getinfo(void) {
+static uint32_t getinfo(void) {
     if (!(RCC->AHB2ENR & RCC_AHB2ENR_OTGFSEN)) return STATUS_VAL(0);
     if (!(OTGD->DCTL & USB_OTG_DCTL_SDIS)) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
     return STATUS_VAL(USBD_HW_ENABLED);
 }
 
-void ep_setstall(uint8_t ep, bool stall) {
+static void ep_setstall(uint8_t ep, bool stall) {
     if (ep & 0x80) {
         ep &= 0x7F;
         uint32_t _t = EPIN(ep)->DIEPCTL;
@@ -90,7 +90,7 @@ void ep_setstall(uint8_t ep, bool stall) {
     }
 }
 
-bool ep_isstalled(uint8_t ep) {
+static bool ep_isstalled(uint8_t ep) {
     if (ep & 0x80) {
         ep &= 0x7F;
         return (EPIN(ep)->DIEPCTL & USB_OTG_DIEPCTL_STALL) ? true : false;
@@ -99,7 +99,7 @@ bool ep_isstalled(uint8_t ep) {
     }
 }
 
-void enable(bool enable) {
+static void enable(bool enable) {
     if (enable) {
         /* enabling USB_OTG in RCC */
         _BST(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
@@ -152,7 +152,7 @@ void enable(bool enable) {
     }
 }
 
-uint8_t connect(bool connect) {
+static uint8_t connect(bool connect) {
     if (connect) {
 /* The ST made a strange thing again. Really i dont'understand what is the reason to name
    signal as PWRDWN (Power down PHY) when it works as "Power up" */
@@ -165,7 +165,7 @@ uint8_t connect(bool connect) {
     return usbd_lane_unk;
 }
 
-void setaddr (uint8_t addr) {
+static void setaddr (uint8_t addr) {
     _BMD(OTGD->DCFG, USB_OTG_DCFG_DAD, addr << 4);
 }
 
@@ -201,7 +201,7 @@ static bool set_tx_fifo(uint8_t ep, uint16_t epsize) {
     return true;
 }
 
-bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
+static bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
     if (ep == 0) {
         /* configureing control endpoint EP0 */
         uint32_t mpsize;
@@ -288,7 +288,7 @@ bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
     return true;
 }
 
-void ep_deconfig(uint8_t ep) {
+static void ep_deconfig(uint8_t ep) {
     ep &= 0x7F;
     volatile USB_OTG_INEndpointTypeDef*  epi = EPIN(ep);
     volatile USB_OTG_OUTEndpointTypeDef* epo = EPOUT(ep);
@@ -317,7 +317,7 @@ void ep_deconfig(uint8_t ep) {
     epo->DOEPINT = 0xFF;
 }
 
-int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
+static int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
     uint32_t len, tmp;
     volatile uint32_t *fifo = EPFIFO(0);
     /* no data in RX FIFO */
@@ -338,7 +338,7 @@ int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
     return (len < blen) ? len : blen;
 }
 
-int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
+static int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     uint32_t len, tmp;
     ep &= 0x7F;
     volatile uint32_t* fifo = EPFIFO(ep);
@@ -365,11 +365,11 @@ int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     return blen;
 }
 
-uint16_t get_frame (void) {
+static uint16_t get_frame (void) {
     return _FLD2VAL(USB_OTG_DSTS_FNSOF, OTGD->DSTS);
 }
 
-void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
+static void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
     uint32_t evt;
     uint32_t ep = 0;
     while (1) {
@@ -446,7 +446,7 @@ static uint32_t fnv1a32_turn (uint32_t fnv, uint32_t data ) {
     return fnv;
 }
 
-uint16_t get_serialno_desc(void *buffer) {
+static uint16_t get_serialno_desc(void *buffer) {
     struct  usb_string_descriptor *dsc = buffer;
     uint16_t *str = dsc->wString;
     uint32_t fnv = 2166136261;

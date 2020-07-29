@@ -97,13 +97,13 @@ static uint16_t get_next_pma(uint16_t sz) {
     return (_result < (0x020 + sz)) ? 0 : (_result - sz);
 }
 
-uint32_t getinfo(void) {
+static uint32_t getinfo(void) {
     if (!(RCC->APB1ENR1 & RCC_APB1ENR1_USBFSEN)) return STATUS_VAL(0);
     if (USB->BCDR & USB_BCDR_DPPU) return STATUS_VAL(USBD_HW_ENABLED | USBD_HW_SPEED_FS);
     return STATUS_VAL(USBD_HW_ENABLED);
 }
 
-void ep_setstall(uint8_t ep, bool stall) {
+static void ep_setstall(uint8_t ep, bool stall) {
     volatile uint16_t *reg = EPR(ep);
     /* ISOCHRONOUS endpoint can't be stalled or unstalled */
     if (USB_EP_ISOCHRONOUS == (*reg & USB_EP_T_FIELD)) return;
@@ -140,7 +140,7 @@ void ep_setstall(uint8_t ep, bool stall) {
     }
 }
 
-bool ep_isstalled(uint8_t ep) {
+static bool ep_isstalled(uint8_t ep) {
     if (ep & 0x80) {
         return (USB_EP_TX_STALL == (USB_EPTX_STAT & *EPR(ep)));
     } else {
@@ -148,7 +148,7 @@ bool ep_isstalled(uint8_t ep) {
     }
 }
 
-void enable(bool enable) {
+static void enable(bool enable) {
     if (enable) {
         RCC->APB1ENR1  |=  RCC_APB1ENR1_USBFSEN;
         RCC->APB1RSTR1 |= RCC_APB1RSTR1_USBFSRST;
@@ -165,7 +165,7 @@ void enable(bool enable) {
     }
 }
 
-uint8_t connect(bool connect) {
+static uint8_t connect(bool connect) {
     uint8_t res;
     USB->BCDR = USB_BCDR_BCDEN | USB_BCDR_DCDEN;
     if (USB->BCDR & USB_BCDR_DCDET) {
@@ -189,11 +189,11 @@ uint8_t connect(bool connect) {
     return res;
 }
 
-void setaddr (uint8_t addr) {
+static void setaddr (uint8_t addr) {
     USB->DADDR = USB_DADDR_EF | addr;
 }
 
-bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
+static bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
     volatile uint16_t *reg = EPR(ep);
     pma_table *tbl = EPT(ep);
     /* epsize should be 16-bit aligned */
@@ -264,7 +264,7 @@ bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
     return true;
 }
 
-void ep_deconfig(uint8_t ep) {
+static void ep_deconfig(uint8_t ep) {
     pma_table *ept = EPT(ep);
     *EPR(ep) &= ~USB_EPREG_MASK;
     ept->rx.addr = 0;
@@ -294,7 +294,7 @@ static uint16_t pma_read (uint8_t *buf, uint16_t blen, pma_rec *rx) {
     return rxcnt;
 }
 
-int32_t ep_read(uint8_t ep, void *buf, uint16_t blen) {
+static int32_t ep_read(uint8_t ep, void *buf, uint16_t blen) {
     pma_table *tbl = EPT(ep);
     volatile uint16_t *reg = EPR(ep);
     switch (*reg & (USB_EPRX_STAT | USB_EP_T_FIELD | USB_EP_KIND)) {
@@ -348,7 +348,7 @@ static void pma_write(uint8_t *buf, uint16_t blen, pma_rec *tx) {
     if (blen) *pma = *buf;
 }
 
-int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
+static int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     pma_table *tbl = EPT(ep);
     volatile uint16_t *reg = EPR(ep);
     switch (*reg & (USB_EPTX_STAT | USB_EP_T_FIELD | USB_EP_KIND)) {
@@ -383,11 +383,11 @@ int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     return blen;
 }
 
-uint16_t get_frame (void) {
+static uint16_t get_frame (void) {
     return USB->FNR & USB_FNR_FN;
 }
 
-void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
+static void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
     uint8_t _ev, _ep;
     uint16_t _istr = USB->ISTR;
     _ep = _istr & USB_ISTR_EP_ID;
@@ -439,7 +439,7 @@ static uint32_t fnv1a32_turn (uint32_t fnv, uint32_t data ) {
     return fnv;
 }
 
-uint16_t get_serialno_desc(void *buffer) {
+static uint16_t get_serialno_desc(void *buffer) {
     struct  usb_string_descriptor *dsc = buffer;
     uint16_t *str = dsc->wString;
     uint32_t fnv = 2166136261;
