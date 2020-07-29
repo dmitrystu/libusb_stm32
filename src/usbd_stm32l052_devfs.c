@@ -273,22 +273,20 @@ void ep_deconfig(uint8_t ep) {
 }
 
 static uint16_t pma_read (uint8_t *buf, uint16_t blen, pma_rec *rx) {
+    uint16_t tmp;
     uint16_t *pma = (void*)(USB_PMAADDR + rx->addr);
     uint16_t rxcnt = rx->cnt & 0x03FF;
     rx->cnt &= ~0x3FF;
-
-    if (blen > rxcnt) {
-        blen = rxcnt;
-    }
-    rxcnt = blen;
-    while (blen) {
-        uint16_t _t = *pma;
-        *buf++ = _t & 0xFF;
-        if (--blen) {
-            *buf++ = _t >> 8;
-            pma++;
-            blen--;
-        } else break;
+    for(int idx = 0; idx < rxcnt; idx++) {
+        if ((idx & 0x01) == 0) {
+            tmp = *pma++;
+        }
+        if (idx < blen) {
+            buf[idx] = tmp & 0xFF;
+            tmp >>= 8;
+        } else {
+            return blen;
+        }
     }
     return rxcnt;
 }
@@ -338,13 +336,15 @@ int32_t ep_read(uint8_t ep, void *buf, uint16_t blen) {
 
 static void pma_write(uint8_t *buf, uint16_t blen, pma_rec *tx) {
     uint16_t *pma = (void*)(USB_PMAADDR + tx->addr);
+    uint16_t tmp = 0;
     tx->cnt = blen;
-    while (blen > 1) {
-        *pma++ = buf[1] << 8 | buf[0];
-        buf += 2;
-        blen -= 2;
+    for (int idx=0; idx < blen; idx++) {
+        tmp |= buf[idx] << ((idx & 0x01) ? 8 : 0);
+        if ((idx & 0x01) || (idx + 1) == blen) {
+            *pma++ = tmp;
+            tmp = 0;
+        }
     }
-    if (blen) *pma = *buf;
 }
 
 int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
