@@ -206,10 +206,16 @@ stm32g431xb 32g431rb-nucleo: clean
 						DEFINES='STM32G4 STM32G431xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4'
 
-stm32f446xc:  clean
+stm32f446xc 32f446re-nucleo:  clean
 	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f446xx.s' \
 						LDSCRIPT='demo/stm32f446xc.ld' \
 						DEFINES='STM32F4 STM32F446xx USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4'
+
+stm32f446xc_hs 32f446re-nucleo_hs:  clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f446xx.s' \
+						LDSCRIPT='demo/stm32f446xc.ld' \
+						DEFINES='STM32F4 STM32F446xx USBD_SOF_DISABLED USBD_PRIMARY_OTGHS' \
 						CFLAGS='-mcpu=cortex-m4'
 
 stm32f373xc: clean

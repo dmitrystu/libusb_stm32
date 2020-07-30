@@ -476,7 +476,18 @@ static void cdc_init_usbd(void) {
 #elif defined(STM32L100xC) || defined(STM32G4)
     #define USB_HANDLER     USB_LP_IRQHandler
     #define USB_NVIC_IRQ    USB_LP_IRQn
-#elif defined(STM32L476xx)
+#elif defined(USBD_PRIMARY_OTGHS) && \
+    (defined(STM32F446xx) || defined(STM32F429xx))
+    #define USB_HANDLER     OTG_HS_IRQHandler
+    #define USB_NVIC_IRQ    OTG_HS_IRQn
+    /* WA. With __WFI/__WFE interrupt will not be fired
+     * faced with F4 series and OTGHS only
+     */
+    #undef  __WFI
+    #define __WFI __NOP
+#elif defined(STM32L476xx) || defined(STM32F429xx) || \
+      defined(STM32F105xC) || defined(STM32F107xC) || \
+      defined(STM32F446xx)
     #define USB_HANDLER     OTG_FS_IRQHandler
     #define USB_NVIC_IRQ    OTG_FS_IRQn
 #elif defined(STM32F103x6)
@@ -485,9 +496,6 @@ static void cdc_init_usbd(void) {
 #elif defined(STM32F103xE)
     #define USB_HANDLER     USB_LP_CAN1_RX0_IRQHandler
     #define USB_NVIC_IRQ    USB_LP_CAN1_RX0_IRQn
-#elif defined(STM32F429xx) || defined(STM32F105xC) || defined(STM32F107xC)
-    #define USB_HANDLER     OTG_FS_IRQHandler
-    #define USB_NVIC_IRQ    OTG_FS_IRQn
 #else
     #error Not supported
 #endif
