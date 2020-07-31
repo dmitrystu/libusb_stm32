@@ -229,3 +229,15 @@ stm32l053x8 32l053r8-nucleo: clean
 						LDSCRIPT='demo/stm32l052x8.ld' \
 						DEFINES='STM32L0 STM32L053xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m0plus'
+
+stm32f405xg: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f405xx.s' \
+						LDSCRIPT='demo/stm32f405xg.ld' \
+						DEFINES='STM32F4 STM32F405xx USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4'
+
+stm32f405xg_hs: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f405xx.s' \
+						LDSCRIPT='demo/stm32f405xg.ld' \
+						DEFINES='STM32F4 STM32F405xx USBD_SOF_DISABLED USBD_PRIMARY_OTGHS' \
+						CFLAGS='-mcpu=cortex-m4'

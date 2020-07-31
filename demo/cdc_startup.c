@@ -113,7 +113,7 @@ static void cdc_init_rcc (void) {
     _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24)); // MCO
 
 
-#elif defined(STM32F429xx)
+#elif defined(STM32F429xx) || defined(STM32F405xx)
     /* set flash latency 2WS */
     _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_2WS);
     /* setting up PLL 16MHz HSI, VCO=144MHz, PLLP = 72MHz PLLQ = 48MHz  */
