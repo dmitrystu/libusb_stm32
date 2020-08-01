@@ -30,6 +30,6 @@
 #define HID_DEVICE_SECURITY_CHAR_ENT   0x24    /**<\brief OSC Code character entered.*/
 #define HID_DEVICE_SECURITY_CHAR_ERA   0x25    /**<\brief OSC Code character erased.*/
 #define HID_DEVICE_SCURITY_CODE_CLR    0x26    /**<\brief OSC Security code cleared.*/
-
+/** @} */
 #endif
 

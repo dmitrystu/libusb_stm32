@@ -102,6 +102,6 @@
 #define HID_LED_GENERIC_INDICATOR       0x4B
 #define HID_LED_SYSTEM_SUSPEND          0x4C
 #define HID_LED_EXT_POWER_CONNECTED     0x4D
-
+/** @} */
 #endif
 

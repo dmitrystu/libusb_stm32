@@ -53,7 +53,6 @@
 #define HID_GAME_GUN_SAFETY             0x36
 #define HID_GAME_GANEPAD_FIRE_JUMP      0x37
 #define HID_GAME_GAMEPAD_TRIGGER        0x38
-
-
+/** @} */
 #endif
 

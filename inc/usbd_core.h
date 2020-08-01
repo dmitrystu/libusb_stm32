@@ -34,13 +34,13 @@
 #define USBD_USE_EXT_ULPI   /**<\brief Enables external ULPI interface for OTGHS */
 #define USB_PMA_SIZE        /**<\brief PMA memoty size in bytes. Adjust this for
                               * the devices that shares PMA memory with CAN in case
-                              * of both USB and CAN in use to avoid data corruption.
+                              * of both USB and CAN in use to avoid data corruption. */
 /** @} */
 #endif
 
 /**\addtogroup USBD_HW USB hardware driver
- * \brief Contains HW driver API
  * @{ */
+
 /**\anchor USB_EVENTS
  * \name USB device events
  * @{ */
@@ -53,7 +53,7 @@
 #define usbd_evt_epsetup    6   /**<\brief Setup packet received.*/
 #define usbd_evt_error      7   /**<\brief Data error.*/
 #define usbd_evt_count      8
-/** @} */
+/** @}*/
 
 /**\anchor USB_LANES_STATUS
  * \name USB lanes connection states
@@ -106,7 +106,8 @@
 #if !defined(__ASSEMBLER__)
 #include <stdbool.h>
 
-/**\brief USB device machine states.*/
+/** @brief USB device machine states
+ */
 enum usbd_machine_state {
     usbd_state_disabled,
     usbd_state_disconnected,
