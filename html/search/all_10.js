@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['wcountycode0',['wCountyCode0',['../d4/d3e/a00116.html#a87f5818c0cc1323ab0a9b5a0b6791aa6',1,'usb_cdc_country_desc']]],
+  ['wdescriptorlength',['wDescriptorLength',['../d5/d0b/a00220.html#a3d4bc9b3e09f73b9521ad95ae9b853b6',1,'usb_hid_report_descriptor']]],
+  ['wdescriptorlength0',['wDescriptorLength0',['../dd/dc1/a00212.html#a59ae6a6605ca3e11a1b2887e5d44d242',1,'usb_hid_descriptor']]],
+  ['wdetachtimeout',['wDetachTimeout',['../d1/d72/a00204.html#a3f7688e3e61d7cd8ee14ea5f02c95598',1,'usb_dfu_func_desc']]],
+  ['windex',['wIndex',['../d1/d88/a00128.html#a16a0d11a8158e6b5532d8aa24fc09da6',1,'usb_cdc_notification::wIndex()'],['../db/d7b/a00296.html#aed13e15136df440fc2dd200db37b9491',1,'usbd_ctlreq::wIndex()']]],
+  ['wlength',['wLength',['../d1/d88/a00128.html#a9fa99e9c9fd2abd8c3bc5fbcb04b290b',1,'usb_cdc_notification::wLength()'],['../db/d7b/a00296.html#a2ed43a4022c10d426f1149fcea6cb53b',1,'usbd_ctlreq::wLength()']]],
+  ['wmaxcommand',['wMaxCommand',['../d7/ded/a00196.html#afc48d4d0780b7a668c57843cdb1be9b6',1,'usb_cdc_dmm_desc']]],
+  ['wmaxpacketsize',['wMaxPacketSize',['../dd/dd7/a00248.html#a0b665a4fbe5daf9ede7ae18d75e1c744',1,'usb_endpoint_descriptor']]],
+  ['wmaxsegmentsize',['wMaxSegmentSize',['../d5/db1/a00140.html#a0f8e2d1cd6932d758baf7c8f99cac1e4',1,'usb_cdc_ether_desc']]],
+  ['wmaxvc',['wMaxVC',['../d0/d5e/a00136.html#aa774b605ab031964baf2c31d55c0fd3b',1,'usb_cdc_atm_desc']]],
+  ['wnumbermcfilters',['wNumberMCFilters',['../d5/db1/a00140.html#ac0c54b224da4d2f57774999e7e64bd74',1,'usb_cdc_ether_desc']]],
+  ['wobexserviceversion',['wOBEXServiceVersion',['../d3/db1/a00200.html#af41008dcb7c724dbec9a56791565023d',1,'usb_cdc_obex_serv_desc']]],
+  ['wpolltimeout',['wPollTimeout',['../dc/d31/a00208.html#a5eb86c5861af3fa2682043c66593ea80',1,'usb_dfu_status']]],
+  ['wstring',['wString',['../dc/ded/a00252.html#a17640b507278689e628df88524c12b86',1,'usb_string_descriptor']]],
+  ['wtotallength',['wTotalLength',['../d7/d40/a00236.html#a09fb7940f26366f7f0aedb496a18b97c',1,'usb_config_descriptor']]],
+  ['wtransfersize',['wTransferSize',['../d1/d72/a00204.html#a92b40217da98301dfce02f02ce83986d',1,'usb_dfu_func_desc']]],
+  ['wtype2maxsegmentsize',['wType2MaxSegmentSize',['../d0/d5e/a00136.html#a9a8ba972d62a101b29e5c5ffde741938',1,'usb_cdc_atm_desc']]],
+  ['wtype3maxsegmentsize',['wType3MaxSegmentSize',['../d0/d5e/a00136.html#a56add7d0f8c131efe9c72aa8e451ad8d',1,'usb_cdc_atm_desc']]],
+  ['wvalue',['wValue',['../d1/d88/a00128.html#aefff96f443fd9d7ca49a897a9303d647',1,'usb_cdc_notification::wValue()'],['../db/d7b/a00296.html#a5a7109c916cc80dee20087d92d27aab2',1,'usbd_ctlreq::wValue()']]]
+];

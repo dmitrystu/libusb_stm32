@@ -1,0 +1,11 @@
+var a00079 =
+[
+    [ "HID_PAGE_DEVICE", "d1/d51/a00079.html#gae69fbdee007f1521bccf47bb14fa1e39", null ],
+    [ "HID_DEVICE_BATTERY_STRENGHT", "d1/d51/a00079.html#ga4675613fd4ab9d5d7241759f8d527851", null ],
+    [ "HID_DEVICE_WIRELESS_CHANNEL", "d1/d51/a00079.html#ga2077e5dd1702605e451f94942cc412f7", null ],
+    [ "HID_DEVICE_WIRELESS_ID", "d1/d51/a00079.html#gaa8f7805ea8acba806a53037ce894fd8b", null ],
+    [ "HID_DEVICE_DISCO_WIRELESS_CTL", "d1/d51/a00079.html#ga5512119af92416561390c5d6fa85f570", null ],
+    [ "HID_DEVICE_SECURITY_CHAR_ENT", "d1/d51/a00079.html#ga23327c35de5a2929ab34fbc2d3ca086c", null ],
+    [ "HID_DEVICE_SECURITY_CHAR_ERA", "d1/d51/a00079.html#gab8d0cfd01704c721cbb53edd15a839f7", null ],
+    [ "HID_DEVICE_SCURITY_CODE_CLR", "d1/d51/a00079.html#ga241054a36888fa4328503d6b874049a4", null ]
+];
