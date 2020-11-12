@@ -179,8 +179,8 @@ static void setaddr (uint8_t addr) {
 static bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
     volatile uint16_t *reg = EPR(ep);
     pma_table *tbl = EPT(ep);
-    /* epsize must be 2-byte aligned */
-    epsize = (~0x01U) & (epsize + 1);
+    /* epsize should be 16-bit aligned */
+    if (epsize & 0x01) epsize++;
 
     switch (eptype) {
     case USB_EPTYPE_CONTROL:
@@ -220,9 +220,12 @@ static bool ep_config(uint8_t ep, uint8_t eptype, uint16_t epsize) {
     if (!(ep & 0x80)) {
         uint16_t _rxcnt;
         uint16_t _pma;
-            /* using 32-byte blocks. epsize must be 32-byte aligned */
-            epsize = (~0x1FU) & (epsize + 0x1FU);
-            _rxcnt = 0x8000 - 0x400 + (epsize << 5);
+        if (epsize > 62) {
+            if (epsize & 0x1F) {
+                epsize &= ~0x1F;
+                epsize += 0x20;
+            }
+            _rxcnt = 0x8000 - 0x20 + (epsize << 5);
         } else {
             _rxcnt = epsize << 9;
         }

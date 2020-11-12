@@ -219,6 +219,7 @@ _enable:
     ldr     r1, =#USB_REGBASE     //USB->CNTR
     ldr     r2, =#RCC_BASE        //RCC
     movs    r3, #0x01
+//    lsls    r3, #23             //USBEN or USBRST
     lsls    r3, #RCC_USBEN        //USBEN or USBRST
     tst     r0, r0
     beq     .L_disable
@@ -646,15 +647,18 @@ _ep_config:
     bne     .L_epc_exit
 .L_epc_setuprx:
 /* calculating RX_COUNT field. result in R3*/
-    movs    r3, r2
+    mov     r3, r2
     cmp     r2, #62
     bls     .L_epc_rxbb
-    /* ep size must be 32-byte aligned if >= 64 */
     movs    r3, #0x1F
-    adds    r2, r3
+    ands    r3, r2
+    bne     .L_epc_rxaa
+    subs    r2, #0x20
+.L_epc_rxaa:
     bics    r2, r3
     lsrs    r3, r2, #4
-    adds    r3, #0x3E
+    adds    r3, #0x40
+    adds    r2, #0x20
 .L_epc_rxbb:
     lsls    r3, #9
     ldr     r5, =#USB_PMABASE
