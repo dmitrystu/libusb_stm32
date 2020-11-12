@@ -623,18 +623,14 @@ _ep_config:
     cmp     r1, #0x00       //is a control ep ?
     bne     .L_epc_exit
 .L_epc_setuprx:
-    mov     r3, r2
+    movs    r3, r2
     cmp     r2, #62
     bls     .L_epc_rxbb
     movs    r3, #0x1F
-    ands    r3, r2
-    bne     .L_epc_rxaa
-    subs    r2, #0x20
-.L_epc_rxaa:
+    adds    r2, r3
     bics    r2, r3
-    lsrs    r3, r2, #4
-    adds    r3, #0x40
-    adds    r2, #0x20
+    lsrs    r3, r2, #5
+    adds    r3, #0x3E
 .L_epc_rxbb:
     lsls    r3, #9
     ldr     r5, =#USB_PMABASE
