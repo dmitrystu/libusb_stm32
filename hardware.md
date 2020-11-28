@@ -3,6 +3,7 @@
 |     Target     |   Board                    | Notes                                       |
 |----------------|----------------------------|---------------------------------------------|
 | stm32f103x6    | bluepill                   |                                             |
+| stm32f103x6    | bluepill with GD32F103C8T6 |                                             |
 | stm32f303xe    | NUCLEO-F303RE + NUCLEO2USB |                                             |
 | stm32f105xb    | NUCLEO-F105RB + NUCLEO2USB | based on NUCLEO-F103RE, direct replacement  |
 | stm32l052x8    | DIY board                  |                                             |
