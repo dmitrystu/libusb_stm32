@@ -102,7 +102,7 @@
     #endif
     #endif  //__ASSEMBLER__
 
-#elif defined(STM32F411xE)
+#elif defined(STM32F411xE) || defined(STM32F401xC) || defined(STM32F401xE)
 
     #define USBD_STM32F429FS
     #if !defined(__ASSEMBLER__)
