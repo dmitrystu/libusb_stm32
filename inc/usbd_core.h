@@ -72,7 +72,7 @@
 #define USBD_HW_BC          (1 << 1)    /**<\brief Battery charging detection supported.*/
 #define USND_HW_HS          (1 << 2)    /**<\brief High speed supported.*/
 #define USBD_HW_ENABLED     (1 << 3)    /**<\brief USB device enabled. */
-#define USBD_HW_ENUMSPEED   (2 << 4)    /**<\brief USB device enumeration speed mask.*/
+#define USBD_HW_ENUMSPEED   (3 << 4)    /**<\brief USB device enumeration speed mask.*/
 #define USBD_HW_SPEED_NC    (0 << 4)    /**<\brief Not connected */
 #define USBD_HW_SPEED_LS    (1 << 4)    /**<\brief Low speed */
 #define USBD_HW_SPEED_FS    (2 << 4)    /**<\brief Full speed */
