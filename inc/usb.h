@@ -75,7 +75,7 @@
     #endif
     #endif
 
-#elif defined(STM32L475xx) || defined(STM32L476xx)
+#elif defined(STM32L475xx) || defined(STM32L476xx) || defined(STM32L496xx)
 
     #define USBD_STM32L476
 
