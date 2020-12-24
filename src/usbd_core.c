@@ -209,7 +209,7 @@ static void usbd_process_eptx(usbd_device *dev, uint8_t ep) {
     case usbd_ctl_txdata:
         _t = _MIN(dev->status.data_count, dev->status.ep0size);
         dev->driver->ep_write(ep, dev->status.data_ptr, _t);
-        dev->status.data_ptr += _t;
+        dev->status.data_ptr = (uint8_t*)dev->status.data_ptr + _t;
         dev->status.data_count -= _t;
         /* if all data is not sent */
         if (0 != dev->status.data_count) break;
@@ -224,7 +224,8 @@ static void usbd_process_eptx(usbd_device *dev, uint8_t ep) {
         break;
     case usbd_ctl_statusin:
         dev->status.control_state = usbd_ctl_idle;
-        return usbd_process_callback(dev);
+        usbd_process_callback(dev);
+        break;
     default:
         /* unexpected TX completion */
         /* just skipping it */
@@ -243,7 +244,8 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
     case usbd_ctl_idle:
         /* read SETUP packet, send STALL_PID if incorrect packet length */
         if (0x08 !=  dev->driver->ep_read(ep, req, dev->status.data_maxsize)) {
-            return usbd_stall_pid(dev, ep);
+            usbd_stall_pid(dev, ep);
+            return;
         }
         dev->status.data_ptr = req->data;
         dev->status.data_count = req->wLength;
@@ -251,7 +253,8 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
         if ((req->bmRequestType & USB_REQ_DEVTOHOST) || (0 == req->wLength)) break;
         /* checking available memory for DATA OUT stage */
         if (req->wLength > dev->status.data_maxsize) {
-            return usbd_stall_pid(dev, ep);
+            usbd_stall_pid(dev, ep);
+            return;
         }
         /* continue DATA OUT stage */
         dev->status.control_state = usbd_ctl_rxdata;
@@ -262,11 +265,12 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
         if (dev->status.data_count < _t) {
         /* if received packet is large than expected */
         /* Must be error. Let's drop this request */
-            return usbd_stall_pid(dev, ep);
+            usbd_stall_pid(dev, ep);
+            return;
         } else if (dev->status.data_count != _t) {
         /* if all data payload was not received yet */
             dev->status.data_count -= _t;
-            dev->status.data_ptr += _t;
+            dev->status.data_ptr = (uint8_t*)dev->status.data_ptr + _t;
             return;
         }
         break;
@@ -274,10 +278,12 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
         /* fake reading STATUS OUT */
         dev->driver->ep_read(ep, 0, 0);
         dev->status.control_state = usbd_ctl_idle;
-        return usbd_process_callback(dev);
+        usbd_process_callback(dev);
+        return;
     default:
         /* unexpected RX packet */
-        return usbd_stall_pid(dev, ep);
+        usbd_stall_pid(dev, ep);
+        return;
     }
     /* usb request received. let's handle it */
     dev->status.data_ptr = req->data;
@@ -294,8 +300,7 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
                 /* ZLP maybe wanted */
                 dev->status.control_state = usbd_ctl_ztxdata;
             }
-            return usbd_process_eptx(dev, ep | 0x80);
-
+            usbd_process_eptx(dev, ep | 0x80);
         } else {
             /* confirming by ZLP in STATUS_IN stage */
             dev->driver->ep_write(ep | 0x80, 0, 0);
@@ -306,7 +311,8 @@ static void usbd_process_eprx(usbd_device *dev, uint8_t ep) {
         dev->status.control_state = usbd_ctl_statusin;
         break;
     default:
-        return usbd_stall_pid(dev, ep);
+        usbd_stall_pid(dev, ep);
+        break;
     }
 }
 
@@ -321,9 +327,11 @@ static void usbd_process_ep0 (usbd_device *dev, uint8_t event, uint8_t ep) {
         dev->status.control_state = usbd_ctl_idle;
         dev->complete_callback = 0;
     case usbd_evt_eprx:
-        return usbd_process_eprx(dev, ep);
+        usbd_process_eprx(dev, ep);
+        break;
     case usbd_evt_eptx:
-        return usbd_process_eptx(dev, ep);
+        usbd_process_eptx(dev, ep);
+        break;
     default:
         break;
     }
@@ -352,5 +360,5 @@ static void usbd_process_evt(usbd_device *dev, uint8_t evt, uint8_t ep) {
 }
 
  __attribute__((externally_visible)) void usbd_poll(usbd_device *dev) {
-    return dev->driver->poll(dev, usbd_process_evt);
+    dev->driver->poll(dev, usbd_process_evt);
 }

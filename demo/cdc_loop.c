@@ -298,7 +298,7 @@ static usbd_respond cdc_getdesc (usbd_ctlreq *req, void **address, uint16_t *len
     *address = (void*)desc;
     *length = len;
     return usbd_ack;
-};
+}
 
 
 static usbd_respond cdc_control(usbd_device *dev, usbd_ctlreq *req, usbd_rqc_callback *callback) {
@@ -514,12 +514,13 @@ void main(void) {
     }
 }
 #else
-void main(void) {
+int main(void) {
     cdc_init_usbd();
     usbd_enable(&udev, true);
     usbd_connect(&udev, true);
     while(1) {
         usbd_poll(&udev);
     }
+    return 0;
 }
 #endif
