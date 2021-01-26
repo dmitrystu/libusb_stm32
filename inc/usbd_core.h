@@ -105,7 +105,7 @@
 
 #if !defined(__ASSEMBLER__)
 #include <stdbool.h>
-
+#include <stddef.h>
 /** @brief USB device machine states
  */
 enum usbd_machine_state {
@@ -348,7 +348,7 @@ inline static void usbd_init(usbd_device *dev, const struct usbd_driver *drv,
     dev->status.ep0size = ep0size;
     dev->status.data_ptr = buffer;
     dev->status.data_buf = buffer;
-    dev->status.data_maxsize = bsize - __builtin_offsetof(usbd_ctlreq, data);
+    dev->status.data_maxsize = bsize - offsetof(usbd_ctlreq, data);
 }
 
 /**\brief Polls USB for events
