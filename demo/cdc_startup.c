@@ -114,7 +114,7 @@ static void cdc_init_rcc (void) {
 
 
 #elif defined(STM32F429xx) || defined(STM32F405xx) \
-    || defined(STM32F401xC) || defined(STM32F401xE)  || defined(STM32F411xE) 
+    || defined(STM32F401xC) || defined(STM32F401xE)  || defined(STM32F411xE)
     /* set flash latency 2WS */
     _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_2WS);
     /* setting up PLL 16MHz HSI, VCO=144MHz, PLLP = 72MHz PLLQ = 48MHz  */
@@ -144,7 +144,7 @@ static void cdc_init_rcc (void) {
     _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
     #endif //defined(USBD_PRIMARY_OTGHS)
 
-#elif defined(STM32F446xx)
+#elif defined(STM32F446xx) || defined(STM32F745xx)
     /* set flash latency 2WS */
     _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_2WS);
     /* setting up PLL 16MHz HSI, VCO=144MHz, PLLP = 72MHz PLLQ = 48MHz  */
