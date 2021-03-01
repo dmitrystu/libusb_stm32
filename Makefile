@@ -70,7 +70,7 @@ help all:
 	@echo ' '
 	@echo 'Examples:'
 	@echo '  make bluepill program'
-	@echo '  make module MODULE="usbd.a" CFLAGS="-mcpu=cotrex-m4" DEFINES="STM32L4 STM32L476xx USBD_VBUS_DETECT"'
+	@echo '  make module MODULE="usbd.a" CFLAGS="-mcpu=cortex-m4" DEFINES="STM32L4 STM32L476xx USBD_VBUS_DETECT"'
 
 cmsis: $(CMSISDEV)/ST
 
