@@ -117,7 +117,7 @@ See [hardware.md](hardware.md) for details.
 ### Using makefile ###
 + to build library module
 ```
-make module MODULE=path/module.a DEFINES="mcu spcified defines" CFLAGS="cpu cpecified compiler flags"
+make module MODULE=path/module.a DEFINES="mcu specified defines" CFLAGS="cpu specified compiler flags"
 ```
 + to build demo
 ```
