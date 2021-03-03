@@ -1,4 +1,6 @@
-![Travis (.org) branch](https://img.shields.io/travis/dmitrystu/libusb_stm32/master?logo=travis)
+![LNX build](https://github.com/dmitrystu/libusb_stm32/workflows/LNX%20build/badge.svg)
+![WIN build](https://github.com/dmitrystu/libusb_stm32/workflows/WIN%20build/badge.svg)
+![OSX build](https://github.com/dmitrystu/libusb_stm32/workflows/OSX%20build/badge.svg)
 
 ### Lightweight USB Device Stack ###
 

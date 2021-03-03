@@ -1,0 +1,54 @@
+name: LNX build
+on:
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**.md'
+  push:
+    branches:
+    - master
+    paths-ignore:
+    - '**.md'
+
+jobs:
+  build:
+    name: Linux
+    env:
+      CMSIS: CMSIS_5
+    runs-on: ubuntu-latest
+    steps:
+    - name: ARM GCC setup
+      uses: fiam/arm-none-eabi-gcc@v1
+      with:
+        release: 8-2019-q3
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Resolve prerequisites
+      run: make cmsis
+    - name: testbuild F103
+      run: make stm32f103x6
+    - name: testbuild F303
+      run: make stm32f303xe
+    - name: testbuild F105
+      run: make stm32f105xb
+    - name: testbuild L052
+      run: make stm32l052x8
+    - name: testbuild L100
+      run: make stm32l100xc
+    - name: testbuild L476
+      run: make stm32l476xg
+    - name: testbuild F429
+      run: make stm32f429xi
+    - name: testbuild L433
+      run: make stm32l433cc
+    - name: testbuild F070
+      run: make stm32f070xb
+    - name: testbuild G431
+      run: make stm32g431xb
+    - name: testbuild F446
+      run: make stm32f446xc
+    - name: testbuild F373
+      run: make stm32f373xc
+    - name: testbuild F745
+      run: make stm32f745xe
