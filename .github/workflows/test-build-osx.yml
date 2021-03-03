@@ -1,0 +1,56 @@
+name: OSX build
+on:
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '**.md'
+  push:
+    branches:
+    - master
+    paths-ignore:
+    - '**.md'
+
+jobs:
+  build:
+    name: OSX
+    env:
+      CMSIS: CMSIS_5
+    runs-on: macos-latest
+    steps:
+    - name: ARM GCC setup
+      uses: fiam/arm-none-eabi-gcc@v1
+      with:
+        release: 8-2019-q3
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Update make
+      run: brew install make
+    - name: Resolve prerequisites
+      run: gmake cmsis
+    - name: testbuild F103
+      run: gmake stm32f103x6
+    - name: testbuild F303
+      run: gmake stm32f303xe
+    - name: testbuild F105
+      run: gmake stm32f105xb
+    - name: testbuild L052
+      run: gmake stm32l052x8
+    - name: testbuild L100
+      run: gmake stm32l100xc
+    - name: testbuild L476
+      run: gmake stm32l476xg
+    - name: testbuild F429
+      run: gmake stm32f429xi
+    - name: testbuild L433
+      run: gmake stm32l433cc
+    - name: testbuild F070
+      run: gmake stm32f070xb
+    - name: testbuild G431
+      run: gmake stm32g431xb
+    - name: testbuild F446
+      run: gmake stm32f446xc
+    - name: testbuild F373
+      run: gmake stm32f373xc
+    - name: testbuild F745
+      run: gmake stm32f745xe
