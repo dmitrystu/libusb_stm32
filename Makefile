@@ -259,3 +259,9 @@ stm32f745xe_hs: clean
 						LDSCRIPT='demo/stm32f745xe.ld' \
 						DEFINES='STM32F7 STM32F745xx USBD_SOF_DISABLED USBD_PRIMARY_OTGHS' \
 						CFLAGS='-mcpu=cortex-m7'
+
+stm32f042f6: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F0xx/Source/Templates/gcc/startup_stm32f042x6.s' \
+						LDSCRIPT='demo/stm32f042x6.ld' \
+						DEFINES='STM32F0 STM32F042x6 USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m0 -DUSBD_PINS_REMAP'
