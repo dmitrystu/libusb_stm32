@@ -242,6 +242,12 @@ static void cdc_init_rcc (void) {
     _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
     _BST(RCC->CFGR3, RCC_CFGR3_USBSW_PLLCLK);
+#elif defined(STM32F042x6)
+    /* set flash latency 1WS */
+    _BST(FLASH->ACR, FLASH_ACR_LATENCY);
+    /* use HSI48 as clock incl. USB PHY clock, no PLL */
+	_BST(RCC->CR2, RCC_CR2_HSI48ON);
+	_WBS(RCC->CR2, RCC_CR2_HSI48RDY);
 #elif defined(STM32G4)
     /* using HSI16 as AHB/CPU clock, HSI48 as USB PHY clock */
     _BST(RCC->CRRCR, RCC_CRRCR_HSI48ON);
