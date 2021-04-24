@@ -92,6 +92,19 @@ static void cdc_init_rcc (void) {
     _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
 
+#elif defined(STM32F303xC)
+    /* set flash latency 1WS */
+    _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_1);
+    /* use PLL 48MHz clock from 8Mhz HSI */
+    _BMD(RCC->CFGR,
+         RCC_CFGR_PLLMUL | RCC_CFGR_PLLSRC | RCC_CFGR_USBPRE,
+         RCC_CFGR_PLLMUL12 | RCC_CFGR_USBPRE);
+    _BST(RCC->CR, RCC_CR_PLLON);
+    _WBS(RCC->CR, RCC_CR_PLLRDY);
+    /* switch to PLL */
+    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+
 #elif defined(STM32F373xC)
     /* set flash latency 1WS */
     _BMD(FLASH->ACR, FLASH_ACR_LATENCY, FLASH_ACR_LATENCY_1);

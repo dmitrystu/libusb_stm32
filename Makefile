@@ -145,6 +145,11 @@ stm32f303xe 32f303re-nucleo: clean
 						DEFINES='STM32F3 STM32F303xE USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4'
 
+stm32f303xc: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F3xx/Source/Templates/gcc/startup_stm32f303xc.s' \
+						LDSCRIPT='demo/stm32f303xc.ld' \
+						DEFINES='STM32F3 STM32F303xC USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4'
 
 stm32f105xb: clean
 	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f105xc.s' \
