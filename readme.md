@@ -68,6 +68,12 @@ All requirements can be downloaded into a directory specified in environment var
         <td>usbd_stm32l476_otgfs.c</td>
     </tr>
     <tr>
+        <td>STM32F401 STM32F411</td>
+        <td nowrap>Doublebuffered<br/>4 endpoints<br/>VBUS detection<br/>SOF output</td>
+        <td>usbd_otgfs</td>
+        <td>usbd_stm32f429_otgfs.c</td>
+    </tr>
+    <tr>
         <td rowspan="2">STM32F4x5 STM32F4x7 STM32F4x9</td>
         <td nowrap>Doublebuffered<br/>4 endpoints<br/>VBUS detection<br/>SOF output</td>
         <td>usbd_otgfs</td>
