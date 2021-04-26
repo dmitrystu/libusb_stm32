@@ -53,6 +53,8 @@ help all:
 	@echo '  stm32l052x8   CDC loopback demo for STM32L052x8 based boards'
 	@echo '  32f429zi-nucleo'
 	@echo '  stm32f429xi   CDC loopback demo for STM32F429xI based boards'
+	@echo '  stm32f401xc   CDC loopback demo for STM32F401xC based boards'
+	@echo '  stm32f401xe   CDC loopback demo for STM32F401xE based boards'
 	@echo '  cmsis         Download CMSIS 5 and stm32.h into a $$(CMSIS) directory'
 	@echo '  doc           DOXYGEN documentation'
 	@echo '  module        static library module using following envars (defaults)'
@@ -246,6 +248,12 @@ stm32f401xc: clean
 	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f401xc.s' \
 						LDSCRIPT='demo/stm32f401xc.ld' \
 						DEFINES='STM32F4 STM32F401xC USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4'
+
+stm32f401xe: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f401xe.s' \
+						LDSCRIPT='demo/stm32f401xe.ld' \
+						DEFINES='STM32F4 STM32F401xE USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4'
 
 stm32f745xe: clean

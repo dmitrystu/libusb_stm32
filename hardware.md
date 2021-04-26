@@ -21,6 +21,7 @@
 | stm32f405xg    | NUCLEO-F405RG + NUCLEO2USB | based on NUCLEO-F103RE, 0.1uF at SB33, SB38 |
 | stm32f405xg_hs | NUCLEO-F405RG + NUCLEO2USB | based on NUCLEO-F103RE, 0.1uF at SB33, SB38 |
 | stm32f745xe    | NUCO-V-F745VE + NUCLEO2USB |                                             |
+| stm32f401xe    | WeAct STM32F401CEU6        |                                             |
 
 [NUCLEO2USB SHIELD](https://github.com/dmitrystu/Nucleo2USB)
 [NUCO-V](https://github.com/dmitrystu/nuco-v)
