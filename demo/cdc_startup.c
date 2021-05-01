@@ -104,6 +104,10 @@ static void cdc_init_rcc (void) {
     /* switch to PLL */
     _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
+    
+    _BST(RCC->AHBENR, RCC_AHBENR_GPIOAEN);
+    _BST(GPIOA->AFR[1], (0x0E << 12) | (0x0E << 16));
+    _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
 
 #elif defined(STM32F373xC)
     /* set flash latency 1WS */
