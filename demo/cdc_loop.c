@@ -308,7 +308,7 @@ static usbd_respond cdc_control(usbd_device *dev, usbd_ctlreq *req, usbd_rqc_cal
         case USB_CDC_SET_CONTROL_LINE_STATE:
             return usbd_ack;
         case USB_CDC_SET_LINE_CODING:
-            memcpy( req->data, &cdc_line, sizeof(cdc_line));
+            memcpy(&cdc_line, req->data, sizeof(cdc_line));
             return usbd_ack;
         case USB_CDC_GET_LINE_CODING:
             dev->status.data_ptr = &cdc_line;
