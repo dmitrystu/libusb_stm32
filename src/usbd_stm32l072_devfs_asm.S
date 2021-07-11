@@ -118,7 +118,7 @@ _get_serial_desc:
     bl      .L_fnv1a
     ldr     r2, [r5, 0x04]      //UID1
     bl      .L_fnv1a
-    ldr     r2, [r5, 0x14]      //UID2
+    ldr     r2, [r5, 0x08]      //UID2
     bl      .L_fnv1a
     movs    r3, #28
 .L_gsn_loop:
