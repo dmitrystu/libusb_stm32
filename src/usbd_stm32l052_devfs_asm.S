@@ -114,11 +114,11 @@ _get_serial_desc:
     strb    r1,[r0, #0x01]
     ldr     r5, .L_uid_base     //UID3 this is the serial number
     ldr     r4, .L_fnv1a_offset //FNV1A offset
-    ldr     r2, [r5, 0x00]      //UID0
+    ldr     r2, [r5, UID_OFFSET0]   //UID0
     bl      .L_fnv1a
-    ldr     r2, [r5, 0x04]      //UID1
+    ldr     r2, [r5, UID_OFFSET1]   //UID1
     bl      .L_fnv1a
-    ldr     r2, [r5, 0x14]      //UID2
+    ldr     r2, [r5, UID_OFFSET2]   //UID2
     bl      .L_fnv1a
     movs    r3, #28
 .L_gsn_loop:
