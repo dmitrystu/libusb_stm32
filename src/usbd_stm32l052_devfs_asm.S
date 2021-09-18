@@ -61,10 +61,16 @@
 #define RXADDR      0x04
 #define RXCOUNT     0x06
 
-#ifndef UID_OFFSET0
-#define UID_OFFSET0 0x04
-#define UID_OFFSET1 0x08
-#define UID_OFFSET2 0x14
+#if defined(STM32F070x6) || defined(STM32F070xB) || \
+    defined(STM32F042x6) || defined(STM32F048xx) || \
+    defined(STM32F072xB) || defined(STM32F078xx)
+    #define UID_OFFSET_0    0x00
+    #define UID_OFFSET_1    0x04
+    #define UID_OFFSET_2    0x08
+#else
+    #define UID_OFFSET_0    0x00
+    #define UID_OFFSET_1    0x04
+    #define UID_OFFSET_2    0x14
 #endif
 
 #define EP_NOTOG    (EP_RX_CTR | EP_TX_CTR | EP_SETUP | EP_TYPE | EP_KIND | EP_ADDR)
