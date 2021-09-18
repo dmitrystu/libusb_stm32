@@ -61,6 +61,11 @@
 #define RXADDR      0x04
 #define RXCOUNT     0x06
 
+#ifndef UID_OFFSET0
+#define UID_OFFSET0 0x04
+#define UID_OFFSET1 0x08
+#define UID_OFFSET2 0x14
+#endif
 
 #define EP_NOTOG    (EP_RX_CTR | EP_TX_CTR | EP_SETUP | EP_TYPE | EP_KIND | EP_ADDR)
 

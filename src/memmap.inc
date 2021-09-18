@@ -46,9 +46,6 @@
         #define RCC_APB1RSTR    0x28
         #define RCC_APB1ENR     0x38
         #define UID_BASE        0x1FF80050
-        #define UID_OFFSET0     0x00
-        #define UID_OFFSET1     0x04
-        #define UID_OFFSET2     0x14
     #endif
 
     #if defined(STM32F042x6) || defined(STM32F048xx) || \
