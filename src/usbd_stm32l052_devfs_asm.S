@@ -61,6 +61,17 @@
 #define RXADDR      0x04
 #define RXCOUNT     0x06
 
+#if defined(STM32F070x6) || defined(STM32F070xB) || \
+    defined(STM32F042x6) || defined(STM32F048xx) || \
+    defined(STM32F072xB) || defined(STM32F078xx)
+    #define UID_OFFSET_0    0x00
+    #define UID_OFFSET_1    0x04
+    #define UID_OFFSET_2    0x08
+#else
+    #define UID_OFFSET_0    0x00
+    #define UID_OFFSET_1    0x04
+    #define UID_OFFSET_2    0x14
+#endif
 
 #define EP_NOTOG    (EP_RX_CTR | EP_TX_CTR | EP_SETUP | EP_TYPE | EP_KIND | EP_ADDR)
 
@@ -114,11 +125,11 @@ _get_serial_desc:
     strb    r1,[r0, #0x01]
     ldr     r5, .L_uid_base     //UID3 this is the serial number
     ldr     r4, .L_fnv1a_offset //FNV1A offset
-    ldr     r2, [r5, 0x00]      //UID0
+    ldr     r2, [r5, UID_OFFSET_0]   //UID0
     bl      .L_fnv1a
-    ldr     r2, [r5, 0x04]      //UID1
+    ldr     r2, [r5, UID_OFFSET_1]   //UID1
     bl      .L_fnv1a
-    ldr     r2, [r5, 0x14]      //UID2
+    ldr     r2, [r5, UID_OFFSET_2]   //UID2
     bl      .L_fnv1a
     movs    r3, #28
 .L_gsn_loop:

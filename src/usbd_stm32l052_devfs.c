@@ -20,6 +20,18 @@
 
 #if defined(USBD_STM32L052)
 
+#if defined(STM32F070x6) || defined(STM32F070xB) || \
+    defined(STM32F042x6) || defined(STM32F048xx) || \
+    defined(STM32F072xB) || defined(STM32F078xx)
+    #define UID_OFFSET_0    0x00
+    #define UID_OFFSET_1    0x04
+    #define UID_OFFSET_2    0x08
+#else
+    #define UID_OFFSET_0    0x00
+    #define UID_OFFSET_1    0x04
+    #define UID_OFFSET_2    0x14
+#endif
+
 #ifndef USB_PMASIZE
     #pragma message "PMA memory size is not defined. Use 1k by default"
     #define USB_PMASIZE 0x400
@@ -440,9 +452,9 @@ static uint16_t get_serialno_desc(void *buffer) {
     struct  usb_string_descriptor *dsc = buffer;
     uint16_t *str = dsc->wString;
     uint32_t fnv = 2166136261;
-    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x00));
-    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x04));
-    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + 0x14));
+    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + UID_OFFSET_0));
+    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + UID_OFFSET_1));
+    fnv = fnv1a32_turn(fnv, *(uint32_t*)(UID_BASE + UID_OFFSET_2));
     for (int i = 28; i >= 0; i -= 4 ) {
         uint16_t c = (fnv >> i) & 0x0F;
         c += (c < 10) ? '0' : ('A' - 10);
