@@ -62,6 +62,12 @@ All requirements can be downloaded into a directory specified in environment var
         <td>usbd_stm32f103_devfs_asm.S</td>
     </tr>
     <tr>
+        <td>STM32WB55</td>
+        <td>Doublebuffered<sup>[2]</sup><br />External DP pullup<br />8<sup>[1]</sup> endpoints</td>
+        <td>usbd_devfs</td>
+        <td>usbd_stm32wb55_devfs.c</td>
+    </tr>
+    <tr>
         <td>STM32L4x5 STM32L4x6</td>
         <td nowrap>Doublebuffered<br />6 endpoints<br /> BC1.2<br />VBUS detection</td>
         <td>usbd_otgfs</td>

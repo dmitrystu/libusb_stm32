@@ -151,6 +151,14 @@
     #define usbd_hw usbd_otgfs
     #endif
 
+#elif defined(STM32WB55xx)
+    #define USBD_STM32WB55
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_devfs;
+    #define usbd_hw usbd_devfs
+    #endif
+
 #else
     #error Unsupported STM32 family
 #endif
