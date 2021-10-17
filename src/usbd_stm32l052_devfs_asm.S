@@ -89,8 +89,8 @@
     .cpu cortex-m0plus
     .thumb
 
-    .align  4
     .section .rodata.usbd_devfs_asm
+    .align  4
     .globl  usbd_devfs_asm
 usbd_devfs_asm:
     .long   _getinfo
