@@ -269,6 +269,22 @@ static void cdc_init_rcc (void) {
     /* using HSI16 as AHB/CPU clock, HSI48 as USB PHY clock */
     _BST(RCC->CRRCR, RCC_CRRCR_HSI48ON);
     _WBS(RCC->CRRCR, RCC_CRRCR_HSI48RDY);
+#elif defined(STM32WB55xx)
+    /* using HSI16 as AHB/CPU clock, HSI48 as USB PHY clock */
+    _BST(RCC->CR, RCC_CR_HSION);
+    _WBS(RCC->CR, RCC_CR_HSIRDY);
+    _BMD(RCC->CFGR, RCC_CFGR_SW, (0x01UL << RCC_CFGR_SW_Pos)); // HSI16
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, (0x01UL << RCC_CFGR_SWS_Pos));
+    _BST(RCC->CRRCR, RCC_CRRCR_HSI48ON);
+    _WBS(RCC->CRRCR, RCC_CRRCR_HSI48RDY);
+    _BMD(RCC->CCIPR, RCC_CCIPR_CLK48SEL, 0);
+    /* setup PA11 PA12 to AF10 (USB FS) */
+    _BST(RCC->AHB2ENR, RCC_AHB2ENR_GPIOAEN);
+    _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
+    _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
+    /* Disabling USB Vddusb power isolation. Vusb connected to Vdd */
+    _BST(PWR->CR2, PWR_CR2_USV);
+
 #else
     #error Not supported
 #endif

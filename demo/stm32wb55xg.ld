@@ -1,0 +1,16 @@
+ENTRY(Reset_Handler)
+MEMORY
+{
+    ROM   (rx): ORIGIN = 0x08000000, LENGTH = 1024K
+    RAM  (rwx): ORIGIN = 0x20000008, LENGTH = 0x2fff8
+    RAM_SHARED (xrw) : ORIGIN = 0x20030000, LENGTH = 10K
+}
+
+SECTIONS
+{
+   MAPPING_TABLE (NOLOAD) : { *(MAPPING_TABLE) } >RAM_SHARED
+   MB_MEM1 (NOLOAD)       : { *(MB_MEM1) } >RAM_SHARED
+   MB_MEM2 (NOLOAD)       : { _sMB_MEM2 = . ; *(MB_MEM2) ; _eMB_MEM2 = . ; } >RAM_SHARED
+}
+
+INCLUDE sections.ld
