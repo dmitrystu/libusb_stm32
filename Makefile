@@ -279,10 +279,15 @@ stm32f042f6: clean
 						LDSCRIPT='demo/stm32f042x6.ld' \
 						DEFINES='STM32F0 STM32F042x6 USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m0 -DUSBD_PINS_REMAP'
-						
+
 stm32wb55xg: clean
 	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32WBxx/Source/Templates/gcc/startup_stm32wb55xx_cm4.s' \
 						LDSCRIPT='demo/stm32wb55xg.ld' \
 						DEFINES='STM32WB STM32WB55xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4'
-						
+
+stm32f411xe stm32f411e-disco: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f411xe.s' \
+						LDSCRIPT='demo/stm32f401xe.ld' \
+						DEFINES='STM32F4 STM32F411xE USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m4'

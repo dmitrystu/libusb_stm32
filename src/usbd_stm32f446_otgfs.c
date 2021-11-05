@@ -345,7 +345,7 @@ static int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     }
     epi->DIEPTSIZ = 0;
     epi->DIEPTSIZ = (1 << 19) + blen;
-    _BMD(epi->DIEPCTL, USB_OTG_DIEPCTL_STALL, USB_OTG_DOEPCTL_EPENA | USB_OTG_DOEPCTL_CNAK);
+    _BMD(epi->DIEPCTL, USB_OTG_DIEPCTL_STALL, USB_OTG_DIEPCTL_EPENA | USB_OTG_DIEPCTL_CNAK);
     /* push data to FIFO */
     tmp = 0;
     for (int idx = 0; idx < blen; idx++) {
