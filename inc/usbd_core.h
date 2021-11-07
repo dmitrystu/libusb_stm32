@@ -154,14 +154,14 @@ typedef struct {
 
 /** USB device status data.*/
 typedef struct {
-    void        *data_buf;      /**<\brief Pointer to data buffer used for control requests.*/
-    void        *data_ptr;      /**<\brief Pointer to current data for control request.*/
-    uint16_t    data_count;     /**<\brief Count remained data for control request.*/
-    uint16_t    data_maxsize;   /**<\brief Size of the data buffer for control requests.*/
-    uint8_t     ep0size;        /**<\brief Size of the control endpoint.*/
-    uint8_t     device_cfg;     /**<\brief Current device configuration number.*/
-    uint8_t     device_state;   /**<\brief Current \ref usbd_machine_state.*/
-    uint8_t     control_state;  /**<\brief Current \ref usbd_ctl_state.*/
+             void        *data_buf;      /**<\brief Pointer to data buffer used for control requests.*/
+             void        *data_ptr;      /**<\brief Pointer to current data for control request.*/
+             uint16_t    data_count;     /**<\brief Count remained data for control request.*/
+             uint16_t    data_maxsize;   /**<\brief Size of the data buffer for control requests.*/
+             uint8_t     ep0size;        /**<\brief Size of the control endpoint.*/
+             uint8_t     device_cfg;     /**<\brief Current device configuration number.*/
+    volatile uint8_t     device_state;   /**<\brief Current \ref usbd_machine_state.*/
+             uint8_t     control_state;  /**<\brief Current \ref usbd_ctl_state.*/
 } usbd_status;
 
 /**\brief Generic USB device event callback for events and endpoints processing
