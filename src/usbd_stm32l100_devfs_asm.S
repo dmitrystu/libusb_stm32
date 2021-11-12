@@ -629,7 +629,7 @@ _ep_config:
     movs    r3, #0x1F
     adds    r2, r3
     bics    r2, r3
-    lsrs    r3, r2, #5
+    lsrs    r3, r2, #4
     adds    r3, #0x3E
 .L_epc_rxbb:
     lsls    r3, #9
