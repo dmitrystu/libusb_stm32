@@ -261,7 +261,8 @@ static uint16_t pma_read (uint8_t *buf, uint16_t blen, pma_rec *rx) {
     rx->cnt &= ~0x3FF;
     for(int idx = 0; idx < rxcnt; idx++) {
         if ((idx & 0x01) == 0) {
-            tmp = *pma++;
+            tmp = *pma;
+            pma += 2;
         }
         if (idx < blen) {
             buf[idx] = tmp & 0xFF;
@@ -323,7 +324,8 @@ static void pma_write(const uint8_t *buf, uint16_t blen, pma_rec *tx) {
     for (int idx=0; idx < blen; idx++) {
         tmp |= buf[idx] << ((idx & 0x01) ? 8 : 0);
         if ((idx & 0x01) || (idx + 1) == blen) {
-            *pma++ = tmp;
+            *pma = tmp;
+            pma += 2;
             tmp = 0;
         }
     }
