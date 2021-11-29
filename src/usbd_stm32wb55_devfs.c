@@ -417,8 +417,8 @@ static void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
         USB->ISTR &= ~USB_ISTR_WKUP;
     } else if (_istr & USB_ISTR_SUSP) {
         _ev = usbd_evt_susp;
-        USB->CNTR |= USB_CNTR_FSUSP;
         USB->ISTR &= ~USB_ISTR_SUSP;
+        USB->CNTR |= USB_CNTR_FSUSP;
     } else if (_istr & USB_ISTR_ERR) {
         USB->ISTR &= ~USB_ISTR_ERR;
         _ev = usbd_evt_error;
