@@ -74,6 +74,16 @@ All requirements can be downloaded into a directory specified in environment var
         <td>usbd_stm32l476_otgfs.c</td>
     </tr>
     <tr>
+        <td rowspan="2">STM32L552</td>
+        <td nowrap rowspan="2">Doublebuffered<sup>[2]</sup><br />8<sup>[1]</sup> endpoints<br /> BC1.2</td>
+        <td>usbd_devfs</td>
+        <td>usbd_stm32l552_devfs.c</td>
+    </tr>
+    <tr>
+        <td>usbd_devfs_asm</td>
+        <td>usbd_stm32l552_devfs_asm.S</td>
+    </tr>
+    <tr>
         <td>STM32F401 STM32F411</td>
         <td nowrap>Doublebuffered<br/>4 endpoints<br/>VBUS detection<br/>SOF output</td>
         <td>usbd_otgfs</td>
