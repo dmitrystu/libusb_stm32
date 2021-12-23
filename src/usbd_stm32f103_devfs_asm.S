@@ -390,16 +390,15 @@ _ep_isstalled:
     lsls    r2, r0, #28
     lsrs    r2, #26
     ldr     r1, [r1, r2]
-    lsls    r1, #17
+    lsls    r1, #18
     cmp     r0, #0x80
-    bhs     .L_eis_check
+    blo     .L_eis_check
     lsls    r1, #8
 .L_eis_check:
-    lsrs    r1, r1, #28
-    subs    r1, #0x01
-    subs    r0, r1, #0x01
-    sbcs    r1, r1
-    rsbs    r0, r1, #0
+    lsrs    r0, r1, #30
+    subs    r0, #0x01
+    subs    r1, r0, #0x01
+    sbcs    r0, r0
     bx      lr
     .size  _ep_isstalled, . - _ep_isstalled
 
