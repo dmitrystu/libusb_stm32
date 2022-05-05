@@ -94,7 +94,7 @@ static uint16_t get_next_pma(uint16_t sz) {
         if ((tbl->rx.addr) && (tbl->rx.addr < _result)) _result = tbl->rx.addr;
         if ((tbl->tx.addr) && (tbl->tx.addr < _result)) _result = tbl->tx.addr;
     }
-    return (_result < (0x020 + sz)) ? 0 : (_result - sz);
+    return (_result < (unsigned)(0x020 + sz)) ? 0 : (_result - sz);
 }
 
 static uint32_t getinfo(void) {
