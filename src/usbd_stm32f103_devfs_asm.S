@@ -458,7 +458,7 @@ _ep_read:
     strh    r5, [r4, #RXCOUNT]
     eors    r0, r5          // r0 &= 0x3FF (RX count)
     ldrh    r5, [r4, #RXADDR]
-    adds    r5, r4, r5, LSL (EPT_SHIFT - 3)
+    adds    r5, r6, r5, LSL (EPT_SHIFT - 3)
     cmp     r2, r0
     blo     .L_epr_read
     mov     r2, r0          // if buffer is larger
