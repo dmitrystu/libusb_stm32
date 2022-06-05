@@ -344,7 +344,7 @@ static int32_t ep_read(uint8_t ep, void *buf, uint16_t blen) {
     }
 }
 
-static void pma_write(uint8_t *buf, uint16_t blen, pma_rec *tx) {
+static void pma_write(const uint8_t *buf, uint16_t blen, pma_rec *tx) {
     uint16_t *pma = (void*)(USB_PMAADDR + tx->addr);
     uint16_t tmp = 0;
     tx->cnt = blen;
@@ -357,7 +357,7 @@ static void pma_write(uint8_t *buf, uint16_t blen, pma_rec *tx) {
     }
 }
 
-static int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
+static int32_t ep_write(uint8_t ep, const void *buf, uint16_t blen) {
     pma_table *tbl = EPT(ep);
     volatile uint16_t *reg = EPR(ep);
     switch (*reg & (USB_EPTX_STAT | USB_EP_T_FIELD | USB_EP_KIND)) {

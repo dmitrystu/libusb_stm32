@@ -438,7 +438,7 @@ _ep_read:
 
     .thumb_func
     .type   _ep_write, %function
-/* int32_t ep_write(uint8_t ep, void *buf, uint16_t blen)
+/* int32_t ep_write(uint8_t ep, const void *buf, uint16_t blen)
  * R0 -> endpoint
  * R1 -> *buffer
  * R2 -> data length
