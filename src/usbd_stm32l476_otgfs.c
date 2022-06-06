@@ -364,7 +364,7 @@ static int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
     return (len < blen) ? len : blen;
 }
 
-static int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
+static int32_t ep_write(uint8_t ep, const void *buf, uint16_t blen) {
     uint32_t len, tmp;
     ep &= 0x7F;
     volatile uint32_t* fifo = EPFIFO(ep);
@@ -382,7 +382,7 @@ static int32_t ep_write(uint8_t ep, void *buf, uint16_t blen) {
     /* push data to FIFO */
     tmp = 0;
     for (int idx = 0; idx < blen; idx++) {
-        tmp |= (uint32_t)((uint8_t*)buf)[idx] << ((idx & 0x03) << 3);
+        tmp |= (uint32_t)((const uint8_t*)buf)[idx] << ((idx & 0x03) << 3);
         if ((idx & 0x03) == 0x03 || (idx + 1) == blen) {
             *fifo = tmp;
             tmp = 0;
