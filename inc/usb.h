@@ -164,11 +164,7 @@
 
     #if !defined(__ASSEMBLER__)
     extern const struct usbd_driver usbd_otgfs;
-    #if defined(USBD_PRIMARY_OTGHS)
-    #define usbd_hw usbd_otghs
-    #else
     #define usbd_hw usbd_otgfs
-    #endif
     #endif  //__ASSEMBLER__
 
 #else
