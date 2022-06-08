@@ -284,7 +284,19 @@ static void cdc_init_rcc (void) {
     _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
     /* Disabling USB Vddusb power isolation. Vusb connected to Vdd */
     _BST(PWR->CR2, PWR_CR2_USV);
+#elif defined(STM32H743xx)
+    /* Enable USB supply */
+    _BST(PWR->CR3, PWR_CR3_SCUEN | PWR_CR3_LDOEN | PWR_CR3_USB33DEN);
 
+    /* Enable HSI48 and use as USB PHY clock */
+    _BST(RCC->CR, RCC_CR_HSI48ON);
+    _WBS(RCC->CR, RCC_CR_HSI48RDY);
+    _BMD(RCC->D2CCIP2R, RCC_D2CCIP2R_USBSEL, 3 << RCC_D2CCIP2R_USBSEL_Pos);
+
+    /* enabling GPIOA and setting PA11 and PA12 to AF10 (USB_FS) */
+    _BST(RCC->AHB4ENR, RCC_AHB4ENR_GPIOAEN);
+    _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
+    _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
 #else
     #error Not supported
 #endif
