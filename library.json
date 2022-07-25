@@ -1,0 +1,18 @@
+{
+	"name": "libusb_stm32",
+	"description": "Lightweight USB Device Stack",
+	"version": "0.1.0",
+	"keywords": "stm32, usb",
+	"authors": {
+		"name": "Dmitry Filimonchuk",
+		"email": "dmitrystu@gmail.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/dmitrystu/libusb_stm32.git"
+	},
+	"frameworks": [ "cmsis", "stm32cube" ],
+	"platforms": [ "ststm32" ],
+	"headers": ["stm32_compat.h", "usb.h"],
+	"build": { "includeDir": "inc" }
+}

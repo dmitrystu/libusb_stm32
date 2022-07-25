@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include "stm32.h"
+#include "stm32_compat.h"
 #include "usb.h"
 #include "usb_cdc.h"
 #include "usb_hid.h"
