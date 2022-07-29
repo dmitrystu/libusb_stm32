@@ -40,7 +40,6 @@ vpath %.c $(SRCPATH)
 vpath %.S $(SRCPATH)
 vpath %.s $(SRCPATH)
 
-
 help all:
 	@echo 'Usage: make target [program]'
 	@echo 'Available targets are:'
@@ -109,6 +108,7 @@ $(DOUT).elf : $(OBJDIR) $(DOBJ) $(OBJECTS)
 	@$(LD) $(CFLAGS2) $(LDFLAGS) -Wl,--script='$(LDSCRIPT)' -Wl,-Map=$(DOUT).map $(DOBJ) $(OBJECTS) -o $@
 
 clean: $(OBJDIR)
+	$(MAKE) --version
 	@$(RM) $(DOUT).*
 	@$(RM) $(call fixpath, $(OBJDIR)/*.*)
 
