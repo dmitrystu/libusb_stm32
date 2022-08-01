@@ -11,7 +11,6 @@
 		"type": "git",
 		"url": "https://github.com/dmitrystu/libusb_stm32.git"
 	},
-	"frameworks": [ "cmsis", "stm32cube" ],
 	"platforms": [ "ststm32" ],
 	"headers": ["stm32_compat.h", "usb.h"],
 	"build": { "includeDir": "inc" }
