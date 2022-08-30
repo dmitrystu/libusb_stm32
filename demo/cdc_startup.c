@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "stm32.h"
+#include "stm32_compat.h"
 
 static void cdc_init_rcc (void) {
 #if defined(STM32L0)

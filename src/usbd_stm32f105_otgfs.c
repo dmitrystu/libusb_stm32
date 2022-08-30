@@ -16,7 +16,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "stm32.h"
+#include "stm32_compat.h"
 #include "usb.h"
 
 #if defined(USBD_STM32F105)
