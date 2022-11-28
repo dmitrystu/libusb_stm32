@@ -78,7 +78,7 @@
 #define HID_KEYBOARD_SEMICOLON          0x33
 #define HID_KEYBOARD_APOSTROPHE         0x34
 #define HID_KEYBOARD_GRAVE_ACCENT       0x35
-#define HID_KEYBOARD_COLON              0x36
+#define HID_KEYBOARD_COMMA              0x36
 #define HID_KEYBOARD_DOT                0x37
 #define HID_KEYBOARD_SLASH              0x38
 #define HID_KEYBOARD_CAPS_LOCK          0x39
