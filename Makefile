@@ -1,6 +1,6 @@
-CMSIS       ?= CMSIS
+CMSIS       ?= $(HOME)/STM32Cube/Repository/STM32Cube_FW_G0_V1.6.1/Drivers/CMSIS
 CMSISDEV    ?= $(CMSIS)/Device
-CMSISCORE   ?= $(CMSIS)/CMSIS/Include $(CMSIS)/CMSIS/Core/Include
+CMSISCORE   ?= $(CMSIS)/Include $(CMSIS)/Core/Include
 FLASH       ?= st-flash
 TOOLSET     ?= arm-none-eabi-
 CC           = $(TOOLSET)gcc
@@ -9,7 +9,7 @@ AR           = $(TOOLSET)gcc-ar
 OBJCOPY      = $(TOOLSET)objcopy
 DFU_UTIL    ?= dfu-util
 STPROG_CLI  ?= ~/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI
-OPTFLAGS    ?= -Os
+OPTFLAGS    ?= -Os -g
 
 ifeq ($(OS),Windows_NT)
 	RM = del /Q
@@ -297,3 +297,9 @@ stm32f411xe stm32f411e-disco: clean
 						LDSCRIPT='demo/stm32f401xe.ld' \
 						DEFINES='STM32F4 STM32F411xE USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4'
+
+stm32g0b1xe: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32G0xx/Source/Templates/gcc/startup_stm32g0b1xx.s' \
+						LDSCRIPT='demo/stm32g0b1xe.ld' \
+						DEFINES='STM32G0 STM32G0B1xx USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m0plus'
