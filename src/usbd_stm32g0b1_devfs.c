@@ -273,8 +273,8 @@ static void ep_deconfig(uint8_t ep) {
 
 static uint16_t pma_read (uint8_t *buf, uint16_t blen, pma_rec *rx) {
     uint32_t *pma = (void*)(USB_DRD_PMAADDR + pma_addr(rx->addr_cnt));
-    uint16_t rxcnt = pma_cnt(rx->addr_cnt) & 0x07FF;
-    rx->addr_cnt &= ~0x7FF0000;
+    uint16_t rxcnt = pma_cnt(rx->addr_cnt) & 0x03FF;
+    rx->addr_cnt &= ~0x3FF0000;
 
     if (blen > rxcnt) {
         blen = rxcnt;
