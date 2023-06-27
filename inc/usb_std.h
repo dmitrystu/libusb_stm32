@@ -126,7 +126,6 @@ extern "C" {
 #define USB_DTYPE_OTG               0x09    /**<\brief OTG descriptor.*/
 #define USB_DTYPE_DEBUG             0x0A    /**<\brief Debug descriptor.*/
 #define USB_DTYPE_INTERFASEASSOC    0x0B    /**<\brief Interface association descriptor.*/
-#define USB_DTYPE_FUNCTIONAL_DESC   0x21   /**<\brief Functonal descriptor.*/
 #define USB_DTYPE_CS_INTERFACE      0x24    /**<\brief Class specific interface descriptor.*/
 #define USB_DTYPE_CS_ENDPOINT       0x25    /**<\brief Class specific endpoint descriptor.*/
 /** @} */
