@@ -134,7 +134,6 @@ struct PC_to_RDR_XfrBlock {
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
-    uint8_t                 bSeq;
     uint8_t                 bBWI;
     uint16_t                wLevelParameter;
     uint8_t                 abData[0];
@@ -348,7 +347,7 @@ struct RDR_to_PC_NotifySlotChange {
     uint8_t                 bmSlotICCState[0];
 }  __attribute__((packed));
 
-struct RDR_to_PC_NotifySlotChange {
+struct RDR_to_PC_HardwareError {
     uint8_t                 bMessageType;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
