@@ -167,6 +167,14 @@
     #define usbd_hw usbd_otgfs
     #endif  //__ASSEMBLER__
 
+#elif defined(STM32H747xx)
+
+    #define USBD_STM32H747XXHS
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_otghs;
+    #define usbd_hw usbd_otghs
+    #endif
 #else
     #error Unsupported STM32 family
 #endif
