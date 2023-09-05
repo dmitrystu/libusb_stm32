@@ -1,5 +1,4 @@
 /* This file is the part of the Lightweight USB device Stack for STM32 microcontrollers
- * Reference: https://www.usb.org/sites/default/files/DWG_Smart-Card_CCID_Rev110.pdf
  *
  * Copyright ©2023 Filipe Rodrigues <filipepazrodrigues[at]gmail[dot]com>
  *
@@ -13,25 +12,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdint.h>
-
 #ifndef _USB_CCID_H_
 #define _USB_CCID_H_
+
 #ifdef __cplusplus
     extern "C" {
 #endif
 
-#define USB_CLASS_CCID                   0x0b    /**<\brief Smart Card Device class */
-#define USB_DTYPE_CCID_FUNCTIONAL   0x21   /**<\brief Functional descriptor.*/
+/**\addtogroup USB_CCID USB CCID class
+ * \brief Integrated Circuit(s) Cards Interface Devices class definitions
+ * \details This module based on
+ * + [Specification for Integrated Circuit(s) Cards Interface Devices, Revision 1.1](https://www.usb.org/sites/default/files/DWG_Smart-Card_CCID_Rev110.pdf)
+ * @{ */
 
+/**\name USB CCID class subclass and protocol definitions
+ * @{ */
+#define USB_CLASS_CCID                  0x0B   /**<\brief Smart Card Device class */
+#define USB_CCID_SUBCLASS               0x00   /**<\brief Subclass code*/
+#define USB_CCID_PROTO_CCID             0x00   /**<\brief CCID protocol*/
+/** @} */
+
+/**\name USB CCID descriptor types
+ * @{ */
+#define USB_DTYPE_CCID_FUNCTIONAL       0x21   /**<\brief Functional descriptor*/
+/** @} */
+
+/**\name CCID Functional descriptor parameters
+ * @{ */
 #define CCID_CURRENT_SPEC_RELEASE_NUMBER            0x0110
+
 #define CCID_VOLTAGESUPPORT_5V                      0
 #define CCID_VOLTAGESUPPORT_3V                      (1 << 0)
 #define CCID_VOLTAGESUPPORT_1V8                     (1 << 1)
 
 #define CCID_PROTOCOL_T0                            0
 #define CCID_PROTOCOL_T1                            (1 << 0)
+/** @} */
 
+/**\name CCID Slot status register codes
+ * @{ */
 #define CCID_ICCSTATUS_PRESENTANDACTIVE             0
 #define CCID_ICCSTATUS_PRESENTANDINACTIVE           (1 << 0)
 #define CCID_ICCSTATUS_NOICCPRESENT                 (1 << 1)
@@ -39,15 +58,23 @@
 #define CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR    0
 #define CCID_COMMANDSTATUS_FAILED                   (1 << 6)
 #define CCID_COMMANDSTATUS_TIMEEXTENSIONREQUESTED   (1 << 7)
+/** @} */
 
+/**\name CCID Error codes
+ * @{ */
 #define CCID_ERROR_NOERROR          0
 #define CCID_ERROR_SLOTNOTFOUND     5
+/** @} */
 
+/**\name USB CCID class-specific requests
+ * @{ */
 #define CCID_ABORT                                  0x1
 #define CCID_GET_CLOCK_FREQUENCIES                  0x2
 #define CCID_GET_DATA_RATES                         0x3
+/** @} */
 
-/* Bulk-OUT Messages */
+/**\name CCID Bulk-OUT Messages
+ * @{ */
 #define PC_TO_RDR_ICCPOWERON                   0x62
 #define PC_TO_RDR_ICCPOWEROFF                  0x63
 #define PC_TO_RDR_GETSLOTSTATUS                0x65
@@ -62,19 +89,24 @@
 #define PC_TO_RDR_MECHANICAL                   0x71
 #define PC_TO_RDR_ABORT                        0x72
 #define PC_TO_RDR_SETDATARATEANDCLOCKFREQUENCY 0x73
+/** @} */
 
-/* Bulk-IN Messages */
+/**\name CCID Bulk-IN Messages
+ * @{ */
 #define RDR_TO_PC_DATABLOCK                    0x80
 #define RDR_TO_PC_SLOTSTATUS                   0x81
 #define RDR_TO_PC_PARAMETERS                   0x82
 #define RDR_TO_PC_ESCAPE                       0x83
 #define RDR_TO_PC_DATARATEANDCLOCKFREQUENCY    0x84
+/** @} */
 
-/* Interrupt-IN Messages */
+/**\name CCID Interrupt-IN Messages
+ * @{ */
 #define RDR_TO_PC_NOTIFYSLOTCHANGE             0x50
 #define RDR_TO_PC_HARDWAREERROR                0x51
+/** @} */
 
-
+/**\brief USB CCID functional descriptor */
 struct usb_ccid_descriptor {
     uint8_t bLength;                /**<\brief Size of the descriptor, in bytes.*/
     uint8_t bDescriptorType;        /**<\brief IAD descriptor */
@@ -102,34 +134,36 @@ struct usb_ccid_descriptor {
 } __attribute__((packed));
 
 
-/* Bulk-Out Messages*/
-
-struct PC_to_RDR_IccPowerOn {
+/**\brief PC_to_RDR_IccPowerOn Bulk-Out Message */
+struct pc_to_rdr_icc_power_on {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 bPowerSelect;
     uint8_t                 abRFU[2];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_IccPowerOff {
+/**\brief PC_to_RDR_IccPowerOff Bulk-Out Message */
+struct pc_to_rdr_icc_power_off {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 abRFU[3];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_GetSlotStatus {
+/**\brief PC_to_RDR_GetSlotStatus Bulk-Out Message */
+struct pc_to_rdr_get_slot_status {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 abRFU[3];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_XfrBlock {
+/**\brief PC_to_RDR_XfrBlock Bulk-Out Message */
+struct pc_to_rdr_xfr_block {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
@@ -137,25 +171,28 @@ struct PC_to_RDR_XfrBlock {
     uint8_t                 bBWI;
     uint16_t                wLevelParameter;
     uint8_t                 abData[0];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_GetParameters {
+/**\brief PC_to_RDR_GetParameters Bulk-Out Message */
+struct pc_to_rdr_get_parameters {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 abRFU[3];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_ResetParameters {
+/**\brief PC_to_RDR_ResetParameters Bulk-Out Message */
+struct pc_to_rdr_reset_parameters {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 abRFU[3];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_SetParameters_T0 {
+/**\brief PC_to_RDR_SetParameters (T0 protocol) Bulk-Out Message */
+struct pc_to_rdr_set_parameters_t0 {
     //common
     uint8_t                 bMessageType;
     uint32_t                dwLength;
@@ -170,9 +207,10 @@ struct PC_to_RDR_SetParameters_T0 {
     uint8_t                 bGuardTimeT0;
     uint8_t                 bWaitingIntegerT0;
     uint8_t                 bClockStop;
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_SetParameters_T1 {
+/**\brief PC_to_RDR_SetParameters (T1 protocol) Bulk-Out Message */
+struct pc_to_rdr_set_parameters_t1 {
     //common
     uint8_t                 bMessageType;
     uint32_t                dwLength;
@@ -189,27 +227,30 @@ struct PC_to_RDR_SetParameters_T1 {
     uint8_t                 bClockStop;
     uint8_t                 bIFSC;
     uint8_t                 bNadValue;
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_Escape {
+/**\brief PC_to_RDR_Escape Bulk-Out Message */
+struct pc_to_rdr_escape {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 abRFU[3];
     uint8_t                 abData[0];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_IccClock {
+/**\brief PC_to_RDR_IccClock Bulk-Out Message */
+struct pc_to_rdr_icc_clock {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 bClockCommand;
     uint8_t                 abRFU[2];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_T0APDU {
+/**\brief PC_to_RDR_T0APDU Bulk-Out Message */
+struct pc_to_rdr_t0_apdu {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
@@ -217,9 +258,10 @@ struct PC_to_RDR_T0APDU {
     uint8_t                 bmChanges;
     uint8_t                 bClassGetResponse;
     uint8_t                 bClassEnvelope;
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_Secure {
+/**\brief PC_to_RDR_Secure Bulk-Out Message */
+struct pc_to_rdr_secure {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
@@ -227,26 +269,29 @@ struct PC_to_RDR_Secure {
     uint8_t                 bBWI;
     uint16_t                wLevelParameter;
     uint8_t                 abData[0];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_Mechanical {
+/**\brief PC_to_RDR_Mechanical Bulk-Out Message */
+struct pc_to_rdr_mechanical {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 bFunction;
     uint8_t                 abRFU[2];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_Abort {
+/**\brief PC_to_RDR_Abort Bulk-Out Message */
+struct pc_to_rdr_abort {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 abRFU[3];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct PC_to_RDR_SetDataRateAndClockFrequency {
+/**\brief PC_to_RDR_SetDataRateAndClockFrequency Bulk-Out Message */
+struct pc_to_rdr_set_data_rate_and_clock_frequency {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
@@ -254,11 +299,10 @@ struct PC_to_RDR_SetDataRateAndClockFrequency {
     uint8_t                 abRFU[3];
     uint32_t                dwClockFrequency;
     uint32_t                dwDataRate;
-}  __attribute__((packed));
+} __attribute__((packed));
 
-/* Bulk-In Messages*/
-
-struct RDR_to_PC_DataBlock {
+/**\brief RDR_to_PC_DataBlock Bulk-In Message */
+struct rdr_to_pc_data_block {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
@@ -267,9 +311,10 @@ struct RDR_to_PC_DataBlock {
     uint8_t                 bError;
     uint8_t                 bChainParameter;
     uint8_t                 abData[0];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct RDR_to_PC_SlotStatus {
+/**\brief RDR_to_PC_SlotStatus Bulk-In Message */
+struct rdr_to_pc_slot_status {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
@@ -277,9 +322,10 @@ struct RDR_to_PC_SlotStatus {
     uint8_t                 bStatus;
     uint8_t                 bError;
     uint8_t                 bClockStatus;
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct RDR_to_PC_Parameters_T0 {
+/**\brief RDR_to_PC_Parameters (T0 protocol) Bulk-In Message */
+struct rdr_to_pc_parameters_t0 {
     //common
     uint8_t                 bMessageType;
     uint32_t                dwLength;
@@ -295,9 +341,10 @@ struct RDR_to_PC_Parameters_T0 {
     uint8_t                 bGuardTimeT0;
     uint8_t                 bWaitingIntegerT0;
     uint8_t                 bClockStop;
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct RDR_to_PC_Parameters_T1 {
+/**\brief RDR_to_PC_Parameters (T1 protocol) Bulk-In Message */
+struct rdr_to_pc_parameters_t1 {
     //common
     uint8_t                 bMessageType;
     uint32_t                dwLength;
@@ -315,9 +362,10 @@ struct RDR_to_PC_Parameters_T1 {
     uint8_t                 bClockStop;
     uint8_t                 bIFSC;
     uint8_t                 bNadValue;
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct RDR_to_PC_Escape {
+/**\brief RDR_to_PC_Escape Bulk-In Message */
+struct rdr_to_pc_escape {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
@@ -326,9 +374,10 @@ struct RDR_to_PC_Escape {
     uint8_t                 bError;
     uint8_t                 bRFU;
     uint8_t                 abData[0];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct RDR_to_PC_DataRateAndClockFrequency {
+/**\brief RDR_to_PC_DataRateAndClockFrequency Bulk-In Message */
+struct rdr_to_pc_data_rate_and_clock_frequency {
     uint8_t                 bMessageType;
     uint32_t                dwLength;
     uint8_t                 bSlot;
@@ -338,24 +387,26 @@ struct RDR_to_PC_DataRateAndClockFrequency {
     uint8_t                 bRFU;
     uint32_t                dwClockFrequency;
     uint32_t                dwDataRate;
-}  __attribute__((packed));
+} __attribute__((packed));
 
-/* Interrupt-In Messages*/
-
-struct RDR_to_PC_NotifySlotChange {
+/**\brief RDR_to_PC_NotifySlotChange Interrupt-In Message */
+struct rdr_to_pc_notify_slot_change {
     uint8_t                 bMessageType;
     uint8_t                 bmSlotICCState[0];
-}  __attribute__((packed));
+} __attribute__((packed));
 
-struct RDR_to_PC_HardwareError {
+/**\brief RDR_to_PC_HardwareError Interrupt-In Message */
+struct rdr_to_pc_hardware_error {
     uint8_t                 bMessageType;
     uint8_t                 bSlot;
     uint8_t                 bSeq;
     uint8_t                 bHardwareErrorCode;
-}  __attribute__((packed));
+} __attribute__((packed));
+
+/** @} */
 
 #ifdef __cplusplus
     }
 #endif
 
-#endif
+#endif /* _USB_CCID_H_ */
