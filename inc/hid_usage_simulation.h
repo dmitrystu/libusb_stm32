@@ -14,7 +14,7 @@
  */
 
 #ifndef _USB_HID_USAGE_SIMUL_H_
-#define _USB_HID_USAHE_SUMUL_H_
+#define _USB_HID_USAGE_SIMUL_H_
 #ifdef __cplusplus
     extern "C" {
 #endif
