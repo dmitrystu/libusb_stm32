@@ -269,6 +269,11 @@ typedef int32_t (*usbd_hw_ep_read)(uint8_t ep, void *buf, uint16_t blen);
  * \param buf pointer to data buffer
  * \param blen size of data will be written
  * \return number of written bytes
+ *
+ * The \ref usbd_evt_eptx event will fire for the endpoint once the
+ * write is \e complete. A trick commonly used is to enqueue a zero-length
+ * write as soon as the endpoint is configured, so that it would
+ * "complete", firing an event, the next time an IN request arrives.
  */
 typedef int32_t (*usbd_hw_ep_write)(uint8_t ep, const void *buf, uint16_t blen);
 
