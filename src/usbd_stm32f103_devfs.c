@@ -345,7 +345,7 @@ static void ep_deconfig(uint8_t ep) {
 }
 
 static uint16_t pma_read (uint8_t *buf, uint16_t blen, pma_rec *rx) {
-    uint16_t tmp;
+    uint16_t tmp = 0;
     uint16_t *pma = PMA(rx->addr);
     uint16_t rxcnt = rx->cnt & 0x03FF;
     rx->cnt &= ~0x3FF;

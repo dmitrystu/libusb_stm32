@@ -320,7 +320,7 @@ static void ep_deconfig(uint8_t ep) {
 }
 
 static int32_t ep_read(uint8_t ep, void* buf, uint16_t blen) {
-    uint32_t len, tmp;
+    uint32_t len, tmp = 0;
     volatile uint32_t *fifo = EPFIFO(0);
     /* no data in RX FIFO */
     if (!(OTG->GINTSTS & USB_OTG_GINTSTS_RXFLVL)) return -1;
@@ -418,6 +418,7 @@ static void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
             case 0x03:  /* OUT completed */
             case 0x04:  /* SETUP completed */
                 _BST(EPOUT(ep)->DOEPCTL, USB_OTG_DOEPCTL_CNAK | USB_OTG_DOEPCTL_EPENA);
+                // fall through
             default:
                 /* pop GRXSTSP */
                 OTG->GRXSTSP;
@@ -438,7 +439,7 @@ static void evt_poll(usbd_device *dev, usbd_evt_callback callback) {
             /* no more supported events */
             return;
         }
-        return callback(dev, evt, ep);
+        callback(dev, evt, ep);
     }
 }
 
