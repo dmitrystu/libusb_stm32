@@ -359,8 +359,11 @@ static void cdc_rxonly (usbd_device *dev, uint8_t event, uint8_t ep) {
 
 static void cdc_txonly(usbd_device *dev, uint8_t event, uint8_t ep) {
     uint8_t _t = dev->driver->frame_no();
-    memset(fifo, _t, CDC_DATA_SZ);
-    usbd_ep_write(dev, ep, fifo, CDC_DATA_SZ);
+    if (_t > CDC_DATA_SZ) _t = CDC_DATA_SZ;
+    for (size_t i = 0; i < _t; ++i) {
+        fifo[i] = fpos++;
+    }
+    usbd_ep_write(dev, ep, fifo, _t);
 }
 
 static void cdc_rxtx(usbd_device *dev, uint8_t event, uint8_t ep) {
