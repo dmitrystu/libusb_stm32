@@ -32,7 +32,7 @@
 #define HID_RIN_EP      0x83
 #define HID_RIN_SZ      0x10
 
-//#define CDC_LOOPBACK
+#define CDC_LOOPBACK
 #define ENABLE_HID_COMBO
 
 //#define SIGNAL_MODEM  /* uncomment to signal modem capabilities */
