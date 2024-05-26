@@ -350,9 +350,8 @@ static int32_t ep_write(uint8_t ep, const void *buf, uint16_t blen) {
     len = (blen + 3) >> 2;
     /* no enough space in TX fifo */
     if (len > 0 && len > _FLD2VAL(USB_OTG_DTXFSTS_INEPTFSAV, epi->DTXFSTS)) return -1;
-    //epi->DIEPTSIZ = 0;
     epi->DIEPTSIZ = (1 << 19) + blen;
-    _BST(epi->DIEPCTL, USB_OTG_DIEPCTL_EPENA | USB_OTG_DIEPCTL_CNAK);
+    _BMD(epi->DIEPCTL, USB_OTG_DIEPCTL_STALL, USB_OTG_DOEPCTL_EPENA | USB_OTG_DOEPCTL_CNAK);
     /* push data to FIFO */
     for (int idx = 0; idx < blen; idx++) {
         tmp |= (uint32_t)((const uint8_t*)buf)[idx] << ((idx & 0x03) << 3);
