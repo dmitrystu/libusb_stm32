@@ -358,9 +358,24 @@ static void cdc_rxonly (usbd_device *dev, uint8_t event, uint8_t ep) {
 }
 
 static void cdc_txonly(usbd_device *dev, uint8_t event, uint8_t ep) {
-    uint8_t _t = dev->driver->frame_no();
-    memset(fifo, _t, CDC_DATA_SZ);
-    usbd_ep_write(dev, ep, fifo, CDC_DATA_SZ);
+    static uint8_t psize = 0x00U;
+    static uint8_t remained = 0x00U;
+    static uint8_t lastsym = 0x00U;
+
+    uint8_t _t = (remained < CDC_DATA_SZ) ? remained : CDC_DATA_SZ;
+    // fill buffer by sequental data
+    for (size_t i = 0; i < _t; ++i) {
+        fifo[i] = lastsym++;
+    }
+    usbd_ep_write(dev, ep, fifo, _t);
+
+    if (remained < CDC_DATA_SZ) {
+        // bulk xfer completed. increase bulk size
+        remained = ++psize;
+    } else {
+        // continue to send remained data or ZLP
+        remained -= _t;
+    }
 }
 
 static void cdc_rxtx(usbd_device *dev, uint8_t event, uint8_t ep) {

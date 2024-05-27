@@ -128,6 +128,10 @@ STM32G431RB, STM32F411CEUx, STM32F405RG, STM32F446RE, STM32F373CC, STM32L053R8, 
 STM32F745VE, STM32F401CE, STM32H743.
 See [hardware.md](hardware.md) for details.
 
+### Don't copy-paste the startup code from the demo without considering RCC and USB clock requirements.
+The HSI oscillator usually does not meet the timing requirements for USB and may cause performance loss
+and a high error rate.
+
 ### Implemented definitions for classes ###
 1. USB HID based on [Device Class Definition for Human Interface Devices (HID) Version 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
 2. USB DFU based on [USB Device Firmware Upgrade Specification, Revision 1.1](https://www.usb.org/sites/default/files/DFU_1.1.pdf)

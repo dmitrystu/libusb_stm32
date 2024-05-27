@@ -104,7 +104,7 @@ static void cdc_init_rcc (void) {
     /* switch to PLL */
     _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
-    
+
     _BST(RCC->AHBENR, RCC_AHBENR_GPIOAEN);
     _BST(GPIOA->AFR[1], (0x0E << 12) | (0x0E << 16));
     _BMD(GPIOA->MODER, (0x03 << 22) | (0x03 << 24), (0x02 << 22) | (0x02 << 24));
@@ -141,8 +141,12 @@ static void cdc_init_rcc (void) {
     /* enabling PLL */
     _BST(RCC->CR, RCC_CR_PLLON);
     _WBS(RCC->CR, RCC_CR_PLLRDY);
-    /* switching to PLL */
-    _BMD(RCC->CFGR, RCC_CFGR_SW, RCC_CFGR_SW_PLL);
+    /* Setup CFGR to PLL*/
+    /*                        APB1  |   APB2  */
+    /* STM32F411             <50Mhz | <100MHz */
+    /* STM32F429             <45MHz |  <90MHz */
+    /* STM32F405, STM32F401  <42MHz |  <84MHz */
+    _BMD(RCC->CFGR, RCC_CFGR_SW | RCC_CFGR_PPRE1, RCC_CFGR_SW_PLL | RCC_CFGR_PPRE1_DIV2);
     _WVL(RCC->CFGR, RCC_CFGR_SWS, RCC_CFGR_SWS_PLL);
     #if defined(USBD_PRIMARY_OTGHS)
     /* enabling GPIOB and setting PB13, PB14 and PB15 to AF11 (USB_OTG2FS) */
