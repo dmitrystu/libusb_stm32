@@ -273,6 +273,17 @@ static void cdc_init_rcc (void) {
     /* using HSI16 as AHB/CPU clock, HSI48 as USB PHY clock */
     _BST(RCC->CRRCR, RCC_CRRCR_HSI48ON);
     _WBS(RCC->CRRCR, RCC_CRRCR_HSI48RDY);
+#elif defined(STM32G0)
+    /* using HSI16 as AHB/CPU clock, HSI48 as USB PHY clock */
+    _BST(RCC->CR, RCC_CR_HSION);
+    _WBS(RCC->CR, RCC_CR_HSIRDY);
+    _BST(RCC->CR, RCC_CR_HSI48ON);
+    _WBS(RCC->CR, RCC_CR_HSI48RDY);
+    _BMD(RCC->CFGR, RCC_CFGR_HPRE, 0U /*LL_RCC_SYSCLK_DIV_1*/);
+    _BMD(RCC->CFGR, RCC_CFGR_SW, 0U /*LL_RCC_SYS_CLKSOURCE_HSI*/);
+    _WVL(RCC->CFGR, RCC_CFGR_SWS, 0U /*LL_RCC_SYS_CLKSOURCE_STATUS_HSI*/);
+    _BMD(RCC->CFGR, RCC_CFGR_PPRE, 0U /*LL_RCC_APB1_DIV_1*/);
+    _BST(FLASH->ACR, FLASH_ACR_PRFTEN);
 #elif defined(STM32WB55xx)
     /* using HSI16 as AHB/CPU clock, HSI48 as USB PHY clock */
     _BST(RCC->CR, RCC_CR_HSION);
