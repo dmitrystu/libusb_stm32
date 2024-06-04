@@ -352,6 +352,7 @@ static int32_t ep_write(uint8_t ep, const void *buf, uint16_t blen) {
     switch (*reg & (USB_EPTX_STAT | USB_EP_T_FIELD | USB_EP_KIND)) {
     /* doublebuffered bulk endpoint */
     case (USB_EP_TX_NAK   | USB_EP_BULK | USB_EP_KIND):
+    case (USB_EP_TX_VALID | USB_EP_BULK | USB_EP_KIND):
         if (*reg & USB_EP_SWBUF_TX) {
             pma_write(buf, blen, &(tbl->tx1));
         } else {
