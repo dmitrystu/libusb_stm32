@@ -12,8 +12,10 @@ STPROG_CLI  ?= ~/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Prog
 OPTFLAGS    ?= -Os
 
 ifeq ($(OS),Windows_NT)
-	RM = del /Q
-	fixpath = $(strip $(subst /,\, $1))
+	ifneq ($(MSYSTEM),MINGW64)
+		RM = del /Q
+		fixpath = $(strip $(subst /,\, $1))
+	endif
 else
 	RM = rm -f
 	fixpath = $(strip $1)
@@ -54,6 +56,7 @@ help all:
 	@echo '  stm32f429xi   CDC loopback demo for STM32F429xI based boards'
 	@echo '  stm32f401xc   CDC loopback demo for STM32F401xC based boards'
 	@echo '  stm32f401xe   CDC loopback demo for STM32F401xE based boards'
+	@echo '  stm32h750xx   CDC loopback demo for STM32H750xx based boards'
 	@echo '  cmsis         Download CMSIS 5 and stm32.h into a $$(CMSIS) directory'
 	@echo '  doc           DOXYGEN documentation'
 	@echo '  module        static library module using following envars (defaults)'
@@ -290,6 +293,12 @@ stm32h743xx: clean
 	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32H7xx/Source/Templates/gcc/startup_stm32h743xx.s' \
 						LDSCRIPT='demo/stm32h743xx.ld' \
 						DEFINES='STM32H7 STM32H743xx USBD_VBUS_DETECT USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m7'
+
+stm32h750xx: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32H7xx/Source/Templates/gcc/startup_stm32h750xx.s' \
+						LDSCRIPT='demo/stm32h750xx.ld' \
+						DEFINES='STM32H7 STM32H750xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m7'
 
 stm32f411xe stm32f411e-disco: clean

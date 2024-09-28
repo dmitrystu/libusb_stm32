@@ -288,7 +288,7 @@ static void cdc_init_rcc (void) {
     _BST(GPIOA->AFR[1], (0x0A << 12) | (0x0A << 16));
     /* Disabling USB Vddusb power isolation. Vusb connected to Vdd */
     _BST(PWR->CR2, PWR_CR2_USV);
-#elif defined(STM32H743xx)
+#elif defined(STM32H743xx) || defined(STM32H750xx)
     /* Enable USB supply */
     _BST(PWR->CR3, PWR_CR3_SCUEN | PWR_CR3_LDOEN | PWR_CR3_USB33DEN);
 
