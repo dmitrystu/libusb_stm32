@@ -201,6 +201,11 @@ stm32l433cc: clean
 						DEFINES='STM32L4 STM32L433xx USBD_SOF_DISABLED' \
 						CFLAGS='-mcpu=cortex-m4'
 
+stm32l552xe: clean
+	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32L5xx/Source/Templates/gcc/startup_stm32l55sxx.s' \
+						LDSCRIPT='demo/stm32l552xe.ld' \
+						DEFINES='STM32L5 STM32L552xx USBD_SOF_DISABLED' \
+						CFLAGS='-mcpu=cortex-m33'
 
 stm32f070xb: clean
 	@$(MAKE) demo STARTUP='$(CMSISDEV)/ST/STM32F0xx/Source/Templates/gcc/startup_stm32f070xb.s' \

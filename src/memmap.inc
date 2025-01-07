@@ -71,6 +71,23 @@
     #define UID_BASE        0x1FFF7590
     #define RCC_USBEN       26
 
+#elif defined(STM32L552xx)
+
+    #define USB_EPBASE      0x4000D400
+    #define USB_REGBASE     0x4000D440
+    #define USB_CNTR        0x00
+    #define USB_ISTR        0x04
+    #define USB_FNR         0x08
+    #define USB_DADDR       0x0C
+    #define USB_BTABLE      0x10
+    #define USB_BCDR        0x18
+    #define USB_PMABASE     0x4000D800
+    #define RCC_BASE        0x40021000
+    #define RCC_APB1RSTR2   0x3C
+    #define RCC_APB1ENR2    0x5C
+    #define UID_BASE        0x0BFA0590
+    #define RCC_USBEN       21
+
 #elif defined(STM32G4)
 
     #define USB_EPBASE      0x40005C00

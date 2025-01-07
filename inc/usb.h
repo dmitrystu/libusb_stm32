@@ -61,6 +61,20 @@
     #endif
     #endif
 
+#elif defined(STM32L552xx)
+
+    #define USBD_STM32L552
+
+    #if !defined(__ASSEMBLER__)
+    extern const struct usbd_driver usbd_devfs;
+    extern const struct usbd_driver usbd_devfs_asm;
+    #if defined(USBD_ASM_DRIVER)
+    #define usbd_hw usbd_devfs_asm
+    #else
+    #define usbd_hw usbd_devfs
+    #endif
+    #endif
+
 #elif defined(STM32L1)
 
     #define USBD_STM32L100
