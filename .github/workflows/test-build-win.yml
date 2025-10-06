@@ -16,7 +16,7 @@ jobs:
     name: Windows
     env:
       CMSIS: CMSIS_5
-    runs-on: windows-2019
+    runs-on: windows-2025
     steps:
     - name: ARM GCC setup
       uses: fiam/arm-none-eabi-gcc@v1
