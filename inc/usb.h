@@ -159,7 +159,7 @@
     #define usbd_hw usbd_devfs
     #endif
 
-#elif defined(STM32H743xx)
+#elif defined(STM32H743xx) || defined(STM32H750xx)
     #define USBD_STM32H743FS
 
     #if !defined(__ASSEMBLER__)
